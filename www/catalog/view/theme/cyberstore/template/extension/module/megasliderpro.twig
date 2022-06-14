@@ -1,0 +1,83 @@
+<div class="megasliderpro">
+<div class="row">
+<div class="megasliderpro-container col-sm-12">
+	<div class="oc-nivoslider">
+		<div id="oc-inivoslider{{ module }}" class="slides">
+			{% set config = slide_setting[0] %}
+			{% set i = 1 %} {% set style_msp = '' %}
+			{% for resultbg in megasliders %}
+			{% if (i > 1) %} {% set style_msp = 'style="display: none;"' %}{% endif %}
+			{% if (resultbg['link'] is not empty) %}
+					<a href="{{ resultbg['link'] }}"><img class="bg-image-slider" {{ style_msp }} src="{{ resultbg['image'] }}" alt="" title="#msp-caption{{ i }}{{ module }}"  /></a>
+			{% else %}
+					<img class="bg-image-slider" {{ style_msp }} src="{{ resultbg['image'] }}" alt="" title="#msp-caption{{ i }}{{ module }}"/>
+			{% endif %}
+			{% set i = i + 1 %}
+			{% endfor %}
+		</div>
+		{% set i = 1 %}
+		{% for result in megasliders %}
+
+			{% set class = "" %}
+			{% if (result['type'] == 1) %} {% set class = "slide-type1" %} {% endif %}
+			{% if (result['type'] == 2) %} {% set class = "slide-type2" %} {% endif %}
+
+			<div id="msp-caption{{ i }}{{ module }}" class="msp-caption nivo-html-caption nivo-caption">
+				<div class="{{ class }} container dflex">
+					{% if (result['small_image']) %}
+						<div class="row-slider-small-img">
+						<div class="msp-small_image">
+							<img src="{{ result['small_image'] }}" alt="" title="small" />
+						</div>
+						</div>
+					{% endif %}
+					<div class="row-slider-info">
+						{% if (result['title']) %}
+						<div class="msp-title effect_title{{ i }}{{ module }}">
+							<div class="text-title" {% if (result['bg_title'] != '' or result['color_title']) %}style="{% if (result['bg_title'] is not empty) %}background:{{ result['bg_title'] }};{% endif %} {% if (result['color_title'] is not empty) %}color:{{ result['color_title'] }}"{% endif %}{% endif %}>{{ result['title'] }}</div>
+						</div>
+						{% endif %}
+						{% if (result['sub_title']) %}
+						<div class="sub-title effect_sub_title{{ i }}{{ module }}">
+							<div class="text-sub-title" {% if (result['bg_sub_title'] != '' or result['color_sub_title']) %}style="{% if (result['bg_title'] is not empty) %}background:{{ result['bg_sub_title'] }};{% endif %}{% if (result['color_sub_title'] is not empty) %}color:{{ result['color_sub_title'] }}"{% endif %}{% endif %}>{{ result['sub_title'] }}</div>
+						</div>
+						{% endif %}
+						{% if (result['description'] is not empty) %}
+						<div class="msp-des effect_description_title{{ i }}{{ module }}">
+							{{ result['description'] }}
+						</div>
+						{% endif %}
+						{% if (result['price'] is not empty) %}
+						<div class="ms-price">
+							<span class="ms-price-cont" {% if (result['price_bg'] is not empty) %}style="background:{{ result['price_bg'] }}"{% endif %}>
+								<span class="ms-price-text"><span class="ms-price-from">{{ text_price_from }}</span>{{ result['price'] }}</span>
+							</span>
+						</div>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+			{% set i = i + 1 %}
+		{% endfor %}
+		<script>
+				addStyleHeader('{{ html_css }}');
+                $('#oc-inivoslider{{ module }}').nivoSlider({
+					effect: {% if (config.effect) %} '{{ config.effect }}'{% else %} 'random' {% endif %},
+                    slices: 25,
+                    boxCols: 14,
+                    boxRows: 8,
+                    animSpeed:500,
+                    pauseTime:{% if (config['delay']) %} {{ config['delay'] }} {% else %} {{ 3000 }}{% endif %},
+                    startSlide: 0,
+					controlNav:{% if (config['contrl'] is defined and config['contrl'] == 1) %} {{ 'true' }} {% else %} {{ 'false' }}{% endif %},
+					directionNav:{% if (config['nextback'] is defined and config['nextback'] == 1) %} {{ 'true' }} {% else %} {{ 'false' }}{% endif %},
+                    controlNavThumbs: false,
+                    pauseOnHover:{% if (config['hover'] is defined and config['hover'] == 1) %} {{ 'true' }} {% else %} {{ 'false' }}{% endif %},
+                    prevText: '<i class="fa fa-angle-left" aria-hidden="true"></i>',
+                    nextText: '<i class="fa fa-angle-right" aria-hidden="true"></i>',
+                });
+		</script>
+	</div>
+</div>
+</div>
+</div>

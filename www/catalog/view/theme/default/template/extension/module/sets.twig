@@ -1,0 +1,49 @@
+{% if (sets) %} 
+{% for iset,set in sets %} 
+{% for key,product in set['products'] %} 
+{% if (product['option_type'] is defined) %} 
+{% if (product['option_type'] == 'fixed') %} 
+{{ product['html_options'] }}
+{% elseif (product['option_type'] == 'popup') %} 
+{{ product['html_options'] }}
+{% endif %} 
+{% endif %} 
+{% endfor %} 
+{% endfor %} 
+
+
+<div class='sets swiper-viewport' id='prd-sets'>
+        {% if (orientation == 'hor') %} 
+            {% include 'default/template/extension/module/sets_hor_slider.twig' with {'sets': sets} %}
+         {% elseif (orientation == 'ver') %} 
+            {% include 'default/template/extension/module/sets_ver_slider.twig' with {'sets': sets} %}
+         {% elseif (orientation == 'series') %} 
+            {% include 'default/template/extension/module/sets_table.twig' with {'sets': sets} %}
+            {% endif %}
+         
+</div>
+<script>
+    $(document).ready(function () {
+        $('#prd-sets').{{ position }}('{{ selector }}');
+        kjset.initCarousel();
+    });
+    if (typeof getDecimal !== "function") { 
+        function getDecimal()
+        {
+            return {{ decimal_place }};
+        }
+    }
+    if (typeof getRoundEconomy !== "function") { 
+        function getRoundEconomy(economy)
+        {
+            {% if (rounding == 'up_to_big') %} 
+                return Math.ceil(economy);
+            {% elseif (product['option_type'] == 'popup') %}          
+                return Math.floor(economy);
+            {% else %}
+                return economy;
+            {% endif %} 
+        }
+    }
+</script>
+{% endif %}

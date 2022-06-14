@@ -1,0 +1,691 @@
+<modification>
+    <name>Укркредит управление заказами</name>
+	<version>1.0.5</version>
+	<link>https://fringe.com.ua</link>
+	<author>Stealth</author>
+	<code>ukrcredit_admin_order_api_ocmod</code>
+
+	<file path="admin/model/sale/order.php">
+		<operation>
+			<search><![CDATA[$order_product_query =]]></search>
+			<add position="before"><![CDATA[
+			$order_ukrcredits_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_ukrcredits WHERE order_id = '" . (int)$order_id . "'");
+			
+			if ($order_ukrcredits_query->num_rows) {
+				$ukrcredits_order_id = $order_ukrcredits_query->row['ukrcredits_order_id'];
+				$ukrcredits_order_status = $order_ukrcredits_query->row['ukrcredits_order_status'];
+				$ukrcredits_order_substatus = $order_ukrcredits_query->row['ukrcredits_order_substatus'];
+			} else {
+				$ukrcredits_order_id = '';
+				$ukrcredits_order_status = '';
+				$ukrcredits_order_substatus = '';
+			}
+			]]></add>
+		</operation>
+		<operation>
+			<search><![CDATA[$order_query->row['payment_code'],]]></search>
+			<add position="after"><![CDATA[
+				'ukrcredits_order_id'         => $ukrcredits_order_id,
+				'ukrcredits_order_status'     => $ukrcredits_order_status,
+				'ukrcredits_order_substatus'  => $ukrcredits_order_substatus,
+			]]></add>
+		</operation>
+		<operation>
+			<search><![CDATA[$this->db->query("DELETE FROM `" . DB_PREFIX . "order]]></search>
+			<add position="before"><![CDATA[
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "order_ukrcredits` WHERE order_id = '" . (int)$order_id . "'");
+			]]></add>
+		</operation>
+	</file>	
+	<file path="admin/controller/sale/order.php">
+		<operation>
+			<search><![CDATA[$data['comment'] = nl2br($order_info['comment']);]]></search>
+			<add position="before"><![CDATA[
+			$data['text_confirm'] = $this->language->get('text_confirm');
+			$data['text_wait'] = 'Пожалуйста подождите!';
+			$data['ukrcredits_order_substatus'] = $order_info['ukrcredits_order_substatus']; 
+			$data['ukrcredits_order_status'] = $order_info['ukrcredits_order_status']; 
+			$data['ukrcredits_order_id'] = $order_info['ukrcredits_order_id']; 
+			$data['payment_code'] = $order_info['payment_code'];
+			
+			$token = version_compare(VERSION,'3.0','>=') ? 'user_' : '';
+			$data['token'] = $this->session->data[$token.'token'];
+			$data['text_token'] = $token.'token';
+			]]></add>
+		</operation>
+		<operation>
+			<search><![CDATA[public function getForm]]></search>
+			<add position="before"><![CDATA[
+    public function askstatus_mb (){
+		$type = version_compare(VERSION,'3.0','>=') ? 'payment_' : '';
+		$setting = $this->config->get($type.'ukrcredits_settings');
+		
+		if (isset($this->request->get['ukrcredits_order_id'])) {
+			$ukrcredits_order_id = $this->request->get['ukrcredits_order_id'];
+		} else {
+			$ukrcredits_order_id = 0;
+		}
+		
+		$data_deal['order_id'] = $ukrcredits_order_id;
+		$requestDial = json_encode($data_deal);
+		$signature = base64_encode(hash_hmac("sha256", $requestDial, $setting['mb_shop_password'], true));
+		$url = 'https://u2.monobank.com.ua/api/order/state';
+		$responseResDeal = $this->curlPostWithDataMB($url, $requestDial, $signature);
+		
+        if(is_array($responseResDeal)){
+			if(isset($responseResDeal['order_id']) && $responseResDeal['order_id']) {
+				$this->log->write('ukrcredits_mb успешный запрос состояния заказа ' . $responseResDeal['order_id']);
+				$this->db->query("UPDATE " . DB_PREFIX . "order_ukrcredits SET ukrcredits_order_status = '" . $this->db->escape($responseResDeal['state']) . "', ukrcredits_order_substatus = '" . $this->db->escape($responseResDeal['order_sub_state']) . "' WHERE ukrcredits_order_id = '" . $this->db->escape($responseResDeal['order_id']) . "'");
+			} elseif (isset($responseResDeal['message']) && $responseResDeal['message']) {
+				$this->log->write('ukrcredits_mb по время запроса произошла ошибка ' . $responseResDeal['message']);
+			}
+            echo  json_encode($responseResDeal);         
+        } else {
+            echo json_encode(array('state'=>'sys_error','message'=>$responseResDeal));
+        }
+	}
+	
+    public function cancelhold_mb (){
+		$type = version_compare(VERSION,'3.0','>=') ? 'payment_' : '';
+		$setting = $this->config->get($type.'ukrcredits_settings');
+		$this->language->load('sale/ukrcreditsorder');
+		
+		if (isset($this->request->get['ukrcredits_order_id'])) {
+			$ukrcredits_order_id = $this->request->get['ukrcredits_order_id'];
+		} else {
+			$ukrcredits_order_id = 0;
+		}
+		
+		$data_deal['order_id'] = $ukrcredits_order_id;
+		$requestDial = json_encode($data_deal);
+		$signature = base64_encode(hash_hmac("sha256", $requestDial, $setting['mb_shop_password'], true));
+		$url = 'https://u2.monobank.com.ua/api/order/reject';
+		$responseResDeal = $this->curlPostWithDataMB($url, $requestDial, $signature);
+		
+        if(is_array($responseResDeal)){
+			if(isset($responseResDeal['order_id']) && $responseResDeal['order_id']) {
+				$this->log->write('ukrcredits_mb успешная отмена заказа ' . $responseResDeal['order_id']);
+				$this->db->query("UPDATE " . DB_PREFIX . "order_ukrcredits SET ukrcredits_order_status = '" . $this->db->escape($responseResDeal['state']) . "', ukrcredits_order_substatus = '" . $this->db->escape($responseResDeal['order_sub_state']) . "' WHERE ukrcredits_order_id = '" . $this->db->escape($responseResDeal['order_id']) . "'");
+				$responseResDeal['order_status_id'] = $setting['canceled_status_id'];
+				$responseResDeal['comment'] = $this->language->get('text_order_canceled');
+			
+			} elseif (isset($responseResDeal['message']) && $responseResDeal['message']) {
+				$this->log->write('ukrcredits_mb по время запроса произошла ошибка ' . $responseResDeal['message']);
+			}
+            echo  json_encode($responseResDeal);
+        } else {
+            echo json_encode(array('state'=>'sys_error','message'=>$responseResDeal));
+        }
+	}
+	
+    public function confirmhold_mb (){
+		$type = version_compare(VERSION,'3.0','>=') ? 'payment_' : '';
+		$setting = $this->config->get($type.'ukrcredits_settings');
+		$this->language->load('sale/ukrcreditsorder');
+		
+		if (isset($this->request->get['ukrcredits_order_id'])) {
+			$ukrcredits_order_id = $this->request->get['ukrcredits_order_id'];
+		} else {
+			$ukrcredits_order_id = 0;
+		}
+		
+		$data_deal['order_id'] = $ukrcredits_order_id;
+		$requestDial = json_encode($data_deal);
+		$signature = base64_encode(hash_hmac("sha256", $requestDial, $setting['mb_shop_password'], true));
+		$url = 'https://u2.monobank.com.ua/api/order/confirm';
+		$responseResDeal = $this->curlPostWithDataMB($url, $requestDial, $signature);
+		
+        if(is_array($responseResDeal)){
+			if(isset($responseResDeal['order_id']) && $responseResDeal['order_id']) {
+				$this->log->write('ukrcredits_mb успешное подтверждение заказа ' . $responseResDeal['order_id']);
+				$this->db->query("UPDATE " . DB_PREFIX . "order_ukrcredits SET ukrcredits_order_status = '" . $this->db->escape($responseResDeal['state']) . "', ukrcredits_order_substatus = '" . $this->db->escape($responseResDeal['order_sub_state']) . "' WHERE ukrcredits_order_id = '" . $this->db->escape($responseResDeal['order_id']) . "'");
+				$responseResDeal['order_status_id'] = $setting['completed_status_id'];
+				$responseResDeal['comment'] = $this->language->get('text_order_confirmed');
+			
+			} elseif (isset($responseResDeal['message']) && $responseResDeal['message']) {
+				$this->log->write('ukrcredits_mb по время запроса произошла ошибка ' . $responseResDeal['message']);
+			}
+            echo  json_encode($responseResDeal);
+        } else {
+            echo json_encode(array('state'=>'sys_error','message'=>$responseResDeal));
+        }
+	}	
+			
+    public function askstatus_pp (){
+		$type = version_compare(VERSION,'3.0','>=') ? 'payment_' : '';
+		$setting = $this->config->get($type.'ukrcredits_settings');
+		
+		if (isset($this->request->get['ukrcredits_order_id'])) {
+			$ukrcredits_order_id = $this->request->get['ukrcredits_order_id'];
+			$payment_code = $this->request->get['payment_code'];
+		} else {
+			$ukrcredits_order_id = 0;
+			$payment_code = 0;
+		}
+		
+		$data_deal['storeId'] = $setting[substr($payment_code, -2) . '_shop_id'];
+		$data_deal['orderId'] = $ukrcredits_order_id;
+		$data_deal['showRefund'] = true;
+		$data_deal['showAmount'] = true;
+		$data_deal['signature'] = $this->generateSignature($payment_code, $data_deal);
+
+        $requestDial = json_encode($data_deal);       
+        $url = 'https://payparts2.privatbank.ua/ipp/v2/payment/state';     
+		
+		$responseResDeal = $this->curlPostWithData($url,$requestDial);
+
+        if(is_array($responseResDeal)){
+            if(strcmp($responseResDeal['state'], 'FAIL') == 0){
+                $this->log->write('PRIVATBANK_PAYMENTPARTS :: REFRESH STATUS failed: ' . json_encode($responseResDeal));                
+            }            
+            if(strcmp($responseResDeal['state'], 'SUCCESS') == 0){
+				$this->db->query("UPDATE " . DB_PREFIX . "order_ukrcredits SET ukrcredits_order_status = '" . $this->db->escape($responseResDeal['paymentState']) . "' WHERE ukrcredits_order_id = '" . $this->db->escape($ukrcredits_order_id) . "'");				
+            }   
+            echo  json_encode($responseResDeal);         
+        } else {
+            echo json_encode(array('state'=>'sys_error','message'=>$responseResDeal));
+        }
+	}	
+	
+    public function confirmhold_pp (){
+		$type = version_compare(VERSION,'3.0','>=') ? 'payment_' : '';
+		$setting = $this->config->get($type.'ukrcredits_settings');
+		
+		$this->language->load('sale/ukrcreditsorder');
+		
+		if (isset($this->request->get['ukrcredits_order_id'])) {
+			$ukrcredits_order_id = $this->request->get['ukrcredits_order_id'];
+			$payment_code = $this->request->get['payment_code'];
+		} else {
+			$ukrcredits_order_id = 0;
+			$payment_code = 0;
+		}
+		
+		$data_deal['storeId'] = $setting[substr($payment_code, -2) . '_shop_id'];
+		$data_deal['orderId'] = $ukrcredits_order_id;
+		$data_deal['signature'] = $this->generateSignature($payment_code, $data_deal);
+
+        $requestDial = json_encode($data_deal);       
+        $url = 'https://payparts2.privatbank.ua/ipp/v2/payment/confirm';     
+		
+		$responseResDeal = $this->curlPostWithData($url,$requestDial);
+
+        if(is_array($responseResDeal)){
+            if(strcmp($responseResDeal['state'], 'FAIL') == 0){
+                $this->log->write('PRIVATBANK_PAYMENTPARTS :: CONFIRM failed: ' . json_encode($responseResDeal));                
+            }            
+            if(strcmp($responseResDeal['state'], 'SUCCESS') == 0){
+				$this->db->query("UPDATE " . DB_PREFIX . "order_ukrcredits SET ukrcredits_order_status = 'SUCCESS' WHERE ukrcredits_order_id = '" . $this->db->escape($ukrcredits_order_id) . "'");				
+				$responseResDeal['order_status_id'] = $setting['completed_status_id'];
+				$responseResDeal['comment'] = $this->language->get('text_order_confirmed');
+            }   
+            echo  json_encode($responseResDeal);         
+        } else {
+            echo json_encode(array('state'=>'sys_error','message'=>$responseResDeal));
+        }
+	}
+	
+    public function cancelhold_pp (){
+		$type = version_compare(VERSION,'3.0','>=') ? 'payment_' : '';
+		$setting = $this->config->get($type.'ukrcredits_settings');
+		
+		$this->language->load('sale/ukrcreditsorder');
+		
+		if (isset($this->request->get['ukrcredits_order_id'])) {
+			$ukrcredits_order_id = $this->request->get['ukrcredits_order_id'];
+			$payment_code = $this->request->get['payment_code'];
+		} else {
+			$ukrcredits_order_id = 0;
+			$payment_code = 0;
+		}
+		
+		$data_deal['storeId'] = $setting[substr($payment_code, -2) . '_shop_id'];
+		$data_deal['orderId'] = $ukrcredits_order_id;
+		$data_deal['signature'] = $this->generateSignature($payment_code, $data_deal);
+
+        $requestDial = json_encode($data_deal);       
+        $url = 'https://payparts2.privatbank.ua/ipp/v2/payment/cancel';     
+		
+		$responseResDeal = $this->curlPostWithData($url,$requestDial);
+
+        if(is_array($responseResDeal)){
+            if(strcmp($responseResDeal['state'], 'FAIL') == 0){
+                $this->log->write('PRIVATBANK_PAYMENTPARTS :: CANCEL failed: ' . json_encode($responseResDeal));                
+            }            
+            if(strcmp($responseResDeal['state'], 'SUCCESS') == 0){
+				$this->db->query("UPDATE " . DB_PREFIX . "order_ukrcredits SET ukrcredits_order_status = 'CANCELED' WHERE ukrcredits_order_id = '" . $this->db->escape($ukrcredits_order_id) . "'");				
+				$responseResDeal['order_status_id'] = $setting['canceled_status_id'];
+				$responseResDeal['comment'] = $this->language->get('text_order_canceled');
+            }   
+
+            echo  json_encode($responseResDeal);         
+        } else {
+            echo json_encode(array('state'=>'sys_error','message'=>$responseResDeal));
+        }
+	}
+	
+    private function generateSignature ($payment_code, $dataAnsweArr){
+		$type = version_compare(VERSION,'3.0','>=') ? 'payment_' : '';
+		$setting = $this->config->get($type.'ukrcredits_settings');
+        $passwordStore = $setting[substr($payment_code, -2) . '_shop_password'];
+        
+        $signatureAnswerStr = $passwordStore.
+							  $dataAnsweArr['storeId'].
+                              $dataAnsweArr['orderId'].
+                              $passwordStore;
+                              
+        $signatureAnswer = base64_encode(SHA1($signatureAnswerStr, true));
+		
+        return $signatureAnswer;
+        
+    }
+	
+    private function curlPostWithData($url, $request) {
+		try {
+			$curl = curl_init($url);
+			curl_setopt($curl, CURLOPT_POST, true);
+			curl_setopt($curl, CURLOPT_POSTFIELDS, $request);
+			curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($curl, CURLOPT_HEADER, 0);
+			curl_setopt($curl, CURLOPT_HTTPHEADER, array('Accept: application/json','Accept-Encoding: UTF-8','Content-Type: application/json; charset=UTF-8'));
+			curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+			curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+			$response = curl_exec($curl);
+			$curl_errno = curl_errno($curl);
+			$curl_error = curl_error($curl);
+			$aInfo = @curl_getinfo($curl);            
+			//close curl
+			curl_close($curl);          
+			//analysis of the information received
+	   
+			if($curl_errno!=0){
+				$this->log->write('PRIVATBANK_PAYMENTPARTS :: CURL failed ' . $curl_error . '(' . $curl_errno . ')');  
+				return 'error';
+			} 
+			if($aInfo["http_code"]!='200'){
+				$this->log->write('PRIVATBANK_PAYMENTPARTS :: HTTP failed ' . $aInfo["http_code"] . '(' . $response . ')');  
+				return 'error';
+			} 
+			return json_decode($response,true);
+		   
+		} catch(Exception $e){
+			return false;
+		}
+    }
+	
+    private function curlPostWithDataMB($url, $requestDial, $signature) {
+		$type = version_compare(VERSION,'3.0','>=') ? 'payment_' : '';
+        $setting = $this->config->get($type.'ukrcredits_settings');
+		try{
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $requestDial);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+				'Accept: application/json',
+				'Accept-Encoding: UTF-8',
+				'Content-Type: application/json; charset=UTF-8',
+				'store-id: '.$setting['mb_shop_id'],
+				'signature: '.$signature
+			));
+
+			//execute curl
+			$response = curl_exec($ch);
+
+			//get execute result
+			$curl_errno = curl_errno($ch);
+			$curl_error = curl_error($ch);
+			$aInfo = @curl_getinfo($ch);            
+			//close curl
+			curl_close($ch);          
+			//analysis of the information received
+			$dir = version_compare(VERSION,'2.3','>=') ? 'extension/module' : 'module';
+			$this->language->load($dir.'/ukrcredits');   
+			if($curl_errno!=0){
+				$this->log->write('ukrcredits_mb :: CURL failed ' . $curl_error . '(' . $curl_errno . ')');  
+				return $this->language->get('error_curl');
+			} 
+			return json_decode($response,true);
+		   
+		} catch(Exception $e){
+			return false;
+		}
+    }
+			]]></add>
+		</operation>
+	</file>	
+	<file path="admin/view/template/sale/order_info.twig">
+		<operation>
+			<search><![CDATA[{{ payment_method }}</td>]]></search>
+			<add position="replace"><![CDATA[
+{{ payment_method }}
+{% if ukrcredits_order_status %}
+	<br>Статус: <b id="ukrcredits_order_status">{{ ukrcredits_order_status }} {{ ukrcredits_order_substatus ? ('/ '~ukrcredits_order_substatus) : '' }}</b>
+	<br>
+	{% if ukrcredits_order_status == 'LOCKED' %}
+		<a id="button-confirm" class="btn btn-primary">Подтвердить</a> <a id="button-cancel" class="btn btn-primary">{{ button_cancel }}</a>
+	{% endif %}
+	{% if ukrcredits_order_status == 'IN_PROCESS' and ukrcredits_order_substatus == 'WAITING_FOR_STORE_CONFIRM' %}
+		<a id="button-confirm-mb" class="btn btn-primary">Подтвердить</a> <a id="button-cancel-mb" class="btn btn-primary">{{ button_cancel }}</a>
+	{% endif %}
+	{% if payment_code == 'ukrcredits_mb' %}
+		<a id="button-status-mb" class="btn btn-primary">Обновить</a>
+	{% else %}
+		<a id="button-status" class="btn btn-primary">Обновить</a>
+	{% endif %}
+{% endif %}
+</td>
+			]]></add>
+		</operation>
+		<operation>
+			<search><![CDATA[footer]]></search>
+			<add position="before"><![CDATA[
+{% if ukrcredits_order_status %}
+<script type="text/javascript">
+$(document).ready(function(){
+
+    $("#button-status").click(function(){
+        $.ajax({
+            type: 'post',
+            url: 'index.php?route=sale/order/askstatus_pp&{{ text_token }}={{ token }}&ukrcredits_order_id={{ ukrcredits_order_id }}&payment_code={{ payment_code }}',
+            dataType: 'json',
+			beforeSend: function() {
+				$('.success, .warning, .alert, attention').remove();
+				$('.page-header > div').append('<div class="alert alert-info"> {{ text_wait }}</div>');
+			},
+               success: function(data){
+					console.log(data['state']);
+                    switch(data['state']){
+                        case 'SUCCESS':
+							$('.success, .warning, .alert, .attention').remove();
+                            $('.page-header > div').append('<div class="alert alert-success">Статус заказа обновлен: ' + data['paymentState'] + '</div>');
+							$('#ukrcredits_order_status').html(data['paymentState']);
+                            break;
+                        case 'FAIL':
+							$('.success, .warning, .alert, .attention').remove();
+                            $('.page-header > div').append('<div class="alert alert-warning">При обновлении статуса заказа произошла ошибка: ' + data['message'] + '</div>');
+							break;
+                        case 'sys_error':
+							$('.success, .warning, .alert, .attention').remove();
+                            $('.page-header > div').append('<div class="alert alert-warning">При обновлении статуса заказа произошла ошибка: ' + data['message'] + '</div>');
+							break;
+                    }                                 
+               }    
+        });
+        return false;    
+    });
+	
+    $("#button-confirm").click(function(){
+	if(confirm('{{ text_confirm }}')){
+        $.ajax({
+            type: 'post',
+            url: 'index.php?route=sale/order/confirmhold_pp&{{ text_token }}={{ token }}&ukrcredits_order_id={{ ukrcredits_order_id }}&order_id={{ order_id }}&payment_code={{ payment_code }}',
+            dataType: 'json',
+			beforeSend: function() {
+				$('.success, .warning, .alert, attention').remove();
+				$('.page-header > div').append('<div class="alert alert-info"> {{ text_wait }}</div>');
+			},
+               success: function(data){
+					console.log(data['state']);
+                    switch(data['state']){
+                        case 'SUCCESS':
+							$('.success, .warning, .alert, .attention').remove();
+                            $('.page-header > div').append('<div class="alert alert-success">Заказ успешно подтвержден!</div>');
+							$('#ukrcredits_order_status').html('SUCCESS');
+							
+							$.ajax({
+								url: '{{ catalog }}index.php?route=api/order/history&api_token={{ api_token }}&store_id={{ store_id }}&order_id={{ order_id }}',
+								type: 'post',
+								dataType: 'json',
+								data: 'order_status_id=' + data['order_status_id'] + '&notify=1&override=0&append=' + ($('input[name=\'append\']').prop('checked') ? 1 : 0) + '&comment=' + data['comment'],
+								beforeSend: function() {
+									$('#button-history').button('loading');
+								},
+								complete: function() {
+									$('#button-history').button('reset');
+								},
+								success: function(json) {
+								//	$('.alert').remove();
+
+									if (json['error']) {
+										$('#history').before('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+									}
+
+									if (json['success']) {
+										$('#history').load('index.php?route=sale/order/history&{{ text_token }}={{ token }}&order_id={{ order_id }}');
+
+										$('#history').before('<div class="alert alert-success"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+									}
+								},
+								error: function(xhr, ajaxOptions, thrownError) {
+									alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+								}
+							});
+							
+                            break;
+                        case 'FAIL':
+							$('.success, .warning, .alert, .attention').remove();
+                            $('.page-header > div').append('<div class="alert alert-warning">При подтверждении заказа произошла ошибка: ' + data['message'] + '</div>');
+							break;
+                        case 'sys_error':
+							$('.success, .warning, .alert, .attention').remove();
+                            $('.page-header > div').append('<div class="alert alert-warning">При подтверждении заказа произошла ошибка: ' + data['message'] + '</div>');
+							break;
+                    }                                 
+               }    
+        });
+        return false;   
+	}
+    });
+    $("#button-cancel").click(function(){
+	if(confirm('{{ text_confirm }}')){
+        $.ajax({
+            type: 'post',
+            url: 'index.php?route=sale/order/cancelhold_pp&{{ text_token }}={{ token }}&ukrcredits_order_id={{ ukrcredits_order_id }}&order_id={{ order_id }}&payment_code={{ payment_code }}',
+            dataType: 'json',
+			beforeSend: function() {
+				$('.success, .warning, .alert, attention').remove();
+				$('.page-header > div').append('<div class="alert alert-info"> {{ text_wait }}</div>');
+			},
+               success: function(data){
+					console.log(data['state']);
+                    switch(data['state']){
+                        case 'SUCCESS':
+							$('.success, .warning, .alert, .attention').remove();
+                            $('.page-header > div').append('<div class="alert alert-success">Заказ успешно отменен!</div>');
+							$('#ukrcredits_order_status').html('CANCELED');
+							
+							$.ajax({
+								url: '{{ catalog }}index.php?route=api/order/history&api_token={{ api_token }}&store_id={{ store_id }}&order_id={{ order_id }}',
+								type: 'post',
+								dataType: 'json',
+								data: 'order_status_id=' + data['order_status_id'] + '&notify=1&override=0&append=' + ($('input[name=\'append\']').prop('checked') ? 1 : 0) + '&comment=' + data['comment'],
+								beforeSend: function() {
+									$('#button-history').button('loading');
+								},
+								complete: function() {
+									$('#button-history').button('reset');
+								},
+								success: function(json) {
+								//	$('.alert').remove();
+
+									if (json['error']) {
+										$('#history').before('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+									}
+
+									if (json['success']) {
+										$('#history').load('index.php?route=sale/order/history&{{ text_token }}={{ token }}&order_id={{ order_id }}');
+
+										$('#history').before('<div class="alert alert-success"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+									}
+								},
+								error: function(xhr, ajaxOptions, thrownError) {
+									alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+								}
+							});
+							
+                            break;
+                        case 'FAIL':
+							$('.success, .warning, .alert, .attention').remove();
+                            $('.page-header > div').append('<div class="alert alert-warning">При отмене заказа произошла ошибка: ' + data['message'] + '</div>');
+							break;
+                        case 'sys_error':
+							$('.success, .warning, .alert, .attention').remove();
+                            $('.page-header > div').append('<div class="alert alert-warning">При отмене заказа произошла ошибка: ' + data['message'] + '</div>');
+							break;
+                    }                                 
+               }    
+        });
+        return false;    
+	}
+    });  
+	
+    $("#button-status-mb").click(function(){
+        $.ajax({
+            type: 'post',
+            url: 'index.php?route=sale/order/askstatus_mb&{{ text_token }}={{ token }}&ukrcredits_order_id={{ ukrcredits_order_id }}',
+            dataType: 'json',
+			beforeSend: function() {
+				$('.success, .warning, .alert, attention').remove();
+				$('.page-header > div').append('<div class="alert alert-info"> {{ text_wait }}</div>');
+			},
+               success: function(data){
+					console.log(data);
+					if (data['message']) {
+						$('.success, .warning, .alert, .attention').remove();
+                        $('.page-header > div').append('<div class="alert alert-warning">При обновлении статуса заказа произошла ошибка: ' + data['message'] + '</div>');
+					}
+					if (data['order_id']) {
+						$('.success, .warning, .alert, .attention').remove();
+                        $('.page-header > div').append('<div class="alert alert-success">Статус заказа обновлен: ' + data['state'] + ' / ' + data['order_sub_state'] + '</div>');
+						$('#ukrcredits_order_status').html(data['state'] + ' / ' + data['order_sub_state']);					
+					}
+               }    
+        });
+        return false;    
+    });
+	
+    $("#button-cancel-mb").click(function(){
+	if(confirm('{{ text_confirm }}')){
+        $.ajax({
+            type: 'post',
+            url: 'index.php?route=sale/order/cancelhold_mb&{{ text_token }}={{ token }}&ukrcredits_order_id={{ ukrcredits_order_id }}&order_id={{ order_id }}&payment_code={{ payment_code }}',
+            dataType: 'json',
+			beforeSend: function() {
+				$('.success, .warning, .alert, attention').remove();
+				$('.page-header > div').append('<div class="alert alert-info"> {{ text_wait }}</div>');
+			},
+               success: function(data){
+					console.log(data);
+					if (data['message']) {
+						$('.success, .warning, .alert, .attention').remove();
+                        $('.page-header > div').append('<div class="alert alert-warning">При отмене заказа произошла ошибка: ' + data['message'] + '</div>');
+					}
+					if (data['order_id']) {
+						$('.success, .warning, .alert, .attention').remove();
+                        $('.page-header > div').append('<div class="alert alert-success">Статус заказа обновлен: ' + data['state'] + ' / ' + data['order_sub_state'] + '</div>');
+						$('#ukrcredits_order_status').html(data['state'] + ' / ' + data['order_sub_state']);
+						$('#button-confirm-mb').remove();
+						$('#button-cancel-mb').remove();
+						
+							$.ajax({
+								url: '{{ catalog }}index.php?route=api/order/history&api_token={{ api_token }}&store_id={{ store_id }}&order_id={{ order_id }}',
+								type: 'post',
+								dataType: 'json',
+								data: 'order_status_id=' + data['order_status_id'] + '&notify=1&override=0&append=' + ($('input[name=\'append\']').prop('checked') ? 1 : 0) + '&comment=' + data['comment'],
+								beforeSend: function() {
+									$('#button-history').button('loading');
+								},
+								complete: function() {
+									$('#button-history').button('reset');
+								},
+								success: function(json) {
+								//	$('.alert').remove();
+
+									if (json['error']) {
+										$('#history').before('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+									}
+
+									if (json['success']) {
+										$('#history').load('index.php?route=sale/order/history&{{ text_token }}={{ token }}&order_id={{ order_id }}');
+
+										$('#history').before('<div class="alert alert-success"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+									}
+								},
+								error: function(xhr, ajaxOptions, thrownError) {
+									alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+								}
+							});
+					}
+               }                                   
+        });
+        return false;    
+	}
+    });  
+    $("#button-confirm-mb").click(function(){
+	if(confirm('{{ text_confirm }}')){
+        $.ajax({
+            type: 'post',
+            url: 'index.php?route=sale/order/confirmhold_mb&{{ text_token }}={{ token }}&ukrcredits_order_id={{ ukrcredits_order_id }}&order_id={{ order_id }}&payment_code={{ payment_code }}',
+            dataType: 'json',
+			beforeSend: function() {
+				$('.success, .warning, .alert, attention').remove();
+				$('.page-header > div').append('<div class="alert alert-info"> {{ text_wait }}</div>');
+			},
+               success: function(data){
+					console.log(data);
+					if (data['message']) {
+						$('.success, .warning, .alert, .attention').remove();
+                        $('.page-header > div').append('<div class="alert alert-warning">При подтверждении заказа произошла ошибка: ' + data['message'] + '</div>');
+					}
+					if (data['order_id']) {
+						$('.success, .warning, .alert, .attention').remove();
+                        $('.page-header > div').append('<div class="alert alert-success">Заказ успешно подтвержден!: ' + data['state'] + ' / ' + data['order_sub_state'] + '</div>');
+						$('#ukrcredits_order_status').html(data['state'] + ' / ' + data['order_sub_state']);
+						$('#button-confirm-mb').remove();
+						$('#button-cancel-mb').remove();
+						
+							$.ajax({
+								url: '{{ catalog }}index.php?route=api/order/history&api_token={{ api_token }}&store_id={{ store_id }}&order_id={{ order_id }}',
+								type: 'post',
+								dataType: 'json',
+								data: 'order_status_id=' + data['order_status_id'] + '&notify=1&override=0&append=' + ($('input[name=\'append\']').prop('checked') ? 1 : 0) + '&comment=' + data['comment'],
+								beforeSend: function() {
+									$('#button-history').button('loading');
+								},
+								complete: function() {
+									$('#button-history').button('reset');
+								},
+								success: function(json) {
+								//	$('.alert').remove();
+
+									if (json['error']) {
+										$('#history').before('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+									}
+
+									if (json['success']) {
+										$('#history').load('index.php?route=sale/order/history&{{ text_token }}={{ token }}&order_id={{ order_id }}');
+
+										$('#history').before('<div class="alert alert-success"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+									}
+								},
+								error: function(xhr, ajaxOptions, thrownError) {
+									alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+								}
+							});
+					}
+               }                                   
+        });
+        return false;    
+	}
+    });  	
+});    
+</script>
+{% endif %}
+			]]></add>
+		</operation>
+	</file>	
+</modification>
