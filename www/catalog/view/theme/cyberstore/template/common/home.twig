@@ -1,0 +1,328 @@
+{{ header }}
+<span itemscope itemtype="http://schema.org/Organization">
+<meta itemprop="name" content="{{ name }}">
+<meta itemprop="logo" content="{{ logo }}">
+<meta itemprop="url" content="{{ url }}">
+<span itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">
+<meta itemprop="addressLocality" content="{{ addresslocality }}">
+<meta itemprop="streetAddress" content="{{ streetaddress }}">
+<meta itemprop="addressCountry" content="{{ addresscountry }}">
+</span>
+<meta itemprop="telephone" content="{{ telephone }}">
+<meta itemprop="email" content="{{ email }}">
+</span>
+{% if (position_1 is defined) %}
+	<div class="container-fluid">
+		<div class="row">
+		<div class="col-sm-12 pos1">
+			{% for pos1 in position_1 %}
+				{{ pos1 }}
+			{% endfor %}
+		</div>
+		</div>
+	</div>
+{% endif %}
+<div class="container">
+	<div class="row">
+	{% if ((general_menu_on_off == '1') and (main_menu == '1')) %}
+		<div class="sw-20 col-sm-4 col-md-3 position-no-owl hidden-xs hidden-sm">
+			<div id="menu-header-open"></div>
+			{% if (position_0 is defined) %}
+				{% for pos0 in position_0 %}
+					{{ pos0 }}
+				{% endfor %}
+			{% endif %}
+		</div>
+		{% if (position_1 is not defined) %}
+		<script>
+		if(window.matchMedia("(min-width: 992px)").matches){
+			$('#menu-list').addClass("nsmenu-block");
+			$(function(){$('#menu-header-open').css({'min-height': $('#menu-list').outerHeight()});});
+		}
+		$(window).resize(function() {
+			if ($(window).width() > 992) {
+				$('#menu-list').addClass("nsmenu-block");
+				$(function(){$('#menu-header-open').css({'min-height': $('#menu-list').outerHeight()});});
+			} else {
+				$('#menu-list').removeClass("nsmenu-block");
+			}
+		});
+		</script>
+		{% else %}
+		<script>
+		if(window.matchMedia("(min-width: 992px)").matches){
+			$('#menu-list').addClass("nsmenu-block");
+		}
+		$(window).resize(function() {
+			if ($(window).width() > 992) {
+				$('#menu-list').addClass("nsmenu-block");
+			} else {
+				$('#menu-list').removeClass("nsmenu-block");
+			}
+		});
+		</script>
+		{% endif %}
+		<div class="sw-80 col-md-9">{{ content_top }}</div>
+		{% if (position_17 is defined) %}
+			<div class="col-md-3 pos17">
+				{% for pos17 in position_17 %}
+					{{ pos17 }}
+				{% endfor %}
+			</div>
+		{% endif %}
+		{% if (position_18 is defined) %}
+			<div class="col-md-3 pos18">
+				{% for pos18 in position_18 %}
+					{{ pos18 }}
+				{% endfor %}
+			</div>
+		{% endif %}
+		{% if (position_19 is defined) %}
+			<div class="col-md-3 pos19">
+				{% for pos19 in position_19 %}
+					{{ pos19 }}
+				{% endfor %}
+			</div>
+		{% endif %}
+		{% if (position_20 is defined) %}
+			<div class="col-md-6 pos20">
+				{% for pos20 in position_20 %}
+					{{ pos20 }}
+				{% endfor %}
+			</div>
+		{% endif %}
+		{% if (position_21 is defined) %}
+			<div class="col-md-3 pos21">
+				{% for pos21 in position_21 %}
+					{{ pos21 }}
+				{% endfor %}
+			</div>
+		{% endif %}
+	{% else %}
+		<div class="col-md-12">{{ content_top }}</div>
+		{% if (position_17 is defined) %}
+			<div class="col-md-4 pos17">
+				{% for pos17 in position_17 %}
+					{{ pos17 }}
+				{% endfor %}
+			</div>
+		{% endif %}
+		{% if (position_18 is defined) %}
+			<div class="col-md-4 pos18">
+				{% for pos18 in position_18 %}
+					{{ pos18 }}
+				{% endfor %}
+			</div>
+		{% endif %}
+		{% if (position_19 is defined) %}
+			<div class="col-md-4 pos19">
+				{% for pos19 in position_19 %}
+					{{ pos19 }}
+				{% endfor %}
+			</div>
+		{% endif %}
+		{% if (position_20 is defined) %}
+			<div class="col-md-8 pos20">
+				{% for pos20 in position_20 %}
+					{{ pos20 }}
+				{% endfor %}
+			</div>
+		{% endif %}
+		{% if (position_21 is defined) %}
+			<div class="col-md-4 pos21">
+				{% for pos21 in position_21 %}
+					{{ pos21 }}
+				{% endfor %}
+			</div>
+		{% endif %}
+	{% endif %}
+	</div>
+	<div class="row">
+	{{ column_left }}
+    {% if (column_left and column_right) %}
+    {% set class = 'col-sm-4 col-md-6' %}
+    {% elseif (column_left or column_right) %}
+    {% set class = 'col-sm-8 col-md-9' %}
+    {% else %}
+    {% set class = 'col-sm-12' %}
+    {% endif %}
+    <div class="{{ class }}">
+		{{ content_bottom }}
+	</div>
+    {{ column_right }}
+	</div>
+</div>
+{% if (position_2 is defined or position_3 is defined) %}
+	<div class="box-bg-full bg_mode_pos_2">
+	<div class="container">
+		<div class="row">
+			{% if (position_2 is defined) %}
+			<div class="col-sm-6 col-md-6 pos2">
+			{% for pos2 in position_2 %}
+				{{ pos2 }}
+			{% endfor %}
+			</div>
+			{% endif %}
+			{% if (position_3 is defined) %}
+			<div class="col-sm-6 col-md-6 pos3">
+				{% for pos3 in position_3 %}
+					{{ pos3 }}
+				{% endfor %}
+			</div>
+			{% endif %}
+		</div>
+	</div>
+	</div>
+{% endif %}
+
+{% if (position_4 is defined or position_5 is defined) %}
+	<div class="container">
+		<div class="row">
+			{% if (position_4 is defined) %}
+			<div class="col-sm-4 col-md-3 pos4">
+				{% for pos4 in position_4 %}
+					{{ pos4 }}
+				{% endfor %}
+			</div>
+			{% endif %}
+			{% if (position_5 is defined) %}
+			<div class="col-sm-8 col-md-9 pos5">
+				{% for pos5 in position_5 %}
+					{{ pos5 }}
+				{% endfor %}
+			</div>
+			{% endif %}
+		</div>
+	</div>
+{% endif %}
+
+{% if (position_6 is defined or position_7 is defined) %}
+	<div class="container">
+		<div class="row">
+			{% if (position_6 is defined) %}
+			<div class="col-sm-8 col-md-9 pos6">
+				{% for pos6 in position_6 %}
+					{{ pos6 }}
+				{% endfor %}
+			</div>
+			{% endif %}
+			{% if (position_7 is defined) %}
+			<div class="col-sm-4 col-md-3 pos7">
+				{% for pos7 in position_7 %}
+					{{ pos7 }}
+				{% endfor %}
+			</div>
+			{% endif %}
+		</div>
+	</div>
+{% endif %}
+
+{% if (position_8 is defined or position_9 is defined or position_10 is defined) %}
+	<div class="container">
+		<div class="row">
+		{% if (position_8 is defined and position_9 is defined) %}
+		{% set class10 = 'col-sm-4 col-md-6' %}
+		{% elseif (position_8 is defined or position_9 is defined) %}
+		{% set class10 = 'col-sm-8 col-md-9' %}
+		{% else %}
+		{% set class10 = 'col-sm-12' %}
+		{% endif %}
+			{% if (position_8 is defined) %}
+				<div class="col-sm-4 col-md-3 position-no-owl pos8">
+					{% for pos8 in position_8 %}
+						{{ pos8 }}
+					{% endfor %}
+				</div>
+			{% endif %}
+			{% if (position_9 is defined) %}
+				<div class="col-sm-4 col-md-3 position-no-owl pos9">
+					{% for pos9 in position_9 %}
+						{{ pos9 }}
+					{% endfor %}
+				</div>
+			{% endif %}
+			{% if (position_10 is defined) %}
+				<div class="{{ class10 }} position-no-owl pos10">
+					{% for pos10 in position_10 %}
+						{{ pos10 }}
+					{% endfor %}
+				</div>
+			{% endif %}
+		</div>
+	</div>
+{% endif %}
+{% if (position_22 is defined) %}
+	<div class="box-bg-full bg_mode_pos_22">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12 pos22">
+			{% for pos22 in position_22 %}
+				{{ pos22 }}
+			{% endfor %}
+			</div>
+		</div>
+	</div>
+	</div>
+{% endif %}
+{% if (position_11 is defined or position_12 is defined or position_13 is defined or position_14 is defined) %}
+	<div class="box-bg-full bg_mode_pos_11">
+	<div class="container">
+		<div class="row">
+			{% if (position_11 is defined) %}
+			<div class="col-sm-6 col-md-3 position-no-owl pos11">
+				{% for pos11 in position_11 %}
+					{{ pos11 }}
+				{% endfor %}
+			</div>
+			{% endif %}
+			{% if (position_12 is defined) %}
+			<div class="col-sm-6 col-md-3 position-no-owl pos12">
+				{% for pos12 in position_12 %}
+					{{ pos12 }}
+				{% endfor %}
+			</div>
+			{% endif %}
+			{% if (position_13 is defined) %}
+			<div class="col-sm-6 col-md-3 position-no-owl pos13">
+				{% for pos13 in position_13 %}
+					{{ pos13 }}
+				{% endfor %}
+			</div>
+			{% endif %}
+			{% if (position_14 is defined) %}
+			<div class="col-sm-6 col-md-3 position-no-owl pos14">
+				{% for pos14 in position_14 %}
+					{{ pos14 }}
+				{% endfor %}
+			</div>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% endif %}
+
+{% if (position_15 is defined) %}
+	<div class="box-bg-full bg_mode_pos_15">
+	<div class="container">
+		<div class="row">
+		<div class="col-sm-12 pos15">
+			{% for pos15 in position_15 %}
+				{{ pos15 }}
+			{% endfor %}
+		</div>
+		</div>
+	</div>
+	</div>
+{% endif %}
+{% if (position_16 is defined) %}
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-sm-12 pos16">
+			{% for pos16 in position_16 %}
+				{{ pos16 }}
+			{% endfor %}
+			</div>
+		</div>
+	</div>
+{% endif %}
+{{ footer }}

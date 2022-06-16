@@ -1,0 +1,90 @@
+{{ header }} 
+<div class="container">
+  <ul class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+    {% endfor %}
+  </ul>
+    <div class="row">
+        {{ column_left }} 
+        {% if (column_left and column_right) %} 
+        {% set class = 'col-sm-6' %} 
+        {% elseif (column_left or column_right) %} 
+        {% set class = 'col-sm-9' %} 
+        {% else %} 
+        {% set class = 'col-sm-12' %} 
+        {% endif %} 
+        <div class="{{ class }}" id="content">
+            {{ content_top }} 
+            {% if (sets_array) %} 
+            {% for sets in sets_array %} 
+            {% for iset,set in sets %} 
+            {% for key,product in set['products'] %} 
+            {% if (product['option_type'] is defined) %} 
+            {% if (product['option_type'] == 'fixed') %} 
+            {{ product['html_options'] }}
+            {% elseif (product['option_type'] == 'popup') %} 
+            {{ product['html_options'] }}
+            {% endif %} 
+            {% endif %} 
+            {% endfor %} 
+            {% endfor %} 
+            {% endfor %} 
+             
+             
+             
+            <div class="sets " id="prd-sets">
+                <h3>
+                    {{ text_sets }}
+                </h3>
+                {% for sets in sets_array %} 
+                <div class="swiper-viewport">
+                       {% if (orientation == 'hor') %} 
+            {% include 'default/template/extension/module/sets_hor_slider.twig' with {'sets': sets} %}
+         {% elseif (orientation == 'ver') %} 
+            {% include 'default/template/extension/module/sets_ver_slider.twig' with {'sets': sets} %}
+         {% elseif (orientation == 'series') %} 
+            {% include 'default/template/extension/module/sets_table.twig' with {'sets': sets} %}
+            {% endif %}
+            </div>
+            {% endfor %}
+                 
+                 
+            </div>
+             
+            <div>
+                {{ pagination }} 
+            </div>
+            {% endif %} 
+
+            {{ content_bottom }} 
+        </div>
+        {{ column_right }} 
+    </div>
+</div>
+{% if (sets_array) %} 
+<script>
+    $(document).ready(function () {
+        kjset.initCarousel();
+    });
+    if (typeof getDecimal !== "function") { 
+        function getDecimal()
+        {
+            return {{ decimal_place }};
+        }
+    }
+    if (typeof getRoundEconomy !== "function") { 
+        function getRoundEconomy(economy)
+        {
+            {% if (rounding == 'up_to_big') %} 
+                return Math.ceil(economy);
+            {% elseif (product['option_type'] == 'popup') %}          
+                return Math.floor(economy);
+            {% else %}
+                return economy;
+            {% endif %} 
+        }
+    }
+</script>
+{% endif %} 
+{{ footer }} 

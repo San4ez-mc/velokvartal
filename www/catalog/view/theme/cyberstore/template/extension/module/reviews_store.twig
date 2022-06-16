@@ -1,0 +1,149 @@
+<div class="container-module review-store-cont">
+ 	<div class="title-module">
+ 		<span>{{ heading_title }}</span>
+ 		<a class="see-all-reviews" href="{{ all_review_link }}">{{ btn_all_review }}<span><i class="fa fa-angle-right arrow"></i></span></a>
+ 	</div>
+ 	<div class="row rating-info-box">
+ 		<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+ 			<div class="block-reviews f-box dflex">
+ 				<div class="average-reviews">
+	 				<div class="average-rating-number"><span>{{ rating_store }}</span></div>
+	 				<div class="total-reviews">
+	 					<span class="num-total-rs">{{ text_sum_reviews }}{{ total_rs }}</span>
+	 				</div>
+	 				<div class="average-rating-stars">
+	 					<div class="stars-average-grey">
+	 						<div class="stars-average-gold" style="width:{{ rating_store*100/5}}%;"></div>
+	 					</div>
+	 				</div>
+
+ 				</div>
+ 				<div class="star-rating-desc">
+ 					<div class="line-info">
+ 						<span class="star-before-line">
+ 							<img src="catalog/view/theme/cyberstore/image/r-store/star-y-icon.svg" alt="star-y-icon.svg">
+	 					</span>
+	 					<div class="percent_rating_line">
+	                        <div class="percent_rating" style="width: {{ percent_rating['star5'] }}%"></div>
+	                    </div>
+	                    <span class="percent_rating_text">{{ percent_rating['star5'] }}%</span>
+ 					</div>
+
+ 					<div class="line-info">
+ 						<span class="star-before-line">
+ 							<img src="catalog/view/theme/cyberstore/image/r-store/star-y-icon.svg" alt="star-y-icon.svg">
+	 					</span>
+	 					<div class="percent_rating_line">
+	                        <div class="percent_rating" style="width: {{ percent_rating['star4'] }}%"></div>
+	                    </div>
+	                    <span class="percent_rating_text">{{ percent_rating['star4'] }}%</span>
+ 					</div>
+
+ 					<div class="line-info">
+ 						<span class="star-before-line">
+ 							<img src="catalog/view/theme/cyberstore/image/r-store/star-y-icon.svg" alt="star-y-icon.svg">
+	 					</span>
+	 					<div class="percent_rating_line">
+	                        <div class="percent_rating" style="width: {{ percent_rating['star3'] }}%"></div>
+	                    </div>
+	                    <span class="percent_rating_text">{{ percent_rating['star3'] }}%</span>
+ 					</div>
+
+ 					<div class="line-info">
+ 						<span class="star-before-line">
+ 							<img src="catalog/view/theme/cyberstore/image/r-store/star-y-icon.svg" alt="star-y-icon.svg">
+	 					</span>
+	 					<div class="percent_rating_line">
+	                        <div class="percent_rating" style="width: {{ percent_rating['star2'] }}%"></div>
+	                    </div>
+	                    <span class="percent_rating_text">{{ percent_rating['star2'] }}%</span>
+ 					</div>
+
+ 					<div class="line-info">
+ 						<span class="star-before-line">
+ 							<img src="catalog/view/theme/cyberstore/image/r-store/star-y-icon.svg" alt="star-y-icon.svg">
+	 					</span>
+	 					<div class="percent_rating_line">
+	                        <div class="percent_rating" style="width: {{ percent_rating['star1'] }}%"></div>
+	                    </div>
+	                    <span class="percent_rating_text">{{ percent_rating['star1'] }}%</span>
+ 					</div>
+ 				</div>
+ 			</div>
+ 		</div>
+ 		<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+ 			<div class="block-reviews s-box">
+ 				<div class="rsinfo">
+                    {% for result_info in reviews_theme_rating %}
+                        <div class="rsinfo-item">
+                        	<span class="rs-theme-text">{{ result_info['theme_text'] }}</span>
+                        	<div class="rs-theme-stars"><div class="avg-rating-stars"><div class="avg-realrating" style="width:{{ result_info['avg_rating']*100/5}}%;"></div></div></div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="btn-block-rs">
+	                {% if (review_guest) %}
+	                <button type="button" onclick="popupFormReviewStore()" class="btn btn-write-rs">{{ btn_write_review }}</button>
+	                {% else %}
+	                    {{ text_review_guest }}
+	                {% endif %}
+	            </div>
+ 			</div>
+ 		</div>
+ 	</div>
+ 	<div class="row">
+ 		<div class="review-store-box review-store{{ module }}">
+        {% for review_store in reviews_store %}
+        	<div class="col-xs-12 col-sm-6 col-md-4 no-slider">
+            	<div class="item-rs">
+            		<div class="rs-review-info d-flex jcsb">
+	                    <div class="rs-review-author">
+	                    	<span class="rs-review-icon">
+	                    	<img src="catalog/view/theme/cyberstore/image/r-store/user-icon.svg" alt="user-icon.svg">
+	                    	</span>
+	                    	<span class="author-name">{{ review_store['author'] }}</span>
+	                	</div>
+	                    <div class="rs-review-dateadded">{{ review_store['date_added'] }}</div>
+	                </div>
+	                <div class="rs-review-stars">
+	                      <div class="avg-rating-stars"><div class="avg-realrating" style="width:{{ review_store['avg_customer_rating']*100/5}}%;"></div></div>
+	                </div>
+	                <div class="rs-desc-reviews">{{ review_store['description'] }}</div>
+
+
+            	</div>
+        	</div>
+        {% endfor %}
+        </div>
+        {% if (status_showmore is defined and status_showmore != 0) %}
+	    {% if (nextPage) %}
+	        <div class="showmore-review-store{{ module }} box-showmore"><span data-nextpage="{{ nextPage }}" class="box-ajax-load review-store-ajax-load{{ module }}"><img src="catalog/view/theme/cyberstore/image/showmore.svg" alt="showmore-icon"></span>
+	    	</div>
+	    {% endif %}
+	    {% endif %}
+ 	</div>
+{% if (status_showmore is defined and status_showmore != 0) %}
+<script>
+$(document).on('click', '.review-store-ajax-load{{ module }}', function () {
+    $.ajax({
+        url: 'index.php?route=extension/module/cyber_reviews_store/getNextPage',
+        type: 'post',
+        data: 'page=' + $(this).attr('data-nextpage') + '&module={{ module }}&setting={{ setting }}',
+        dataType: 'html',
+        beforeSend: function() {
+            $('.showmore-review-store{{ module }} span').addClass('active-load');
+        },
+        complete: function() {
+            $('.showmore-review-store{{ module }} span').addClass('active-load');
+        },
+        success:function(data){
+            $data = $(data);
+            var $reviews_store = $data.find('.review-store{{ module }} > div.col-xs-12');
+            $('.review-store{{ module }}').append($reviews_store);
+            $('.showmore-review-store{{ module }}').replaceWith($data.find('.showmore-review-store{{ module }}'));
+        }
+    });
+})
+</script>
+{% endif %}
+</div>

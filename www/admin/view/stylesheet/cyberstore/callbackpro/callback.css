@@ -1,0 +1,108 @@
+.icon_fontawesome_popup {display:none;max-width:80%;background:#fff; padding:10px; border-radius:10px;}
+.icon_fontawesome_popup .col-xs-1 {width:35px; padding:5px 0;text-align:center;}
+.icon_fontawesome_popup i{padding:5px;font-size:18px !important;color:#555;cursor:pointer;border:solid 1px transparent;border-radius:2px;}
+.icon_fontawesome_popup i:hover{color:#4FC605;border:solid 1px #ccc}
+span.icon_open {display:block;float:left;text-align:center;font-weight:400 !important;color:#444 !important;cursor:pointer;text-shadow:0 1px 0 rgba(255, 255, 255, 1);min-width:85px;max-width:150px;margin:0 5px 0 0;padding:5px;line-height:28px;background:#eee;border:solid 1px #aaa;border-radius:4px;}
+span.icon_open:hover {background:#ddd;}
+span.icon_open i {vertical-align:middle;font-size:20px;color:#4FC605;}
+span.icon_open + input + input {width:260px !important;}
+
+.title-fields-callback {
+font-size:16px;
+text-align:right;
+color:orange !important;
+}
+.jPicker.Container {
+position:fixed !important;
+top:35% !important;
+}
+.form-control.jpicker-csseditor-callback_20 {
+display: inline-block;
+float: left;
+margin-right: 5px;
+width: 25%;
+}
+.onoffswitch {
+position: relative;
+width: 75px;
+background-color: white;
+background-image: linear-gradient(to bottom, #eeeeee, white 25px);
+border-radius: 18px;
+box-shadow: 0 -1px white inset, 0 1px 1px rgba(0, 0, 0, 0.05) inset;
+padding: 3px;
+-webkit-user-select:none;
+-moz-user-select:none;
+-ms-user-select: none;
+}
+.onoffswitch-checkbox {
+display: none;
+}
+.onoffswitch-label {
+display: block;
+overflow: hidden;
+cursor: pointer;
+border-radius: 15px;
+margin-bottom:1px;
+}
+.onoffswitch-inner {
+display: block;
+width: 200%;
+margin-left: -100%;
+transition: background 0.2s ease-in 0s;
+}
+.onoffswitch-inner:before, .onoffswitch-inner:after {
+display: block;
+float: left;
+width: 50%;
+height: 29px;
+padding: 0;
+line-height: 29px;
+font-size: 14px;
+color: white;
+font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+box-sizing: border-box;
+}
+.onoffswitch-inner:before {
+content: "ON";
+padding-left: 13px;
+color: #ffffff;
+background-color: #47a8d8;
+box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15) inset, 0 0 3px rgba(0, 0, 0, 0.2) inset;
+text-shadow: 0 1px rgba(0, 0, 0, 0.2);
+border-radius: 18px;
+font-size:13px;
+}
+.onoffswitch-inner:after {
+content: "OFF";
+padding-right: 9px;
+box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15) inset, 0 0 3px rgba(0, 0, 0, 0.2) inset;
+text-shadow: 0 1px rgba(255, 255, 255, 0.5);
+color: #aaa;
+background:#eceeef none repeat scroll 0 0;
+text-align: right;
+border-radius: 18px;
+font-size:13px;
+}
+.onoffswitch-switch {
+display: block;
+width: 25px;
+height:25px;
+box-shadow:-1px 1px 5px rgba(0, 0, 0, 0.2), 0 1px rgba(0, 0, 0, 0.02) inset;
+background: #f9f9f9 linear-gradient(to bottom, #eeeeee, white) repeat scroll 0 0;
+position: absolute;
+top: 5px;
+bottom: 4px;
+right: 45px;
+border: 4px solid #FFFFFF;
+border-radius: 15px;
+transition: all 0.2s ease-in 0s; 
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+right: 5px; 
+box-shadow:-1px 1px 5px rgba(0, 0, 0, 0.2), 0 1px rgba(0, 0, 0, 0.02) inset;
+background: #f9f9f9 linear-gradient(to bottom, #eeeeee, white) repeat scroll 0 0;
+
+}

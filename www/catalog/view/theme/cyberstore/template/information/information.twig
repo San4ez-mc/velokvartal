@@ -1,0 +1,66 @@
+{{ header }} 
+<div id="information-information" class="container">
+<div class="col-sm-12 content-box-cs {% if (menu_open_information is defined and ((menu_open_information == '1') and (main_menu == '1') and (column_left))) %}mtopm10{% endif %}">
+<div class="breadcrumbs-box">
+	<ul class="breadcrumb {% if (menu_open_information is defined and ((menu_open_information == '1') and (main_menu == '1') and (column_left))) %}col-md-offset-3 col-lg-offset-3{% endif %}" itemscope itemtype="https://schema.org/BreadcrumbList">
+		{% for i,breadcrumb in breadcrumbs %} 
+			{% if (i+1 < breadcrumbs|length) %} 
+				<li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+					<a itemprop="item" href="{{ breadcrumb['href'] }}">
+						{% if (i == 0) %}
+						  <meta itemprop="name" content="{{ text_home_ns }}" />
+						  <span>{{ breadcrumb['text'] }}</span>
+						{% else %} 
+						  <span itemprop="name">{{ breadcrumb['text'] }}</span>
+						{% endif %} 
+					</a>
+					<meta itemprop="position" content="{{ i+1 }}" />
+				  </li>
+			{% else %} 
+				<li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+				<link itemprop="item" href="{{ breadcrumb['href'] }}">
+				{% if (i == 0) %}
+				  <meta itemprop="name" content="{{ text_home_ns }}" />
+				  <span>{{ breadcrumb['text'] }}</span>
+				{% else %} 
+				  <span itemprop="name">{{ breadcrumb['text'] }}</span>
+				{% endif %} 
+				<meta itemprop="position" content="{{ i+1 }}" />
+				</li>
+			{% endif %} 
+		{% endfor %} 
+	</ul>
+</div>
+  <div class="row">
+   {% if (menu_open_information is defined and ((menu_open_information == '1') and (main_menu == '1') and (column_left))) %} 
+		<script>
+		if(window.matchMedia("(min-width: 992px)").matches){
+			$('header #menu-list').addClass("nsmenu-block");
+			$(function(){$('#column-left').css({'margin-top': $('header #menu-list').outerHeight() - 54});});
+		}
+		$(window).resize(function() {
+			if ($(window).width() > 992) {
+				$('header #menu-list').addClass("nsmenu-block");
+				$(function(){$('#column-left').css({'margin-top': $('header #menu-list').outerHeight() - 54});});
+			} else {
+				$('header #menu-list').removeClass("nsmenu-block");
+			}
+		});
+		</script>
+	{% endif %} 
+  {{ column_left }} 
+    {% if (column_left and column_right) %} 
+    {% set class = 'col-sm-4 col-md-6' %} 
+    {% elseif (column_left or column_right) %} 
+    {% set class = 'col-sm-8 col-md-9' %} 
+    {% else %} 
+    {% set class = 'col-sm-12' %} 
+    {% endif %} 
+    <div id="content" class="{{ class }}">
+  {{ content_top }} 
+      <h1>{{ heading_title }}</h1>
+      {{ description }}{{ content_bottom }}</div>
+    {{ column_right }}</div>
+</div>
+</div>
+{{ footer }}

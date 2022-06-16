@@ -1,0 +1,24 @@
+<table class="table table-bordered">
+    {% for key,val in options %} 
+    <tr>
+        <td>
+            {{ val['name'] }}
+        </td>
+        <td>
+            {% if val['value'] is iterable %} 
+                {{ val['value']|join(',') }}
+                {% for key2,val2 in val['value'] %} 
+                    {% if (val['type'] != 'checkbox') %} 
+                        <input id="set-input-option{{ key }}" name="sp_option[{{ key }}]" type="hidden" value="{{ key2 }}">
+                    {% else %} 
+                        <input id="set-input-option{{ key }}" name="sp_option[{{ key }}][]" type="hidden" value="{{ key2 }}">
+                    {% endif %} 
+                {% endfor %} 
+            {% else %} 
+                {{ val['value'] }}
+                 <input id="set-input-option{{ key }}" name="sp_option[{{ key }}]" type="hidden" value="{{ val['value'] }}">
+            {% endif %} 
+        </td>
+    </tr>
+    {% endfor %} 
+</table>

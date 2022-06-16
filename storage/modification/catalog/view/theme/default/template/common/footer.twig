@@ -1,0 +1,176 @@
+<footer>
+  <div class="container">
+    <div class="row">
+      {% if informations %}
+      <div class="col-sm-3">
+        <h5>{{ text_information }}</h5>
+        <ul class="list-unstyled">
+         {% for information in informations %}
+          <li><a href="{{ information.href }}">{{ information.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      <div class="col-sm-3">
+        <h5>{{ text_service }}</h5>
+        <ul class="list-unstyled">
+          <li><a href="{{ contact }}">{{ text_contact }}</a></li>
+          <li><a href="{{ return }}">{{ text_return }}</a></li>
+          <li><a href="{{ sitemap }}">{{ text_sitemap }}</a></li>
+        </ul>
+      </div>
+      <div class="col-sm-3">
+        <h5>{{ text_extra }}</h5>
+        <ul class="list-unstyled">
+          <li><a href="{{ manufacturer }}">{{ text_manufacturer }}</a></li>
+          <li><a href="{{ voucher }}">{{ text_voucher }}</a></li>
+          <li><a href="{{ affiliate }}">{{ text_affiliate }}</a></li>
+          <li><a href="{{ special }}">{{ text_special }}</a></li>
+        </ul>
+      </div>
+      <div class="col-sm-3">
+        <h5>{{ text_account }}</h5>
+        <ul class="list-unstyled">
+          <li><a href="{{ account }}">{{ text_account }}</a></li>
+          <li><a href="{{ order }}">{{ text_order }}</a></li>
+          <li><a href="{{ wishlist }}">{{ text_wishlist }}</a></li>
+          <li><a href="{{ newsletter }}">{{ text_newsletter }}</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr>
+    <p>{{ powered }}</p>
+  </div>
+</footer>
+
+				{% if (agreedata is defined and agreedata['status'] != 0) %} 
+				<script>
+				$(function() {
+				{% set delay_time = agreedata['delay_time'] is defined ? agreedata['delay_time'] : '1000' %} 
+					{% if (agreedata['method_agree_popup'] == 'method_session') %} 
+						if(sessionStorage['PopupAgree'] != 'yes'){ 
+							setTimeout(function(){
+								ShowAgree();
+							}, {{ delay_time }});
+						}
+					{% else %} 
+						{% if (PopupAgreecookie is not defined) %}
+							setTimeout(function(){
+								ShowAgree();
+							}, {{ delay_time }});
+						{% endif %} 
+					{% endif %} 
+				});
+				var loading_masked_img = '<img src="catalog/view/theme/cyberstore/image/ring-alt-1.svg" />';
+				function loading_agree(action) {
+					if (action) {
+						$('#loading_agree').html(loading_masked_img);
+						$('#loading_agree').show();
+					} else {
+						$('#loading_agree').html('');
+						$('#loading_agree').hide();
+					}
+				}
+				function ShowAgree() {
+					$('body').prepend('<div id="loading_agree"></div>');
+					loading_agree(true); 
+					$('body').append('<div class="popup_agree"></div>');
+					$('.popup_agree').popup({
+						transition: 'all 0.3s',
+						escape: {% if (agreedata['escape_click'] == '1') %} true {% else %} false {% endif %},
+						blur: {% if (agreedata['blur_click'] == '1') %} true {% else %} false {% endif %},
+						closetransitionend: function () {$(this).remove();}
+					});
+					$('.popup_agree').load('index.php?route=extension/module/cyber_agree_popup', function() {
+						loading_agree(false); 
+						$('.popup_agree').popup('show');
+					});
+				}
+				</script>
+				{% endif %}
+			
+{% for style in styles %}
+<link href="{{ style.href }}" type="text/css" rel="{{ style.rel }}" media="{{ style.media }}" />
+{% endfor %}
+{% for script in scripts %}
+<script src="{{ script }}" type="text/javascript"></script>
+{% endfor %}
+<!--
+OpenCart is open source software and you are free to remove the powered by OpenCart if you want, but its generally accepted practise to make a small donation.
+Please donate via PayPal to donate@opencart.com
+//-->
+
+{% if (callbackpro['status_animate_btn_4'] is defined) %} 
+<div onclick="get_modal_callbacking();" id="animate_btn_4" class="animate_btn_4">
+	<div class="ab4-circlephone"></div>
+	<div class="ab4-circle-fill"></div>
+	<div class="ab4-img-circle"><div class="ab4-img-circleblock"></div></div>
+</div>
+{% endif %} 
+{% if (callbackpro['status_animate_btn_3'] is defined) %} 
+<div onclick="get_modal_callbacking();" id="animate_btn_3" class="animate_btn_3">
+    <div class="ab3-track"></div>
+    <div class="ab3-back-circle"></div>
+    <div class="ab3-circle">
+        <div class="ab3-handset"></div>
+    </div>
+</div>
+{% endif %} 
+{% if (callbackpro['status_animate_btn_2'] is defined) %} 
+<div onclick="get_modal_callbacking();" id="tcb-call">
+	<div class="tcb-phone">
+		<div class="tcb-phone-img"></div>
+	</div>
+	<div class="tcb-layout1"></div>
+	<div class="tcb-layout2"></div>
+	<div class="tcb-layout3"></div>
+</div>
+{% endif %} 
+{% if (callbackpro['status_animate_btn_1'] is defined) %} 
+<div onclick="get_modal_callbacking();" id="tcb_call_1">
+	<div class="tcb_phone_1">
+		<div class="tcb_phone_img_1"></div>
+	</div>
+	<div class="tcb_layout_1"></div>
+	<div class="tcb_layout_2"></div>
+</div>
+{% endif %} 
+{% if (callbackpro['config_right_callback_position_fixed'] is defined) %} 
+<div onclick="get_modal_callbacking();" id="callback"  class="callback-view"><div><img src="catalog/view/theme/cyberstore/image/callback.png"/></div></div>
+{% endif %} 
+<script>	
+function get_modal_callbacking() {		
+		$.magnificPopup.open({
+            tLoading: loading_masked_img,
+            items: {
+              src: 'index.php?route=extension/module/cyber_callback',
+              type: 'ajax'
+            },
+          });
+	}
+</script>
+			
+
+<script>
+function fastorder_open(product_id) {
+  $.magnificPopup.open({
+	tLoading: loading_masked_img,
+	items: {
+	  src: 'index.php?route=extension/module/cyber_newfastorder&product_id='+product_id,
+	  type: 'ajax'
+	}
+  });
+}
+function fastorder_open_cart() {
+  $.magnificPopup.open({
+	tLoading: loading_masked_img,
+	items: {
+	  src: 'index.php?route=extension/module/cyber_newfastordercart',
+	  type: 'ajax'
+	}
+
+  });
+}
+</script>
+			
+</body></html>

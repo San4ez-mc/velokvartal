@@ -1,0 +1,80 @@
+<div id="searchtop">
+<div id="search" class="input-group {% if (search_word is defined and (search_word is not empty)) %}pt20{% endif %}">
+<input type="text" name="search" value="{{ search }}" placeholder="{{ text_search }}" class="form-control input-lg search-autocomplete" />
+{% if (show_hc_search == '1') %}
+<div class="input-group-btn categories">
+    <button id="change_category" type="button" class="btn btn-search-select dropdown-toggle" data-toggle="dropdown">
+		{% for search_category in categories %} {% if (search_category['category_id'] == filter_category_id) %}{% set text_search_everywhere = search_category['name'] %}{% endif %}{% endfor %}
+		<span class="category-name">{{ text_search_everywhere }}&nbsp;</span>&nbsp;<span class="fa fa-angle-down fa-fw car-down"></span>
+	</button>
+    	<ul class="dropdown-menu cs-dropdown">
+			<li><a href="#" onclick="return false;" data-idsearch="0">{{ text_search_everywhere }}</a></li>
+			{% for search_category in categories %}
+			<li><a href="#" onclick="return false;" data-idsearch="{{ search_category['category_id'] }}">{{ search_category['name'] }}</a></li>
+			{% endfor %}
+		</ul>
+		<input id="selected_category" type="hidden" name="category_id" value="0" />
+  </div>
+   {% endif %}
+  <span class="input-group-btn button_search {% if (show_hc_search == '0') %}hc-off{% endif %}">
+    <button type="button" class="btn btn-search">
+      <svg class="icon-search" width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M13.1765 7.17637C13.1765 3.53779 10.2268 0.588135 6.58824 0.588135C2.94965 0.588135 0 3.53779 0 7.17637C0 10.815 2.94965 13.7646 6.58824 13.7646C10.2268 13.7646 13.1765 10.815 13.1765 7.17637ZM1.23529 7.17637C1.23529 4.22002 3.63189 1.82343 6.58823 1.82343C9.54458 1.82343 11.9412 4.22002 11.9412 7.17637C11.9412 10.1327 9.54458 12.5293 6.58823 12.5293C3.63189 12.5293 1.23529 10.1327 1.23529 7.17637Z" fill="white"/>
+      <path d="M10.1563 11.5166C10.3774 11.2992 10.7207 11.2821 10.961 11.4636L11.0298 11.524L13.6167 14.1552C13.8558 14.3984 13.8525 14.7895 13.6093 15.0286C13.3882 15.246 13.0449 15.2631 12.8046 15.0816L12.7358 15.0212L10.1489 12.39C9.90974 12.1468 9.91306 11.7557 10.1563 11.5166Z" fill="white"/>
+      </svg>
+    </button>
+  </span>
+</div>
+{% if (search_word is defined and (search_word is not empty)) %}
+<div id="search_word" class="hidden-xs hidden-sm">{{ text_search_word }}<a>{{ search_word }}</a></div>
+{% endif %}
+</div>
+{% if (show_hc_search == '1') %}
+<script>
+$(document).ready(function() {
+  var category_id_page = $('#content select[name=\'category_id\']').find("option:selected").attr("value");
+  var category_id_html = $('#content select[name=\'category_id\']').find("option:selected").html();
+
+  $("#selected_category").val(category_id_page);
+  $("#category_now").val(category_id_page);
+  $(".category-name").html(category_id_html);
+  $('.select-category').find('.filter-option').html(category_id_html)
+  });
+$('#search a').click(function(){
+	$("#selected_category").val($(this).attr('data-idsearch'));
+	$('.category-name').html($(this).html());
+});
+</script>
+ {% endif %}
+{% if (ns_autosearch_data['status'] == '1') %}
+<script>
+function getAjaxLiveSearch(request, response){
+    $.ajax({
+        url: 'index.php?route=extension/module/cyber_autosearch/ajaxLiveSearch&filter_name=' +  encodeURIComponent(request),
+        dataType : 'json',
+        success : function(json) {
+            response($.map(json, function(item) {
+                return {
+                    label: item.name,
+                    name: item.name1,
+                    value: item.product_id,
+                    model: item.model,
+                    stock_status: item.stock_status,
+                    image: item.image,
+                    manufacturer: item.manufacturer,
+                    price: item.price,
+                    special: item.special,
+                    category: item.category,
+                    rating: item.rating,
+                    reviews: item.reviews,
+                    href:item.href,
+                }
+            }));
+        }
+    });
+}
+$(document).on('click', '#search input[name="search"]', function () {
+  $('#search input[name="search"]').autocompleteSerach({source:getAjaxLiveSearch});
+});
+</script>
+{% endif %}

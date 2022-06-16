@@ -1,0 +1,24 @@
+{% if (options) %} 
+<div id="sets-popup-{{ modal_id }}" class="modal fade options" role="dialog">
+    <div class="modal-dialog modal-lg">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header text-center">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h3 class="modal-title">{{ modal_title }}</h3>
+            </div>
+            <div class="modal-body">
+                <div class='row'>
+                    <div class='col-sm-6'>
+                        <img class="img-responsive mymargin" src="{{ product_thumb }}">
+                    </div>
+                    <div class='col-sm-6'>
+                        {{ inline_options }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

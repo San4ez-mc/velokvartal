@@ -1,0 +1,242 @@
+{{ header }}{{ column_left }} 
+<div id="content">
+
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="pull-right">
+                <button type="submit" form="form-sets" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+                <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+            <h1>{{ heading_title }}</h1>
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %} 
+                <li><a href="{{ breadcrumb['href'] }}">{{ breadcrumb['text'] }}</a></li>
+                {% endfor %} 
+            </ul>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        {% if (error_warning) %} 
+        <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }} 
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        {% endif %} 
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+            </div>
+            <div class="panel-body">
+                <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-sets" class="form-horizontal">
+                    
+                    <div class="form-group {% if (show_lic) %} hidden {% endif %}">
+                        <label class="col-sm-2 control-label" for="input-key">{{ entry_key }}</label>
+                        <div class="col-sm-10">
+                            <textarea id="input-key" name="module_sets_key" class="form-control">{{ module_sets_key }}</textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                        <div class="col-sm-10">
+                            <select name="module_sets_status" id="input-status" class="form-control">
+                                {% if (module_sets_status) %} 
+                                <option value="1" selected="selected">{{ text_enabled }}</option>
+                                <option value="0">{{ text_disabled }}</option>
+                                {% else %} 
+                                <option value="1">{{ text_enabled }}</option>
+                                <option value="0" selected="selected">{{ text_disabled }}</option>
+                                {% endif %} 
+                            </select>
+                        </div>
+                    </div>
+                    <div class='row'>
+                    <div class='col-sm-6'>
+                    <div class='text-center'>
+                        <i class='fa fa-eye fa-2x'></i>
+                    </div>
+                   
+                   <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-display_num_sets">{{ entry_display_num_sets }}</label>
+                        <div class="col-sm-8">
+                            <select name="module_sets_display_num_sets" id="input-display_num_sets" class="form-control">
+                                {% if (module_sets_display_num_sets) %} 
+                                <option value="1" selected="selected">{{ text_enabled }}</option>
+                                <option value="0">{{ text_disabled }}</option>
+                                {% else %} 
+                                <option value="1">{{ text_enabled }}</option>
+                                <option value="0" selected="selected">{{ text_disabled }}</option>
+                                {% endif %} 
+                            </select>
+                        </div>
+                    </div>
+                    
+                    
+                   <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-show-qty">{{ entry_show_qty }}</label>
+                        <div class="col-sm-8">
+                            <select name="module_sets_show_qty" id="input-show-qty" class="form-control">
+                                {% if (module_sets_show_qty) %} 
+                                <option value="1" selected="selected">{{ text_enabled }}</option>
+                                <option value="0">{{ text_disabled }}</option>
+                                {% else %} 
+                                <option value="1">{{ text_enabled }}</option>
+                                <option value="0" selected="selected">{{ text_disabled }}</option>
+                                {% endif %} 
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-product_link_newtab">{{ entry_sets_product_link_newtab }}</label>
+                        <div class="col-sm-8">
+                            <select name="sets_product_link_newtab" id="input-product_link_newtab" class="form-control">
+                                {% if (sets_product_link_newtab) %} 
+                                <option value="1" selected="selected">{{ text_enabled }}</option>
+                                <option value="0">{{ text_disabled }}</option>
+                                {% else %} 
+                                <option value="1">{{ text_enabled }}</option>
+                                <option value="0" selected="selected">{{ text_disabled }}</option>
+                                {% endif %} 
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-show-discount">{{ entry_show_discount }}</label>
+                        <div class="col-sm-8">
+                            <select name="module_sets_show_disc_prec" id="input-show-discount" class="form-control">
+                                {% if (module_sets_show_disc_prec) %} 
+                                <option value="1" selected="selected">{{ text_enabled }}</option>
+                                <option value="0">{{ text_disabled }}</option>
+                                {% else %} 
+                                <option value="1">{{ text_enabled }}</option>
+                                <option value="0" selected="selected">{{ text_disabled }}</option>
+                                {% endif %} 
+                            </select>
+                        </div>
+                    </div>
+                    
+                    
+                     <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-orientation">{{ entry_orientation }}</label>
+                        <div class="col-sm-8">
+                            <select name="module_sets_orientation" id="input-orientation" class="form-control">
+                                    <option {% if (module_sets_orientation == "hor") %} selected="selected" {% endif %} value="hor">{{ text_orientation_horizontal }}</option>
+                                <option {% if (module_sets_orientation == "ver") %} selected="selected" {% endif %} value="ver">{{ text_orientation_vertical }}</option>
+                                <option {% if (module_sets_orientation == "series") %} selected="selected" {% endif %} value="series">{{ text_orientation_series }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-position">{{ entry_position }}</label>
+                        <div class="col-sm-8">
+                            {% set arr=['insertBefore', 'insertAfter', 'prepend', 'append'] %}
+                            <select name="module_sets_position" id="input-position" class="form-control">
+                                {% for val in arr %} 
+
+                                <option {% if (sets_position == val) %} selected="selected" {% endif %} value="{{ val }}">{{ val }}</option>
+                                
+                                {% endfor %} 
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-selector">{{ entry_selector }}</label>
+                        <div class="col-sm-8">
+                            <input id="input-selector" name="module_sets_selector" value="{{ module_sets_selector }}" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class='col-sm-6'>
+                    <div class='text-center'>
+                        <i class='fa fa-cog fa-2x'></i>
+                    </div>
+
+                                        <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-type-add">{{ entry_type_add }}</label>
+                        <div class="col-sm-8">
+                            <select name="module_sets_type_add" id="input-type-add" class="form-control">
+                                <option {% if (module_sets_type_add == "redirect") %} selected="selected" {% endif %} value="redirect">{{ text_type_add_redirect }}</option>
+                                <option {% if (module_sets_type_add == "custom") %} selected="selected" {% endif %} value="custom">{{ text_type_add_custom }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                                        <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-links">{{ entry_sets_links }}</label>
+                        <div class="col-sm-8">
+                            <select name="module_sets_links" id="input-links" class="form-control">
+                                {% if (module_sets_links) %} 
+                                <option value="1" selected="selected">{{ text_enabled }}</option>
+                                <option value="0">{{ text_disabled }}</option>
+                                {% else %} 
+                                <option value="1">{{ text_enabled }}</option>
+                                <option value="0" selected="selected">{{ text_disabled }}</option>
+                                {% endif %} 
+                            </select>
+                        </div>
+                    </div>
+
+                                        <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-showifempty">{{ entry_show_if_empty }}</label>
+                        <div class="col-sm-8">
+                            <select name="module_sets_show_if_empty" id="input-showifempty" class="form-control">
+                                {% if (module_sets_show_if_empty) %} 
+                                <option value="1" selected="selected">{{ text_enabled }}</option>
+                                <option value="0">{{ text_disabled }}</option>
+                                {% else %} 
+                                <option value="1">{{ text_enabled }}</option>
+                                <option value="0" selected="selected">{{ text_disabled }}</option>
+                                {% endif %} 
+                            </select>
+                        </div>
+                    </div>
+
+                                        <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-rounding">{{ entry_rounding }}</label>
+                        <div class="col-sm-8">
+                            <select name="module_sets_rounding" id="input-rounding" class="form-control">
+                                 <option {% if (module_sets_rounding == "off") %} selected="selected" {% endif %} value="off">{{ text_rounding_off }}</option>
+                                 <option {% if (module_sets_rounding == "up_to_big") %} selected="selected" {% endif %} value="up_to_big">{{ text_rounding_up_to_big }}</option>
+                                 <option {% if (module_sets_rounding == "up_to_small") %} selected="selected" {% endif %} value="up_to_small">{{ text_rounding_up_to_small }}</option>
+
+                            </select>
+                        </div>
+                    </div>
+
+                                        <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-discount-from">{{ entry_discount_from }}</label>
+                        <div class="col-sm-8">
+                            <select name="module_sets_discount_from" id="input-discount-from" class="form-control">
+                                 <option {% if (module_sets_discount_from == "current") %} selected="selected" {% endif %} value="current">{{ text_discount_from_current }}</option>
+                                 <option {% if (module_sets_discount_from == "old") %} selected="selected" {% endif %} value="old">{{ text_discount_from_old }}</option>
+
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-js-cart-add">{{ entry_js_for_cart_add }}</label>
+                        <div class="col-sm-8">
+                            <textarea id="js-cart-add" name="module_sets_js_cart_add" class="form-control">{{ module_sets_js_cart_add }}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="input-js-cart-add">{{ entry_media_path }}</label>
+                        <div class="col-sm-8">
+                            <textarea id="js-cart-add" name="module_sets_include_media" class="form-control">{{ module_sets_include_media }}</textarea>
+                        </div>
+                    </div>
+
+                    
+                    </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+{{ footer }}

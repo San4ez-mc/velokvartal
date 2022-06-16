@@ -1,0 +1,246 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-slidedeals" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb['href'] }}">{{ breadcrumb['text'] }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if (error_warning) %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-slidedeals" class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-name">{{ entry_name }}</label>
+            <div class="col-sm-9">
+              <input type="text" name="name" value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
+              {% if (error_name) %}
+              <div class="text-danger">{{ error_name }}</div>
+              {% endif %}
+            </div>
+          </div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">{{ text_title }}</label>
+				<div class="col-sm-9">
+				<tr>
+					<td class="text-left">
+					{% for language in languages %}
+                       <div class="input-group"><span class="input-group-addon"><img src="language/{{ language['code'] }}/{{ language['code'] }}.png" title="{{ language['name'] }}" /></span>
+                          <textarea name="title[{{ language['language_id'] }}][text]" rows="5" placeholder="" class="form-control">{{ title[language['language_id']] is defined ? title[language['language_id']]['text'] : '' }}</textarea>
+                        </div>
+                    {% endfor %}
+					</td>
+				</tr>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">{{ text_description }}</label>
+				<div class="col-sm-9">
+				<tr>
+					<td class="text-left">
+					{% for language in languages %}
+                       <div class="input-group"><span class="input-group-addon"><img src="language/{{ language['code'] }}/{{ language['code'] }}.png" title="{{ language['name'] }}" /></span>
+                          <textarea name="description[{{ language['language_id'] }}][text]" rows="5" placeholder="" class="form-control">{{ description[language['language_id']] is defined ? description[language['language_id']]['text'] : '' }}</textarea>
+                        </div>
+                    {% endfor %}
+					</td>
+				</tr>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">{{ text_on_off_model_product }}</label>
+				<div class="col-sm-9">
+					<div class="checkbox-group-pixelshop">
+						<label><input type="checkbox" name="on_off_model_product" value="1" {{ on_off_model_product is defined and on_off_model_product == '1' ? 'checked="checked"' : '' }} /><span></span></label>
+					</div>
+				</div>
+			</div>
+				<div class="form-group">
+					<label class="col-sm-3 control-label">{{ text_on_off_description }}</label>
+					<div class="col-sm-9">
+						<div class="checkbox-group-pixelshop">
+							<label><input type="checkbox" name="on_off_description" value="1" {{ on_off_description is defined and on_off_description == '1' ? 'checked="checked"' : '' }} /><span></span></label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+                  <label for="input-config_on_off_productany_slider_additional_image" class="col-sm-3 control-label">{{ text_additional_image }}</label>
+                  <div class="col-sm-9">
+                    <select class="form-control" id="on_off_productany_slider_additional_image" name="on_off_slider_additional_image">
+
+						{% if (on_off_slider_additional_image == '2') %}
+						<option selected="selected" value="2">{{ text_additional_image_hover }}</option>
+						{% else %}
+						<option value="2">{{ text_additional_image_hover }}</option>
+						{% endif %}
+                        {% if (on_off_slider_additional_image == '0') %}
+						 <option selected="selected" value="0">{{ text_no }}</option>
+						{% else %}
+						 <option value="0">{{ text_no }}</option>
+						{% endif %}
+                    </select>
+                  </div>
+                </div>
+
+
+				<div class="form-group">
+					<label class="col-sm-3 control-label">{{ text_on_off_rating }}</label>
+					<div class="col-sm-9">
+						<div class="checkbox-group-pixelshop">
+							<label><input type="checkbox" name="on_off_rating" value="1" {{ on_off_rating is defined and on_off_rating == '1' ? 'checked="checked"' : '' }} /><span></span></label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-3 control-label">{{ text_on_off_quantity_reviews }}</label>
+					<div class="col-sm-9">
+						<div class="checkbox-group-pixelshop">
+							<label><input type="checkbox" name="on_off_quantity_reviews" value="1" {{ on_off_quantity_reviews is defined and on_off_quantity_reviews == '1' ? 'checked="checked"' : '' }} /><span></span></label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-3 control-label">{{ text_on_off_fastorder }}</label>
+					<div class="col-sm-9">
+						<div class="checkbox-group-pixelshop">
+							<label><input type="checkbox" name="on_off_fastorder" value="1" {{ on_off_fastorder is defined and on_off_fastorder == '1' ? 'checked="checked"' : '' }} /><span></span></label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-3 control-label">{{ text_on_off_wishlist }}</label>
+					<div class="col-sm-9">
+						<div class="checkbox-group-pixelshop">
+							<label><input type="checkbox" name="on_off_wishlist" value="1" {{ on_off_wishlist is defined and on_off_wishlist == '1' ? 'checked="checked"' : '' }} /><span></span></label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-3 control-label">{{ text_on_off_compare }}</label>
+					<div class="col-sm-9">
+						<div class="checkbox-group-pixelshop">
+							<label><input type="checkbox" name="on_off_compare" value="1" {{ on_off_compare is defined and on_off_compare == '1' ? 'checked="checked"' : '' }} /><span></span></label>
+						</div>
+					</div>
+				</div>
+
+
+
+
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for="input-bg-timer">{{ entry_bg_timer }}</label>
+				<div class="col-sm-9">
+				  <input type="text" name="bg_timer" value="{{ bg_timer }}" id="input-bg-timer" class="form-control color" />
+				</div>
+			</div>
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-limit">{{ entry_limit }}</label>
+            <div class="col-sm-9">
+              <input type="text" name="limit" value="{{ limit }}" placeholder="{{ entry_limit }}" id="input-limit" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-width">{{ entry_width }}</label>
+            <div class="col-sm-9">
+              <input type="text" name="width" value="{{ width }}" placeholder="{{ entry_width }}" id="input-width" class="form-control" />
+              {% if (error_width) %}
+              <div class="text-danger">{{ error_width }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-height">{{ entry_height }}</label>
+            <div class="col-sm-9">
+              <input type="text" name="height" value="{{ height }}" placeholder="{{ entry_height }}" id="input-height" class="form-control" />
+              {% if (error_height) %}
+              <div class="text-danger">{{ error_height }}</div>
+              {% endif %}
+            </div>
+          </div>
+		  <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-statu-stimer-special">{{ entry_timer }}</label>
+            <div class="col-sm-9">
+              <select name="status_timer_special" id="input-statu-stimer-special" class="form-control">
+                {% if (status_timer_special) %}
+                <option value="1" selected="selected">{{ text_enabled }}</option>
+                <option value="0">{{ text_disabled }}</option>
+                {% else %}
+                <option value="1">{{ text_enabled }}</option>
+                <option value="0" selected="selected">{{ text_disabled }}</option>
+                {% endif %}
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-3 control-label" for="input-status">{{ entry_status }}</label>
+            <div class="col-sm-9">
+              <select name="status" id="input-status" class="form-control">
+                {% if (status) %}
+                <option value="1" selected="selected">{{ text_enabled }}</option>
+                <option value="0">{{ text_disabled }}</option>
+                {% else %}
+                <option value="1">{{ text_enabled }}</option>
+                <option value="0" selected="selected">{{ text_disabled }}</option>
+                {% endif %}
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+ </div>
+<style>
+.show_td {
+	display:none;
+}
+.show_td.active {
+	display:block;
+}
+.checkbox-group-pixelshop label {margin-bottom:0px;}
+.checkbox-group-pixelshop {
+	background-color: white;
+	background-image: linear-gradient(to bottom, #eeeeee, white 25px);
+	border-radius: 20px / 20px;
+	box-shadow: 0 -1px white inset, 0 1px 1px rgba(0, 0, 0, 0.05) inset;
+	display: inline-block;
+	padding: 3px;
+}
+.checkbox-group-pixelshop input[type="checkbox"] {display:none}
+.checkbox-group-pixelshop input[type="checkbox"] + span {
+position:relative;
+display:inline-block;
+vertical-align:middle;
+width:50px;
+height:23px;
+background:#ECEEEF;
+border-radius:20px / 20px;
+box-shadow:0 1px 2px rgba(0, 0, 0, 0.15) inset, 0 0 3px rgba(0, 0, 0, 0.2) inset;
+cursor:pointer;
+transition:all ease-in-out .2s;}
+.checkbox-group-pixelshop input[type="checkbox"]:checked + span {background:#3F95C0;}
+
+.checkbox-group-pixelshop label:hover input[type="checkbox"] + span {background:#ECEEEF;}
+.checkbox-group-pixelshop label:hover input[type="checkbox"]:checked + span {background:#3F95C0;}
+
+.checkbox-group-pixelshop input[type="checkbox"] + span:after {position:absolute;left:auto;top:3px;right:3px;width:17px;height:17px;content:'';background:#fff;border-radius:100%;box-shadow:0 1px 1px #777;transition:all ease-in-out .2s;}
+.checkbox-group-pixelshop input[type="checkbox"]:checked + span:after {left:3px;right:auto;background:#fff;transition:all ease-in-out .2s;}
+
+</style>
+{{ footer }}

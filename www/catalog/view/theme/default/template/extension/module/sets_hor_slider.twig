@@ -1,0 +1,97 @@
+<div class='sets-owl swiper-container'>
+ <div class="swiper-wrapper">
+    {% for iset,set in sets %} 
+    <div class="swiper-slide set seth">
+       <h3>{{ set['name'] }}</h3>
+        <div class='timer'></div>
+       <input type='hidden' name='sp_timer' value="{{ set['enddate'] }}">
+       <input type='hidden' name='sp_iset' value="{{ set['id'] }}">
+       <input type='hidden' name='sp_product_id' value="{{ set['product_id'] }}">
+       <div class='set_table'>
+        {% set i=0 %}
+ {% for key,product in set['products'] %} 
+        {% if (i) %}
+        <div class='cell ao plus'><span>+</span></div>
+        {% endif %} 
+        {% set i = i + 1 %}
+        <div class="setb1 rel cell set-product set-product-cell set-product-style product{{ product['product_id']~key }} {% if (product['discount'] =='100%') %} kjpresent {% endif %}" >
+            {% if (product['discount'] and show_disc_prec and product['discount']!='0%') %} 
+            <div class='disc'>{{ product['discount_currency'] }}</div>
+            {% endif %} 
+
+            {% if not(product['required']) %}
+            <input type="checkbox" checked="checked" class="kjincluded" name="sp_include">
+            {% else %} 
+            <input type="checkbox" checked="checked" class="hidden" name="sp_include">
+            {% endif %} 
+            
+            {% if(product['discounts']) %}
+            <input type='hidden' name='sp_discounts_json' value='{{ product["discounts_json"] }}'>
+            {% endif %} 
+
+            <input type='hidden' name='sp_discount' value="{{ product['discount'] }}">
+            <input type='hidden' name='sp_oldcprice' value="{{ product['sp_oldcprice'] }}">
+            <input type='hidden' name='sp_discount_from' value="{{ product['sp_discount_from'] }}">
+            <input type='hidden' name='sp_cprice' value="{{ product['cprice'] }}">
+            <input type='hidden' name='sp_option_price' value="0">
+
+            <input type='hidden' name='sp_product_id' value="{{ product['product_id'] }}">
+            <input type='hidden' name='sp_quantity' value="{{ product['quantity'] }}">
+            {% if (product['thumb']) %} 
+            <a href="{{ product['href'] }}" {{ module_sets_product_link_newtab }}><img src="{{ product['thumb'] }}" alt="{{ product['product_name'] }}" title="{{ product['product_name'] }}" class="img-responsive"></a>
+            {% endif %} 
+            <h4><a href="{{ product['href'] }}" {{ module_sets_product_link_newtab }}>{{ product['product_name'] }}</a></h4>
+            {% if (product['discount']) %} 
+            <span class='old_price'>{{ product['old_price'] }}</span>
+            {% endif %} 
+            <span class='new_price'>{{ product['price'] }}</span>
+
+            {% if (product['quantity']>1 and show_qty) %} 
+            <div class='quantity'>x{{ product['quantity'] }}</div>
+            {% endif %} 
+
+
+
+            {% if (product['option_type'] is defined) %} 
+            {% if (product['option_type'] == 'fixed') %} 
+            {{ product['html_options_button'] }}
+            {% elseif (product['option_type'] == 'popup') %} 
+            {{ product['html_options_button'] }}
+            {% else %} 
+            <input type='hidden' name='sp_option' value='no'>
+            {% endif %} 
+            {% else %} 
+            <input type='hidden' name='sp_option' value='no'>
+            {% endif %} 
+        </div>
+        {% endfor %} 
+ 
+        <div class='cell ao'><span>=</span></div>
+        <div class='cell set-total set-total-cell'>
+
+            {% if(set['ceconomy']) %}
+             <div class='economy'>
+            <span class='economy_text'>{{ text_economy }}</span>: <span class='economy_val'>{{ set['economy'] }}</span>
+            </div>
+            {% endif %} 
+
+            <div class='new_summ'>{{ set['new_total'] }}</div>
+
+             {% if (display_num_sets) %} 
+                <input type='number' name='sp_set_quantity' min="1" class="form-control " value="1">
+            {% else %} 
+                <input type='hidden' name='sp_set_quantity' class="form-control " value="1">
+            {% endif %}
+
+            <button class='add-set-btn btn btn-primary' data-success-text="<i class='fa fa-check'></i>" data-loading-text="<i class='fa fa-spinner fa-spin '></i>">{{ text_buy_sets }}</button>
+        </div>
+    </div>
+</div>
+
+{% endfor %} 
+</div>
+</div>
+<div class="swiper-pager">
+    <div class="swiper-button-next"></div>
+    <div class="swiper-button-prev"></div>
+  </div>

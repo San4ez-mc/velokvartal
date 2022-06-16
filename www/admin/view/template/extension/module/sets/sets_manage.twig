@@ -1,0 +1,906 @@
+{{ header }} 
+{{ column_left }} 
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="pull-right">
+                <!--<button type="submit" form="form-sets_manage" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>-->
+                <a class="btn btn-default" data-toggle="tooltip" href="{{ cancel }}" title="{{ button_cancel }}">
+                    <i class="fa fa-reply">
+                    </i>
+                </a>
+            </div>
+            <h1>
+                {{ heading_title }} 
+            </h1>
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %} 
+                <li>
+                    <a href="{{ breadcrumb['href'] }}">
+                        {{ breadcrumb['text'] }} 
+                    </a>
+                </li>
+                {% endfor %} 
+            </ul>
+        </div>
+    </div>
+    <div class="container-fluid">
+        {% if (error_warning) %} 
+        <div class="alert alert-danger">
+            <i class="fa fa-exclamation-circle">
+            </i>
+            {{ error_warning }} 
+            <button class="close" data-dismiss="alert" type="button">
+                ×
+            </button>
+        </div>
+        {% endif %} 
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    <i class="fa fa-pencil">
+                    </i>
+                    {{ text_edit }} 
+                </h3>
+            </div>
+            <div class="panel-body">
+                <ul class="nav nav-tabs">
+                    <li class="{% if (tab == 'sets_generate') %} active {% endif %}">
+                        <a data-toggle="tab" href="#sets_generate">
+                            {{ tab_sets_generate }}
+                        </a>
+                    </li>
+                    <li class="{% if (tab == 'sets_generate2') %} active {% endif %}">
+                        <a data-toggle="tab" href="#sets_generate2">
+                            {{ tab_sets_generate2 }}
+                        </a>
+                    </li>
+                    <li class="{% if (tab == 'all_sets') %} active {% endif %}">
+                        <a data-toggle="tab" href="#all_sets">
+                            {{ tab_all_sets }}
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade {% if (tab == 'sets_generate') %} in active {% endif %}" id="sets_generate">
+                        <form action="" class="form-horizontal" enctype="multipart/form-data" id="form-sets-manage" method="post">
+
+                            <div class="">
+                                <div class="col-md-4">
+                                    <button class="btn btn-success" id="add">
+                                        {{ btn_add_set }}
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-default" id="check">
+                                        {{ btn_show_count_products }} 
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-danger" id="clear">
+                                        {{ btn_del_set }}
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="clearfix">
+                            </div>
+                            <div class="result">
+                            </div>
+                            </hr>
+                                <div class="row">
+                                   <!--  <div class="text-center">
+                                        <h4>
+                                            <i class="fa fa-cog fa-2x">
+                                            </i>
+                                            {{ block_main_setting }}
+                                        </h4>
+                                    </div> -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="col-md-5 control-label" for="name">
+                                                {{ entry_name }} 
+                                            </label>
+                                            <div class="col-md-7">
+                                                {% for language in languages %} 
+                                                <input class="form-control" name="setname[{{ language['language_id'] }}]" placeholder="{{ language['name'] }}" type="text" value="">
+                                                    {% endfor %} 
+                                                </input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="col-md-5 control-label" for="customer_group">
+                                                {{ entry_customer_group }} 
+                                            </label>
+                                            <div class="col-md-7">
+                                                <select class="form-control" name="customer_group_id">
+                                                    <option value='0'>ALL</option>
+                                                {% for group in customer_groups %} 
+                                                <option value="{{ group['customer_group_id'] }}">{{ group['name'] }}</option>
+                                                    {% endfor %} 
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="col-md-6 control-label" for="sort">
+                                                {{ entry_sort }} 
+                                            </label>
+                                            <div class="col-md-6">
+                                                <input class="form-control" min="1" name="sort" type="number" value="1"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label class="col-md-6 control-label" for="sort">
+                                                {{ entry_status }} 
+                                            </label>
+                                            <div class="col-md-6">
+                                                <input checked="" class="form-control" name="status" type="checkbox"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                </hr>
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <div class="text-center">
+                                                <h4>
+                                                    <i class="fa fa-search fa-2x">
+                                                    </i>
+                                                    {{ block_search }}
+                                                </h4>
+                                            </div>
+
+
+                                            <div class="form-group">
+                                                <label class="col-md-5 control-label" for="cat">
+                                                    {{ entry_model }}
+                                                </label>
+                                                <div class="col-md-7">
+                                                    <input id="model" name="model" type="text" class="form-control">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-md-5 control-label" for="cat">
+                                                    {{ entry_category }} 
+                                                </label>
+                                                <div class="col-md-7">
+                                                    <select class="form-control" id="cat" name="cat">
+                                                        <option selected="selected" value="">
+                                                        </option>
+                                                        {% for cat in cats %} 
+                                                        <option value="{{ cat['category_id'] }}">
+                                                            {{ cat['name'] }}
+                                                        </option>
+                                                        {% endfor %} 
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-md-5 control-label" for="manuf">
+                                                    {{ entry_manufacturer }} 
+                                                </label>
+                                                <div class="col-md-7">
+                                                    <select class="form-control" id="manuf" name="manuf">
+                                                        <option selected="selected" value="">
+                                                        </option>
+                                                        {% for man in manufs %} 
+                                                        <option value="{{ man['manufacturer_id'] }}">
+                                                            {{ man['name'] }}
+                                                        </option>
+                                                        {% endfor %} 
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-md-5 control-label" for="name">
+                                                    {{ entry_name }} 
+                                                </label>
+                                                <div class="col-md-7">
+                                                    <input class="form-control" id="name" name="name" type="text">
+                                                    </input>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-md-5 control-label" for="tag">
+                                                    {{ entry_tag }} 
+                                                </label>
+                                                <div class="col-md-7">
+                                                    <input class="form-control" id="tag" name="tag" type="text">
+                                                    </input>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-md-5 control-label" for="descr">
+                                                    {{ entry_description }} 
+                                                </label>
+                                                <div class="col-md-7">
+                                                    <input class="form-control" id="descr" name="descr" type="text">
+                                                    </input>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-md-5 control-label" for="new_prods">
+                                                    new prods
+                                                </label>
+                                                <div class="col-md-7">
+                                                    <input type="checkbox" class="form-control" id="new_prods" name="new_prods">
+                                                    </input>
+                                                </div>
+                                            </div>
+
+                                            <table class="table table-bordered">
+                                                <tr>
+                                                    <td>
+                                                        {{ entry_qunatity }} 
+                                                    </td>
+                                                    <td>
+                                                        {{ entry_option }} 
+                                                    </td>
+                                                    <td>
+                                                        {{ entry_discount }} 
+                                                    </td>
+                                                    <td>
+                                                        {{ entry_required }} 
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input class="form-control" min="1" name="quantity" type="number" value="1">
+                                                        </input>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control" name="option_type">
+                                                            <option value="no">
+                                                                NO options
+                                                            </option>
+                                                            <option value="popup">
+                                                                POPUP options
+                                                            </option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input class="form-control" name="discount" type="text" value="0">
+                                                        </input>
+                                                    </td>
+                                                    <td>
+                                                        <input class='form-control' type='checkbox' checked='checked' name='required'>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <div class="text-center">
+                                                <h4>
+                                                    <i class="fa fa-list fa-2x">
+                                                    </i>
+                                                    {{ block_products }}
+                                                </h4>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-md-2 control-label" for="input-status">
+                                                    {{ entry_products }} 
+                                                </label>
+                                                <div class="col-md-10">
+                                                    <input class="product_name form-control" name="product_name">
+                                                    </input>
+                                                </div>
+                                            </div>
+                                            <table class="table products table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <td>
+                                                            {{ entry_name }}
+                                                        </td>
+                                                        <td>
+                                                            {{ entry_qunatity }}
+                                                        </td>
+                                                        <td>
+                                                            {{ entry_option }}
+                                                        </td>
+                                                        <td>
+                                                            {{ entry_discount }}
+                                                        </td>
+                                                        <td>
+                                                            {{ entry_required }}
+                                                        </td>
+                                                        <td>
+                                                            {{ entry_delete }}
+                                                        </td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                            
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade {% if (tab == 'sets_generate2') %} in active {% endif %}" id="sets_generate2">
+
+                     <form action="" class="form-horizontal" enctype="multipart/form-data" id="form-sets-manage2" method="post">
+                        <div class="">
+                                <div class="">
+                                    <button class="btn btn-success" id="add">
+                                        {{ btn_add_set }}
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="clearfix">
+                            </div>
+                            <div class="result">
+                            </div>
+                            
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="col-md-5 control-label" for="name">
+                                                {{ entry_name }} 
+                                            </label>
+                                            <div class="col-md-7">
+                                                {% for language in languages %} 
+                                                <input class="form-control" name="setname[{{ language['language_id'] }}]" placeholder="{{ language['name'] }}" type="text" value="">
+                                                    {% endfor %} 
+                                                </input>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="col-md-5 control-label" for="customer_group">
+                                                {{ entry_customer_group }} 
+                                            </label>
+                                            <div class="col-md-7">
+                                                <select class="form-control" name="customer_group_id">
+                                                    <option value='0'>ALL</option>
+                                                {% for group in customer_groups %} 
+                                                <option value="{{ group['customer_group_id'] }}">{{ group['name'] }}</option>
+                                                    {% endfor %} 
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="col-md-6 control-label" for="sort">
+                                                {{ entry_sort }} 
+                                            </label>
+                                            <div class="col-md-6">
+                                                <input class="form-control" min="1" name="sort" type="number" value="1"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label class="col-md-6 control-label" for="sort">
+                                                {{ entry_status }} 
+                                            </label>
+                                            <div class="col-md-6">
+                                                <input checked="" class="form-control" name="status" type="checkbox"/>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class='clearfix'></div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="col-md-9 control-label" for="manuf_conformity">
+                                                {{ entry_manuf_conformity }}
+                                            </label>
+                                            <div class="col-md-3">
+                                                <input class="form-control" name="manuf_conformity" type="checkbox"/>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="col-md-6 control-label" for="attr">
+                                                {{ entry_attribute }} 
+                                            </label>
+                                            <div class="col-md-6">
+                                                <select name="attr" class="form-control" >
+                                                    <option></option>
+                                                    {% for a in attrs %}
+                                                        <option value="{{ a['attribute_id'] }}">
+                                                        <b>{{ a['attribute_group'] }}</b> => {{ a['name'] }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="col-md-7 control-label" for="abs_limit">
+                                                {{ entry_absolute_limit }}
+                                            </label>
+                                            <div class="col-md-5">
+                                                <input  class="form-control" name="abs_limit" type="number"/>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <hr>
+                                    
+                                    <div class="row">
+                                        <button class="btn btn-primary" type="button" id="addFilter">
+                                                <i class="fa fa-plus"></i>
+                                            </button>
+                                        <div class="col-md-6" id='filter_for_products'>
+
+                                            <div class="form-group">
+                                                <label class="col-md-5 control-label" for="cat">
+                                                    {{ entry_model }} 
+                                                </label>
+                                                <div class="col-md-7">
+                                                    <input id="model[]" name="model[]" type="text" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-md-5 control-label" for="cat">
+                                                    {{ entry_category }} 
+                                                </label>
+                                                <div class="col-md-7">
+                                                    <select class="form-control" id="cat" name="cat[]">
+                                                        <option selected="selected" value="">
+                                                        </option>
+                                                        {% for cat in cats %} 
+                                                        <option value="{{ cat['category_id'] }}">
+                                                            {{ cat['name'] }}
+                                                        </option>
+                                                        {% endfor %} 
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-md-5 control-label" for="manuf">
+                                                    {{ entry_manufacturer }} 
+                                                </label>
+                                                <div class="col-md-7">
+                                                    <select class="form-control" id="manuf" name="manuf[]">
+                                                        <option selected="selected" value="">
+                                                        </option>
+                                                        {% for man in manufs %} 
+                                                        <option value="{{ man['manufacturer_id'] }}">
+                                                            {{ man['name'] }}
+                                                        </option>
+                                                        {% endfor %} 
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-md-5 control-label" for="name">
+                                                    {{ entry_name }} 
+                                                </label>
+                                                <div class="col-md-7">
+                                                    <input class="form-control" id="name" name="name[]" type="text">
+                                                    </input>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-md-5 control-label" for="tag">
+                                                    {{ entry_tag }} 
+                                                </label>
+                                                <div class="col-md-7">
+                                                    <input class="form-control" id="tag" name="tag[]" type="text">
+                                                    </input>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-md-5 control-label" for="descr">
+                                                    {{ entry_description }} 
+                                                </label>
+                                                <div class="col-md-7">
+                                                    <input class="form-control" id="descr" name="descr[]" type="text">
+                                                    </input>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-md-5 control-label" for="new_prods">
+                                                    new prods
+                                                </label>
+                                                <div class="col-md-7">
+                                                    <input type="text" class="form-control" id="new_prods" name="new_prods[]">
+                                                    </input>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-md-5 control-label" for="descr">
+                                                    LIMIT
+                                                </label>
+                                                <div class="col-md-7">
+                                                    <input class='form-control' type='number' name='limit[]' value='0'>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-md-5 control-label" for="descr">
+                                                    {{ entry_products_qty }} 
+                                                </label>
+                                                <div class="col-md-7">
+                                                    <input class='form-control' type='number' name='products_qty[]' value='1'>
+                                                </div>
+                                            </div>
+                                            <table class="table table-bordered">
+                                                <tr>
+                                                    <td>
+                                                        {{ entry_qunatity }} 
+                                                    </td>
+                                                    <td>
+                                                        {{ entry_option }} 
+                                                    </td>
+                                                    <td>
+                                                        {{ entry_discount }} 
+                                                    </td>
+                                                    <td>
+                                                        {{ entry_required }} 
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input class="form-control" min="1" name="quantity[]" type="number" value="1">
+                                                        </input>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control" name="option_type[]">
+                                                            <option value="no">
+                                                                NO options
+                                                            </option>
+                                                            <option value="popup">
+                                                                POPUP options
+                                                            </option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input class="form-control" name="discount[]" type="text" value="0">
+                                                        </input>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control" name="required[]">
+                                                            <option value="0">
+                                                               NO
+                                                            </option>
+                                                            <option value="1">
+                                                                YES
+                                                            </option>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        
+                                </div>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade {% if (tab == 'all_sets') %} in active {% endif %}" id="all_sets">
+                        <form action="" id="form-sets-clear">
+                            <button class="btn btn-danger" id="remove">
+                                {{ btn_del_set }}
+                            </button>
+                            <div class="result">
+                            </div>
+                            {{ pagination }}
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <td>
+                                            <input id="select_all" type="checkbox"/>
+                                        </td>
+                                        <td>
+                                            {{ column_set_parent }}
+                                        </td>
+                                        <td>
+                                            {{ column_set_sort }}
+                                        </td>
+                                        <td>
+                                            {{ column_set_status }}
+                                        </td>
+                                        <td>
+                                            {{ column_set_name }}
+                                        </td>
+                                        <td>
+                                            {{ column_set_products }}
+                                        </td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if (sets) %} {% for key,set in sets %} 
+                                    <tr>
+                                        <td>
+                                            <input name="sets[]" type="checkbox" value="{{ key }}"/>
+                                        </td>
+                                        <td>
+                                            {{ set['parent']['name'] }}
+                                        </td>
+                                        <td>
+                                            {{ set['sort'] }}
+                                        </td>
+                                        <td>
+                                            {% if (set['status'] == 1) %} 
+                                            <i class="fa fa-check-circle-o fa-2x">
+                                            </i>
+                                            {% else %} 
+                                            {% endif %} 
+                                        </td>
+                                        <td>
+                                            {{ set['name'] }}
+                                        </td>
+                                        <td>
+                                            <table class="table table-bordered">
+                                                <tr>
+                                                    {% for prd in set['products'] %} 
+                                                    <td class="text-center">
+                                                        {{ prd['product_name'] }}
+                                                        <br>
+                                                            <img src="{{ prd['image'] }}">
+                                                                <br>
+                                                                    {{ prd['discount'] }}
+                                                                </br>
+                                                            </img>
+                                                        </br>
+                                                    </td>
+                                                    {% endfor %} 
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                   {% endfor %}  {% endif %} 
+                                </tbody>
+                            </table>
+                            {{ pagination }}
+                        </form>
+                    </div>
+                    <style>
+                        .btn
+{
+    margin: 0 auto;
+    display:table;
+}
+.result
+{
+    margin:15px 0;
+}
+                    </style>
+                    <script>
+                        function clearAlert()
+    {
+        $(".alert").remove();
+    }
+    $( document ).ready(function() {
+    $('#select_all').change(function() {
+    var checkboxes = $(this).closest('form').find(':checkbox');
+    checkboxes.prop('checked', $(this).is(':checked'));
+});
+});
+
+    $('.products').on('click', '.del_product', function () {
+        $(this).parents('tr').remove();
+        return false;
+    });
+    $('#form-sets-manage').on('click', '#check', function () {
+        var data = $('#form-sets-manage input,#form-sets-manage select,#form-sets-manage checkbox').serialize();
+
+        $.ajax({
+            url: 'index.php?route=extension/module/sets_manage/check&user_token={{ user_token }}',
+            method: 'POST',
+            data: data,
+            success: function (json) {
+
+                if (json['error']) {
+                    $("#form-sets-manage .result").html('<div class=\'alert alert-danger\'>' + json['error'] + '</div>')
+                }
+                if(json['success']) {
+                    $("#kjmodal").remove();
+                    html='<div class="modal fade" id="kjmodal">';
+                    html+='<div class="modal-dialog">';
+                        html+='<div class="modal-content">';
+                         html+='<div class="modal-header">';
+                            html+='<button type="button" class="close" data-dismiss="modal">&times;</button>';
+                          html+='</div>';
+
+                          
+                          html+='<div class="modal-body">';
+                            html+=json['success'];
+                          html+='</div>';
+
+                          
+                          html+='<div class="modal-footer">';
+                            html+='<button type="button" class="btn btn-danger" data-dismiss="modal">X</button>';
+                          html+='</div>';
+
+                        html+='</div>';
+                      html+='</div>';
+                    html+='</div>';
+                    $("body").append(html);
+                    $("#kjmodal").modal()
+                }
+
+                setTimeout(clearAlert,2000);
+            }
+        });
+
+        return false;
+    });
+
+
+    $('#form-sets-manage').on('click', '#add', function () {
+        var data = $('#form-sets-manage input,#form-sets-manage select,#form-sets-manage checkbox').serialize();
+
+        $.ajax({
+            url: 'index.php?route=extension/module/sets_manage/add&user_token={{ user_token }}',
+            method: 'POST',
+            data: data,
+            success: function (json) {
+
+                if (json['error']) {
+                    $("#form-sets-manage .result").html('<div class=\'alert alert-danger\'>' + json['error'] + '</div>')
+                }
+
+                if (json['success']) {
+                    $("#form-sets-manage .result").html('<div class=\'alert alert-success\'>' + json['success'] + '</div>')
+                }
+
+                setTimeout(clearAlert,2000);
+            }
+        });
+
+        return false;
+    });
+
+    $('#form-sets-clear').on('click', '#remove', function () {
+       var data = $('#form-sets-clear').serialize();
+        $.ajax({
+            url: 'index.php?route=extension/module/sets_manage/removeSets&user_token={{ user_token }}',
+            method: 'POST',
+            data: data,
+            success: function (json) {
+                console.log(json);
+                if (json['error']) {
+                    $("#form-sets-clear .result").html('<div class=\'alert alert-danger\'>' + json['error'] + '</div>')
+                }
+
+                if (json['success']) {
+                    $("#form-sets-clear .result").html('<div class=\'alert alert-success\'>' + json['success'] + '</div>');
+                    $("#form-sets-clear tbody input:checked").parents("tr").remove();
+                }
+
+                setTimeout(clearAlert,3000);
+            }
+        });
+        return false;
+    });
+
+    
+
+    $('#form-sets-manage').on('click', '#clear', function () {
+        var data = $('#form-sets-manage input,#form-sets-manage select,#form-sets-manage checkbox').serialize();
+        $.ajax({
+            url: 'index.php?route=extension/module/sets_manage/clear&user_token={{ user_token }}',
+            method: 'POST',
+            data: data,
+            success: function (json) {
+
+                if (json['error']) {
+                    $("#form-sets-manage .result").html('<div class=\'alert alert-danger\'>' + json['error'] + '</div>')
+                }
+
+                if (json['success']) {
+                    $("#form-sets-manage .result").html('<div class=\'alert alert-success\'>' + json['success'] + '</div>')
+                }
+
+                setTimeout(clearAlert,3000);
+            }
+        });
+        return false;
+    });
+
+    $('#form-sets-manage2').on('click', '#addFilter', function () {
+        $("#filter_for_products").parent().append("<div class='col-md-6'>"+$("#filter_for_products").html()+"</div>");
+    });
+
+
+    $('#form-sets-manage2').on('click', '#add', function () {
+        var data = $('#form-sets-manage2 input,#form-sets-manage2 select,#form-sets-manage2 checkbox').serialize();
+
+        $.ajax({
+            url: 'index.php?route=extension/module/sets_manage/add2&user_token={{ user_token }}',
+            method: 'POST',
+            data: data,
+            success: function (json) {
+
+                if (json['error']) {
+                    $("#form-sets-manage2 .result").html('<div class=\'alert alert-danger\'>' + json['error'] + '</div>')
+                }
+
+                if (json['success']) {
+                    $("#form-sets-manage2 .result").html('<div class=\'alert alert-success\'>' + json['success'] + '</div>')
+                }
+
+                setTimeout(clearAlert,2000);
+            }
+        });
+
+        return false;
+    });
+
+
+
+
+    function autocomplete_select(item) {
+        var new_row = "{{ row }}";
+        var i = $('.products tbody tr:last').index() + 1 + 1;
+
+        new_row = new_row.replace(/{pi}/g, i);
+
+        new_row = $(new_row);
+
+
+        $(new_row).find('.product_name input[type="text"]').val(item['label']);
+        $(new_row).find('.product_name input[type="hidden"]').val(item['value']);
+        $(new_row).find('.old_price input').val(item['price']);
+        $(new_row).find('.new_price input').val(item['price']);
+
+
+        $('.products tbody').append(new_row);
+
+        if (item['option'].length)
+            $.ajax({
+                method: 'POST',
+                url: 'index.php?route=extension/module/sets/optionsForms&user_token={{ user_token }}',
+                data: {options: item['option']},
+                success: function (data) {
+                    data = data.replace(/set\[{si}\]\[products\]\[{pi}\]/g, 'products[' + i + ']');
+
+                    $(new_row).find('.option .modal-body').html(data);
+
+
+                }
+            });
+
+
+    }
+
+    function autocomplete_source(request, response) {
+
+
+        $.ajax({
+            url: 'index.php?route=extension/module/sets/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+            dataType: 'json',
+            success: function (json) {
+                response($.map(json, function (item) {
+
+                    return {
+                        label: item['name'],
+                        value: item['product_id'],
+                        price: item['price'],
+                        option: item['option']
+                    }
+                }));
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        $('.product_name').autocomplete({'source': autocomplete_source,'select': autocomplete_select});
+    });
+                    </script>
+                    {{ footer }} 
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
