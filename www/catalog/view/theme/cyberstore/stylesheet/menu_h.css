@@ -1969,3 +1969,22 @@ border-style:solid;
 .nav-coll-m.in {overflow-y: visible;}
 }
 #menu-mobile-ns .nsmenu-thumb.hitem-icon {display: none;}
+
+#horizontal-menu .nsmenu-type-information, #horizontal-menu .nsmenu-type-category-simple {
+	max-height: 500px;
+	overflow-y: auto;
+}
+
+#horizontal-menu .nsmenu-type-information, #horizontal-menu .nsmenu-type-category-simple::-webkit-scrollbar {
+	width: 5px;
+	background-color: #ffffff;
+}
+
+#horizontal-menu .nsmenu-type-information, #horizontal-menu .nsmenu-type-category-simple::-webkit-scrollbar-track {
+	background-color: rgba(0, 0, 0, .3);
+}
+
+#horizontal-menu .nsmenu-type-information, #horizontal-menu .nsmenu-type-category-simple::-webkit-scrollbar-thumb {
+	background-color: rgba(0, 0, 0, .15);
+	border-radius: 3px;
+}
