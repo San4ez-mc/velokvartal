@@ -1,0 +1,15 @@
+/storage/cache/
+/storage/cache__/
+/storage/logs/
+/storage/modification_/
+/storage/modification/
+/storage/modification/*
+/storage/session/
+/storage/vendor/
+/storage/upload/*
+/www/system/storage/*
+/www/image/*
+/www/archive.zip
+
+/www/config.php
+/www/admin/config.php
