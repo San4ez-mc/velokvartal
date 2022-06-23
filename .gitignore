@@ -3,6 +3,7 @@
 /storage/logs/
 /storage/modification_/
 /storage/modification/
+/storage/modification/*
 /storage/session/
 /storage/vendor/
 /storage/upload/*
