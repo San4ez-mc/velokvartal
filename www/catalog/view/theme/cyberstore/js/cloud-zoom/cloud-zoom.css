@@ -32,10 +32,10 @@
 	color:white;	
 	background:#222;
 	padding:3px;
-	border:px solid #000;
+	border:0px solid #000;
 	display:none;
 }
 
-@media (max-width: 700px){
-    .cloud-zoom-big { display: none!important;} /* disable cloud zoom */
-}
+/*@media (max-width: 700px){*/
+/*    .cloud-zoom-big { display: none!important;} !* disable cloud zoom *!*/
+/*}*/
