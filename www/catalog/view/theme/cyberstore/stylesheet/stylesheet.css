@@ -317,11 +317,6 @@ div.additional-tel + div.additional-tel {
 	right:-30px;
 	line-height: 23px;
 }
-@media (max-width: 767px) {
-	#phone .drop-icon-info {
-		display: none;
-	}
-}
 @media (min-width: 992px) {
 	#phone .drop-icon-info {right:-30px;}
 	.pad-top #phone .drop-icon-info {right:-30px;}
@@ -1592,6 +1587,10 @@ border-bottom: 1px dashed #d8d8d8;
 	box-shadow:0px 2px 4px rgba(0,0,0,0.067);
 	background-position: center;
 	background-repeat: no-repeat;
+}
+
+.mfp-gallery-product .mfp-close:active {
+	top: 15px;
 }
 
 .mfp-gallery-product .mfp-container {padding: 25px;}
@@ -3090,6 +3089,7 @@ flex-wrap: nowrap;
 	}
 	#product .actions {
 		margin-top: 15px;
+		row-gap: 15px;
 	}
 	#product .actions .cart {
 		width: 100%;
@@ -3102,7 +3102,7 @@ flex-wrap: nowrap;
 	#product .actions .btn-fastorder {
 		width: 100%;
 		margin-left: 0px !important;
-		margin-bottom: 15px;
+		margin-bottom: 0;
 	}
 	.btn-cheaper {
 		margin-top: 15px;
@@ -3154,6 +3154,7 @@ flex-wrap: nowrap;
 		right: 0;
 		background-color: #fff;
 		padding: 15px 36px;
+		box-shadow: 0 0 12px 7px rgba(0, 0, 0, .15);
 	}
 	#product .actions .cart.pull-left {
 		margin: 0;
@@ -5353,4 +5354,16 @@ div.articles-list + div.articles-list::before {
 	justify-content: center;
 	height: 100%;
 	width: 100%;
+}
+@media (max-width: 767px) {
+	.h-type-2 #phone {
+		flex-direction: column;
+		align-items: center;
+	}
+	.h-type-2 #phone .drop-icon-info {
+		right: -40px;
+	}
+	.h-type-2 #phone .drop-contacts {
+		left: -24px;
+	}
 }
