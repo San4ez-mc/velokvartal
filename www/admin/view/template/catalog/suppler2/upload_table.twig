@@ -1,0 +1,49 @@
+<div class="alert alert-info" role="alert">
+    {{ text_xml_check }}
+</div>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>{{ text_key }}</th>
+        <th>{{ text_value }}</th>
+        <th>{{ text_to }}</th>
+        <th>{{ text_status }}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in rows %}
+        <tr>
+            <td>
+                <span>{{ row.key }}</span>
+                <input type="hidden" name="rows[{{ row.key }}][key]" value="{{ row.key }}" />
+                <input type="hidden" name="rows[{{ row.key }}][route]" value="{{ row.route }}" />
+            </td>
+            <td>
+                <span>{{ row.value }}</span>
+                <input type="hidden" name="rows[{{ row.key }}][value]" value="{{ row.value }}" />
+            </td>
+            <td style="width: 130px">
+                <div class="input-group mb-3">
+                    <select class="form-control" name="rows[{{ row.key }}][site_key]">
+                        <option value=""></option>
+                        <option value="sku">{{ text_sku }}*</option>
+                        <option disabled value="name">{{ text_name }}</option>
+                        <option disabled value="category">{{ text_category }}</option>
+                        <option value="description">{{ text_description }}</option>
+                        <option value="price">{{ text_price }}</option>
+                        <option value="image">{{ text_image }}</option>
+                    </select>
+                </div>
+            </td>
+            <td style="width: 130px">
+                <div class="input-group mb-3">
+                    <select class="form-control" name="rows[{{ row.key }}][status]">
+                        <option value="1" selected>{{ text_on }}</option>
+                        <option value="0">{{ text_off }}</option>
+                    </select>
+                </div>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
