@@ -38,6 +38,18 @@ jQuery(document).ready(function ($) {
                                     route.children.forEach(function (route_) {
                                         html += '<li><a class="" data-route="' + route_.route + '" href="#">' + route_.text + '</a></li>';
                                         // $('.ajax_upload').append('<li><a class="" href="#">' + route_.text +'</a>');
+
+                                        if (route_.children.length > 0) {
+                                            // $('.ajax_upload').append('<ul>');
+                                            html += '<ul class="text-left">';
+                                            route_.children.forEach(function (route__) {
+                                                html += '<li><a class="" data-route="' + route__.route + '" href="#">' + route__.text + '</a></li>';
+                                                // $('.ajax_upload').append('<li><a class="" href="#">' + route_.text +'</a>');
+                                            });
+                                            // $('.ajax_upload').append('</ul>');
+                                            html += '</ul>';
+                                        }
+
                                     });
                                     // $('.ajax_upload').append('</ul>');
                                     html += '</ul>';

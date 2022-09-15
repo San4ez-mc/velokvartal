@@ -384,38 +384,7 @@ class ControllerCatalogSuppler2 extends Controller
             $this->load->model('catalog/suppler2');
             $observe_result = $this->model_catalog_suppler2->observe_xml($link, !empty($_POST['id']) ? $_POST['id'] : null, !empty($_POST['route']) ? $_POST['route'] : null);
 
-//            var_dump($observe_result);
             if ($observe_result['status'] == 'ok') {
-//                if (isset($observe_result['rows'])) {
-//                    $rows = $observe_result['rows'];
-//
-//                    // провірка чи товари одразу доступні чи як ключ - значення
-//                    if (!empty($rows) && !empty($_POST['id'])) {
-//                        // Отримуємо попередні налаштування
-//                        $id = $_POST['id'];
-//
-//                        $suppler_data = $this->model_catalog_suppler2->getSupplerData($id);
-//                        foreach ($rows as &$row) {
-//                            foreach ($suppler_data as $saved_item) {
-//                                if ($row['key'] == $saved_item['key']) {
-//                                    $row['site_key'] = $saved_item['site_key'];
-//                                    $row['status'] = $saved_item['status'];
-//                                }
-//                            }
-//                        }
-//                    }
-//
-//                    $data['rows'] = $rows;
-//                    $this->load->language('catalog/suppler2');
-//
-//                    echo json_encode([
-//                            'status' => 'ok',
-//                            'rows' => $rows,
-//                            'html' => $this->load->view('catalog/suppler2/xml_table_check', $data)
-//                        ]
-//                    );
-//
-//                } else {
                 $routes = $observe_result['routes'];
                 echo json_encode([
                         'status' => 'ok',
@@ -429,7 +398,6 @@ class ControllerCatalogSuppler2 extends Controller
                 echo json_encode($observe_result);
             }
 
-//            $this->response->setOutput();
         } else {
             echo json_encode([
                     'status' => 'error',
