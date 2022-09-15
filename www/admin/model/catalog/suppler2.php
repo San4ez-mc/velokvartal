@@ -113,6 +113,7 @@ class ModelCatalogSuppler2 extends Model
                             'message' => 'Настройка SKU найдено, начинается поиск товаров...'
                         ];
 
+                        // отримуємо продукти з xml
                         if (strripos(htmlspecialchars_decode($main_route), '->') !== false) {
                             $parts = explode('->', htmlspecialchars_decode($main_route));
                             if (count($parts) == 2) {
@@ -130,7 +131,9 @@ class ModelCatalogSuppler2 extends Model
                                 }
                             }
                         } else {
-                            $xml_products = $xml->{$main_route};
+                            $xml_array = (array)$xml;
+//                            $xml_products = $xml->{$main_route};
+                            $xml_products = $xml_array[$main_route];
 
                             if (is_object($xml_products)) {
                                 $xml_arr = (array)$xml;
@@ -138,120 +141,149 @@ class ModelCatalogSuppler2 extends Model
                             }
                         }
 
-
                         if (!empty($xml_products)) {
                             $not_found = 0;
                             $readed = 0;
                             $skus = [];
                             foreach ($xml_products as $xml_product) {
                                 $readed++;
-                                if (strripos($sku_data['route'], '->') === false) {
-                                    $sku = (string)$xml_product->{$sku_data['route']};
-                                    $quantity = (string)$xml_product->{$sku_data['quantity']};
-//                                $sku = 'BTR-029';
-                                    $product = $this->getProductBySKU(trim($sku));
 
+                                $xml_product_array = (array)$xml_product;
+
+                                // знаходимо в рядку xml SKU і по ньому шукаємо продукт
+                                if (strripos(htmlspecialchars_decode($sku_data['route']), '->') === false) {
+//                                    $sku = (string)$xml_product->{$sku_data['route']};
+                                    $sku = (string)$xml_product_array[$sku_data['route']];
+                                    //                                    $quantity = (string)$xml_product->{$sku_data['quantity']};
+                                    $quantity = (string)$xml_product_array[$sku_data['quantity']];
+                                    $product = $this->getProductBySKU(trim($sku));
                                 } else {
                                     // todo допрацювати
-                                    $parts = explode('->', $sku_data['route']);
-                                    if (count($parts) == 2) {
-                                        $products = $xml_product->{$parts[0]}->{$parts[1]};
-                                    }
-                                    $product = null;
-                                    $sku = '';
+//                                    $parts = explode('->', $sku_data['route']);
+//                                    if (count($parts) == 2) {
+//                                        $products = $xml_product->{$parts[0]}->{$parts[1]};
+//                                    }
+//                                    $product = null;
+//                                    $sku = '';
                                 }
 
                                 if ($product) {
+                                    $params_changed = 0;
 
                                     $log[] = [
                                         'type' => 'info',
                                         'message' => 'Найден товар <a target="_blank" href="/admin/index.php?route=catalog/product/edit&user_token=' . $token . '&product_id=' . $product['product_id'] . '" >' . $product['name'] . ' (' . $product['sku'] . ') </a>'
                                     ];
 
-                                    foreach ($suppler_data as $key) {
+                                    $extra_images = [];
+                                    foreach ($suppler_data as $suppler_row) {
+                                        $route = htmlspecialchars_decode($suppler_row['route']);
 
-                                        if (strripos($key['route'], '_') === false) {
-                                            $value = (string)$xml_product->{$key['route']};
+                                        if (strripos($route, '->') === false) {
+//                                            $value = (string)$xml_product->{$suppler_row['route']};
+                                            $value = (string)$xml_product_array[$route];
                                         } else {
-                                            // todo доробити, якщо будуть ключі багаторівневі
-                                            $value = '';
+                                            $parts = explode('->', $route);
+                                            if (count($parts) == 2) {
+                                                $value = $xml_product_array[$parts[0]][$parts[1]];
+                                            } elseif (count($parts) == 3) {
+                                                $value = $xml_product_array[$parts[0]][$parts[1]][$parts[2]];
+                                            }
                                         }
 
-                                        switch ($key['site_key']) {
+                                        if (!empty($value) && strlen($value) > 0) {
 
-                                            case 'name':
-                                                $log[] = [
-                                                    'type' => 'success',
-                                                    'message' => 'Имя успешно заменено на ' . $value
-                                                ];
-                                                break;
-                                            case 'category':
-                                                $log[] = [
-                                                    'type' => 'success',
-                                                    'message' => 'Категория успешно заменена на ' . $value
-                                                ];
-                                                break;
-                                            case 'description':
-                                                $this->editProductDescriptionField($product['product_id'], 'description', $value);
-
-                                                $log[] = [
-                                                    'type' => 'success',
-                                                    'message' => 'Описание успешно заменено на: ' . $value
-                                                ];
-                                                break;
-                                            case 'price':
-                                                if (!empty($availability)) {
-                                                    $this->editProductField($product['product_id'], 'price', $value);
-                                                    $this->editProductField($product['product_id'], 'price_zak', $value);
+                                            switch ($suppler_row['site_key']) {
+                                                case 'name':
+                                                    $log[] = [
+                                                        'type' => 'success',
+                                                        'message' => 'Имя успешно заменено на ' . $value
+                                                    ];
+                                                    break;
+                                                case 'category':
+                                                    $log[] = [
+                                                        'type' => 'success',
+                                                        'message' => 'Категория успешно заменена на ' . $value
+                                                    ];
+                                                    break;
+                                                case 'description':
+                                                    $this->editProductDescriptionField($product['product_id'], 'description', $value);
 
                                                     $log[] = [
                                                         'type' => 'success',
-                                                        'message' => 'Цена успешно заменена на: ' . $value
+                                                        'message' => 'Описание успешно заменено на: ' . $value
                                                     ];
-                                                } else {
-                                                    $log[] = [
-                                                        'type' => 'info',
-                                                        'message' => 'Цена не заменена так как товара нет в наличии в xml'
-                                                    ];
-                                                }
-                                                break;
-                                            case 'price_stock':
-                                                if (!empty($quantity)) {
-                                                    if (!empty($value)) {
-                                                        $this->editProductDiscount($product['product_id'], $value, $quantity);
+                                                    break;
+                                                case 'price':
+                                                    if (!empty($availability)) {
+                                                        $this->editProductField($product['product_id'], 'price', $value);
+                                                        $this->editProductField($product['product_id'], 'price_zak', $value);
 
                                                         $log[] = [
                                                             'type' => 'success',
                                                             'message' => 'Цена успешно заменена на: ' . $value
                                                         ];
+                                                    } else {
+                                                        $log[] = [
+                                                            'type' => 'info',
+                                                            'message' => 'Цена не заменена так как товара нет в наличии в xml'
+                                                        ];
                                                     }
-                                                } else {
-                                                    $log[] = [
-                                                        'type' => 'info',
-                                                        'message' => 'Цена со скидкой не заменена так как товара нет в наличии в xml'
-                                                    ];
-                                                }
-                                                break;
-                                            case 'image':
-                                                $local_path = $this->saveImageFormUrl($value, $sku);
-                                                if ($local_path) {
-                                                    $this->editProductField($product['product_id'], 'image', $local_path);
-                                                    $ext = end(explode('.', $value));
-                                                    $log[] = [
-                                                        'type' => 'success',
-                                                        'message' => 'Изображение успешно заменено на: <img width="200" src ="' . $value . '" />',
-                                                        'temp_url' => $value,
-                                                        'temp_route' => $_SERVER['DOCUMENT_ROOT'],
-                                                        'temp_file_name' => $local_path
-                                                    ];
-                                                } else {
-                                                    $log[] = [
-                                                        'type' => 'warning',
-                                                        'message' => 'Не удалось заменить <a  target="_blank" href="' . $value . '">изображение</a>'
-                                                    ];
-                                                }
-                                                break;
+                                                    break;
+                                                case 'price_stock':
+                                                    if (!empty($quantity)) {
+                                                        if (!empty($value)) {
+                                                            $this->editProductDiscount($product['product_id'], $value, $quantity);
+
+                                                            $log[] = [
+                                                                'type' => 'success',
+                                                                'message' => 'Цена успешно заменена на: ' . $value
+                                                            ];
+                                                        }
+                                                    } else {
+                                                        $log[] = [
+                                                            'type' => 'info',
+                                                            'message' => 'Цена со скидкой не заменена так как товара нет в наличии в xml'
+                                                        ];
+                                                    }
+                                                    break;
+                                                case 'image':
+                                                    $local_path = $this->saveImageFormUrl($value, $sku);
+                                                    if ($local_path) {
+                                                        $this->editProductField($product['product_id'], 'image', $local_path);
+
+                                                        $log[] = [
+                                                            'type' => 'success',
+                                                            'message' => 'Изображение успешно заменено на: <img width="200" src ="' . $value . '" />',
+                                                            'temp_url' => $value,
+                                                            'temp_route' => $_SERVER['DOCUMENT_ROOT'],
+                                                            'temp_file_name' => $local_path
+                                                        ];
+                                                    } else {
+                                                        $log[] = [
+                                                            'type' => 'warning',
+                                                            'message' => 'Не удалось заменить <a  target="_blank" href="' . $value . '">изображение</a>'
+                                                        ];
+                                                    }
+                                                    break;
+                                                case 'image_extra':
+                                                    $extra_images[] = $value;
+                                                    break;
+                                            }
+
+                                            $params_changed ++;
                                         }
+                                    }
+
+                                    if (!empty($extra_images)) {
+                                        $this->updateExtraImages($product['product_id'], $sku, $extra_images, $log);
+                                    }
+
+                                    if(empty($params_changed)){
+                                        $log[] = [
+                                            'type' => 'warning',
+                                            'message' => 'В товаре не заменен ни один параметр так как они пустые в xml',
+                                        ];
                                     }
                                 } else {
                                     $not_found++;
@@ -355,7 +387,7 @@ class ModelCatalogSuppler2 extends Model
         if (!empty($product)) {
             $product_array = (array)$product;
 
-            if(count($product_array) === 1){
+            if (count($product_array) === 1) {
                 $product_array = $product_array[array_key_first($product_array)][0];
                 $product_array = (array)$product_array;
             }
@@ -370,11 +402,35 @@ class ModelCatalogSuppler2 extends Model
 //                        'route' => $key
 //                    ];
                 } elseif (is_object($row)) {
-                    foreach ($row as $key2 => $item) {
+                    if (count((array)$row) > 0) {
+                        $row_array = (array)$row;
+                        if (count($row_array) === 1) {
+                            $row_array = $row_array[array_key_first($row_array)];
+                        }
+//                        foreach ($row as $key2 => $item) {
+
+                        if (!empty($row_array[0])) {
+                            for ($i = 0; $i < count($row_array); $i++) {
+                                $rows[] = [
+                                    'key' => $key . '->' . $i,
+                                    'value' => $row_array[$i],
+                                    'route' => $key . '->' . $i
+                                ];
+                            }
+                        } else {
+                            foreach ($row_array as $key2 => $item) {
+                                $rows[] = [
+                                    'key' => $key . '->' . $key2,
+                                    'value' => $item->{array_key_first((array)$item)},
+                                    'route' => $key . '->' . $key2
+                                ];
+                            }
+                        }
+                    } else {
                         $rows[] = [
-                            'key' => $key2,
-                            'value' => $item->{array_key_first((array)$item)},
-                            'route' => $key . '->' . $key2
+                            'key' => $key,
+                            'value' => (string)$row,
+                            'route' => $key
                         ];
                     }
                 } else {
@@ -415,7 +471,7 @@ class ModelCatalogSuppler2 extends Model
                 return $tree;
             }
 
-            foreach ( $xml_array as $key => $xml_row) {
+            foreach ($xml_array as $key => $xml_row) {
 
                 $xml_row = (array)$xml_row;
                 $first_key = array_key_first($xml_row);
@@ -534,6 +590,58 @@ class ModelCatalogSuppler2 extends Model
     {
         if (isset($product_id) && isset($field) && isset($value)) {
             $this->db->query("UPDATE " . DB_PREFIX . "product_description SET " . $field . " = '" . $this->db->escape($value) . "' WHERE product_id = '" . (int)$product_id . "'");
+        }
+    }
+
+    public
+    function updateExtraImages($product_id, $sku, $images, &$log)
+    {
+        $saved = [];
+        $not_saved = [];
+        if (!empty($images)) {
+            for ($i = 0; $i < count($images); $i++) {
+                $image = $images[$i];
+
+                $local_path = $this->saveImageFormUrl($image, $sku . '_' . $i);
+                if ($local_path) {
+                    $this->editExtraImagesField($product_id, $local_path, $i);
+                    $saved[] = $image;
+                } else {
+                    $not_saved[] = $image;
+                }
+            }
+
+            if (!empty($not_saved)) {
+                $not_saved_str = '';
+                foreach ($not_saved as $not_saved_image) {
+                    $not_saved_str .= '<img width="200" src ="' . $not_saved_image . '" />';
+                }
+                $log[] = [
+                    'type' => 'warning',
+                    'message' => 'Не удалось добавить ' . count($not_saved) . ' дополнительных изображений. <a class="show_more" href="#">Подробнее</a><span class="hidden">:<br/>' . $not_saved_str . '</span>'
+                ];
+            }
+
+            if (!empty($saved)) {
+                $saved_str = '';
+                foreach ($saved as $saved_image) {
+                    $saved_str .= '<img width="200" src ="' . $saved_image . '" />';
+                }
+                $log[] = [
+                    'type' => 'success',
+                    'message' => 'Успешно добавлено ' . count($saved) . ' дополнительных изображений. <a class="show_more" href="#">Подробнее</a><span class="hidden">:<br/>' . $saved_str . '</span>'
+                ];
+            }
+        }
+    }
+
+    public
+    function editExtraImagesField($product_id, $image, $index)
+    {
+        $this->db->query("DELETE FROM " . DB_PREFIX . "product_image WHERE product_id = '" . (int)$product_id . "'");
+
+        if (isset($product_id) && isset($image)) {
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "_product_image` (`product_image_id `, `product_id`, `image`, `sort_order`) VALUES ('" . ((int)$index + 2) . "', '" . (int)$product_id . "', '" . $image . "',  '" . ((int)$index + 1) . "')");
         }
     }
 

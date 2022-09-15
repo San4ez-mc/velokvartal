@@ -63,6 +63,7 @@ class ControllerCatalogSuppler2 extends Controller
 
         $results = $this->model_catalog_suppler2->getSupplers();
 
+        $selected_total = 0;
         foreach ($results as $result) {
             $action = array();
 
@@ -72,9 +73,12 @@ class ControllerCatalogSuppler2 extends Controller
                 'load' => $this->url->link('catalog/suppler2/load', 'user_token=' . $this->session->data['user_token'] . '&form_id=' . $result['form_id'] . $url, true)
             );
 
+            $selected = !empty($this->model_catalog_suppler2->getSupplerDataSKU($result['id']));
+
+
             $data['supplers'][] = array(
                 'suppler_id' => $result['id'],
-                'selected' => $result['status'] == 1,
+                'selected' => $selected,
                 'name' => $result['name'],
                 'link' => $result['link'],
                 'description' => $result['description'],
@@ -82,7 +86,13 @@ class ControllerCatalogSuppler2 extends Controller
                 'sort_order' => $result['sort_order'],
                 'action' => $action
             );
+
+            if ($selected) {
+                $selected_total++;
+            }
         }
+
+        $data['selected_all'] = $selected_total === count ($results);
 
         $this->document->addScript('view/javascript/suppler2/suppler2.js', 'header');
         $this->document->addStyle('view/stylesheet/suppler2/suppler2.css');
@@ -137,6 +147,7 @@ class ControllerCatalogSuppler2 extends Controller
         $this->load->model('catalog/suppler2');
 
         if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
+
             $this->model_catalog_suppler2->editSuppler($this->request->get['id'], $this->request->post);
 
             $this->session->data['success'] = $this->language->get('text_success');
@@ -689,7 +700,6 @@ class ControllerCatalogSuppler2 extends Controller
 //        return $log;
 ////        return [];
 //    }
-
 
 
     private
