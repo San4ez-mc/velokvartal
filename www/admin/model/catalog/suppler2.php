@@ -303,7 +303,6 @@ class ModelCatalogSuppler2 extends Model
             ];
         }
         return $log;
-//        return [];
     }
 
     public function observe_xml($link, $id = null, $route = null)
@@ -339,7 +338,8 @@ class ModelCatalogSuppler2 extends Model
         if (count($xml_array) === 1 && is_array($xml_array[$first_key])) {
             $product = (array)$xml_array[$first_key][0];
         } else {
-            $products = $xml->{$main_key};
+            $products = $xml_array[$main_key];
+
             if (strripos($main_key, '->') !== false) {
                 $parts = explode('->', $main_key);
                 if (count($parts) == 2) {
@@ -353,29 +353,22 @@ class ModelCatalogSuppler2 extends Model
         }
 
         if (!empty($product)) {
-            if (!is_array($product)) {
-                if (is_object($product)) {
-                    if (is_array($product->{array_key_first((array)$product)})) {
-                        $product = (array)$product->{array_key_first((array)$product)}[0];
-                    } else {
-                        if (is_object($product->{array_key_first((array)$product)})) {
-                            $product = (array)$product->{array_key_first((array)$product)};
-                        } else {
-                            $product = (array)$product;
-                        }
-                    }
-                }
+            $product_array = (array)$product;
+
+            if(count($product_array) === 1){
+                $product_array = $product_array[array_key_first($product_array)][0];
+                $product_array = (array)$product_array;
             }
 
-            foreach ($product as $key => $row) {
+            foreach ($product_array as $key => $row) {
                 if (is_array($row)) {
-                    foreach ($row as $key2 => $item) {
-                        $rows[] = [
-                            'key' => $key2,
-                            'value' => $item,
-                            'route' => $key . '->' . $key2
-                        ];
-                    }
+
+                    // поки не буду виводити параметри
+//                    $rows[] = [
+//                        'key' => $key,
+//                        'value' => 'масив данных',
+//                        'route' => $key
+//                    ];
                 } elseif (is_object($row)) {
                     foreach ($row as $key2 => $item) {
                         $rows[] = [
@@ -422,11 +415,10 @@ class ModelCatalogSuppler2 extends Model
                 return $tree;
             }
 
-            foreach ($xml as $key => $xml_row) {
+            foreach ( $xml_array as $key => $xml_row) {
+
                 $xml_row = (array)$xml_row;
                 $first_key = array_key_first($xml_row);
-//                var_dump($first_key);
-//                var_dump($xml_row);
                 $children = [];
                 if (is_int($first_key)) {
                     $children[] = [
@@ -440,10 +432,9 @@ class ModelCatalogSuppler2 extends Model
                 if (is_string($first_key)) {
 
                     $rows = count($xml_row) > 1 ? $xml_row : $xml_row[$first_key];
-//var_dump($rows);
+
                     $counter = 0;
                     foreach ($rows as $key2 => $xml_row2) {
-
                         $children2 = [];
                         foreach ($xml_row2[0] as $key3 => $xml_row3) {
                             $children3 = false;
@@ -455,7 +446,6 @@ class ModelCatalogSuppler2 extends Model
                                 "type" => "file"
                             ];
                         }
-
 
                         if (is_int($key2)) {
                             if (is_string($xml_row2)) {
@@ -478,6 +468,7 @@ class ModelCatalogSuppler2 extends Model
                             "type" => "file",
                             "route" => $route
                         ];
+
                         $counter++;
                         if ($counter == 10) {
                             break;
@@ -495,7 +486,13 @@ class ModelCatalogSuppler2 extends Model
             }
         }
 
-        return $tree;
+        return [[
+            "id" => '0',
+            "text" => 'xml',
+            "children" => $tree,
+            "type" => "root",
+            "route" => '/'
+        ]];
 
     }
 
@@ -508,61 +505,6 @@ class ModelCatalogSuppler2 extends Model
         }
         return $xml;
     }
-
-//    function create_xml_branch($xml){
-//        $tree = [];
-//        if (!empty($xml)) {
-//            foreach ($xml as $key => $xml_row) {
-//                $xml_row = (array)$xml_row;
-//                $first_key = array_key_first($xml_row);
-//
-//                $children = [];
-//                if (is_int($first_key)) {
-//                    $children[] = [
-//                        "id" => $xml_row[0],
-//                        "text" => $xml_row[0],
-//                        "children" => false,
-//                        "type" => "file"
-//                    ];
-//                }
-//
-//                if (is_string($first_key)) {
-//                    foreach ($xml_row[$first_key] as $key2 => $xml_row2) {
-////var_dump($key2);
-////var_dump($xml_row2);
-//                        $children2 = [];
-//                        foreach ($xml_row2[0] as $key3 => $xml_row3) {
-//                            $children3 = false;
-//
-//                            $children2[] = [
-//                                "id" => $key3,
-//                                "text" => $key3,
-//                                "children" => $children3,
-//                                "type" => "file"
-//                            ];
-//                        }
-//
-//
-//                        $children[] = [
-//                            "id" => is_int($key2) ? $xml_row2 : $key2,
-//                            "text" =>  is_int($key2) ? $xml_row2 : $key2,
-//                            "children" => $children2,
-//                            "type" => "file"
-//                        ];
-//                    }
-//                }
-//
-//                $tree[] = [
-//                    "id" => $key,
-//                    "text" => $key,
-//                    "children" => $children,
-//                    "type" => "root"
-//                ];
-//            }
-//        }
-//
-//        return $tree;
-//    }
 
     function saveImageFormUrl($url, $sku)
     {
