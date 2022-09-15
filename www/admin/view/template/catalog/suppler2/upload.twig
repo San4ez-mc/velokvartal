@@ -39,7 +39,14 @@
                                 <table class="table table-bordered table-hover">
                                     <thead>
                                     <tr>
-                                        <td style="width: 1px;" class="text-center"></td>
+                                        <td style="width: 1px;" class="text-center">
+                                            {% if selected_all %}
+                                                <input type="checkbox" class="select_all" name="selected[]"
+                                                       checked="checked"/>
+                                            {% else %}
+                                                <input type="checkbox" class="select_all" name="selected[]"/>
+                                            {% endif %}
+                                        </td>
                                         <td class="text-left" style="color: #1E91CF;">{{ text_name }}</td>
                                     </tr>
                                     </thead>
@@ -81,8 +88,8 @@
                                 <div class="alert alert-info" role="alert">
                                     {{ text_xml_upload_all_start }}
                                 </div>
-{#                                <a data-toggle="tooltip" class="btn btn-primary start_upload"#}
-{#                                   type="button"><i>Start</i></a>#}
+                                {#                                <a data-toggle="tooltip" class="btn btn-primary start_upload"#}
+                                {#                                   type="button"><i>Start</i></a>#}
 
                             </div>
                             <div class="list_end"></div>
