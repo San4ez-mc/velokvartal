@@ -53,6 +53,7 @@ class ModelCatalogSuppler2 extends Model
             $this->db->query("DELETE FROM `" . DB_PREFIX . "suppler2_data` WHERE suppler_id = {$id}");
 
             if (!empty($data['rows'])) {
+
                 foreach ($data['rows'] as $row) {
                     if (strlen($row['site_key']) > 0) {
                         $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_data` ( `suppler_id`, `key`, `example_value`, `route`, `site_key`, `status`) VALUES (" . $id . ", '" . $this->db->escape($row['key']) . "', '" . $this->db->escape($row['value']) . "', '" . $this->db->escape($row['route']) . "', '" . $this->db->escape($row['site_key']) . "', '" . $this->db->escape($row['status']) . "');");
