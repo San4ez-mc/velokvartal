@@ -186,7 +186,12 @@ class ModelCatalogSuppler2 extends Model
                                         } else {
                                             $parts = explode('->', $route);
                                             if (count($parts) == 2) {
-                                                $value = $xml_product_array[$parts[0]][$parts[1]];
+                                                $value = (array)$xml_product_array[$parts[0]];
+                                                if(is_object($xml_product_array[$parts[0]]) && count((array)$xml_product_array[$parts[0]]) == 1){
+                                                    $value = $value[array_key_first($value)];
+                                                }
+                                                $value = $value[$parts[1]];
+
                                             } elseif (count($parts) == 3) {
                                                 $value = $xml_product_array[$parts[0]][$parts[1]][$parts[2]];
                                             }
@@ -642,7 +647,7 @@ class ModelCatalogSuppler2 extends Model
         $this->db->query("DELETE FROM " . DB_PREFIX . "product_image WHERE product_id = '" . (int)$product_id . "'");
 
         if (isset($product_id) && isset($image)) {
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "_product_image` (`product_image_id `, `product_id`, `image`, `sort_order`) VALUES ('" . ((int)$index + 2) . "', '" . (int)$product_id . "', '" . $image . "',  '" . ((int)$index + 1) . "')");
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "product_image` (`product_id`, `image`, `sort_order`) VALUES ('" . (int)$product_id . "', '" . $image . "',  '" . ((int)$index + 1) . "')");
         }
     }
 
