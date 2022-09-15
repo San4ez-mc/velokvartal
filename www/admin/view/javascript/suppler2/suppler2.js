@@ -134,6 +134,18 @@ jQuery(document).ready(function ($) {
         $(this).next('span').removeClass('hidden');
         $(this).remove();
     });
+
+    $(document).on('click', '.select_all', function (e) {
+        if ($(this).prop('checked')) {
+            $('.supplers_checkbox').each(function () {
+                $(this).prop('checked', true);
+            });
+        }else{
+            $('.supplers_checkbox').each(function () {
+                $(this).prop('checked', false);
+            });
+        }
+    });
 });
 
 function show_log(target, message, type = 'info', break_ = false) {
@@ -185,7 +197,7 @@ function upload(ids, token, is_first = false) {
                     //     }
                     // }, 1);
                     if (json.logs.length > 0) {
-                        json.logs.forEach(function(log){
+                        json.logs.forEach(function (log) {
                             show_log($('.ajax_upload'), log.message, log.type, log.break || false);
                         })
                     }
