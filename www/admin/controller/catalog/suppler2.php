@@ -105,39 +105,6 @@ class ControllerCatalogSuppler2 extends Controller
         $this->response->setOutput($this->load->view('catalog/suppler2/upload', $data));
     }
 
-//    public function insert()
-//    {
-//        $this->load->language('catalog/suppler2');
-//
-//        $this->document->setTitle($this->language->get('heading_title'));
-//
-//        $this->load->model('catalog/suppler2');
-//
-//        if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
-//            $this->model_catalog_suppler2->addSuppler($this->request->post, 0);
-//
-//            $this->session->data['success'] = $this->language->get('text_success');
-//
-//            $url = '';
-//
-//            if (isset($this->request->get['filter_name'])) {
-//                $url .= '&filter_name=' . urlencode(html_entity_decode($this->request->get['filter_name'], ENT_QUOTES, 'UTF-8'));
-//            }
-//
-//            if (isset($this->request->get['order'])) {
-//                $url .= '&order=' . $this->request->get['order'];
-//            }
-//
-//            if (isset($this->request->get['page'])) {
-//                $url .= '&page=' . $this->request->get['page'];
-//            }
-//
-//            $this->response->redirect($this->url->link('catalog/suppler2', 'user_token=' . $this->session->data['user_token'] . $url, true));
-//        }
-//
-//        $this->getForm();
-//    }
-
     public function update()
     {
         $this->load->language('catalog/suppler2');
@@ -179,8 +146,10 @@ class ControllerCatalogSuppler2 extends Controller
         $this->document->setTitle($this->language->get('heading_title'));
 
         $this->load->model('catalog/suppler2');
-
+//        var_dump($this->request->post['selected']);die();
         if (isset($this->request->post['selected']) && $this->validateDelete()) {
+
+
             foreach ($this->request->post['selected'] as $form_id) {
                 $this->model_catalog_suppler2->deleteSuppler($form_id);
             }
@@ -440,7 +409,7 @@ class ControllerCatalogSuppler2 extends Controller
                         $suppler_data = $this->model_catalog_suppler2->getSupplerData($id);
                         foreach ($rows as &$row) {
                             foreach ($suppler_data as $saved_item) {
-                                if ($row['key'] == $saved_item['key']) {
+                                if ($row['key'] == htmlspecialchars_decode($saved_item['key'])) {
                                     $row['site_key'] = $saved_item['site_key'];
                                     $row['status'] = $saved_item['status'];
                                 }
