@@ -92,7 +92,7 @@ class ControllerCatalogSuppler2 extends Controller
             }
         }
 
-        $data['selected_all'] = $selected_total === count ($results);
+        $data['selected_all'] = $selected_total === count($results);
 
         $this->document->addScript('view/javascript/suppler2/suppler2.js', 'header');
         $this->document->addStyle('view/stylesheet/suppler2/suppler2.css');
@@ -146,7 +146,6 @@ class ControllerCatalogSuppler2 extends Controller
         $this->document->setTitle($this->language->get('heading_title'));
 
         $this->load->model('catalog/suppler2');
-//        var_dump($this->request->post['selected']);die();
         if (isset($this->request->post['selected']) && $this->validateDelete()) {
 
 
@@ -176,7 +175,32 @@ class ControllerCatalogSuppler2 extends Controller
         $this->getList();
     }
 
-    private function getList()
+    public function delete_ajax()
+    {
+        $this->load->language('catalog/suppler2');
+
+        $this->document->setTitle($this->language->get('heading_title'));
+
+        $this->load->model('catalog/suppler2');
+
+        if (isset($this->request->post['selected']) && $this->validateDelete()) {
+
+            try {
+
+                foreach ($this->request->post['selected'] as $id) {
+                    $this->model_catalog_suppler2->deleteSuppler($id);
+                }
+                echo json_encode(['status' => 'ok', 'message' => $this->language->get('text_success')]);
+
+            } catch (Exception $e) {
+                echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+            }
+            die();
+        }
+    }
+
+    private
+    function getList()
     {
         if (isset($this->request->get['sort'])) {
             $sort = $this->request->get['sort'];
@@ -190,8 +214,8 @@ class ControllerCatalogSuppler2 extends Controller
             $order = 'ASC';
         }
 
-        $this->request->get['page'] = 1;
-
+//        $this->request->get['page'] = 1;
+//
 //        if (isset($this->request->get['page'])) {
 //            $page = $this->request->get['page'];
 //        } else {
@@ -211,8 +235,6 @@ class ControllerCatalogSuppler2 extends Controller
         if (isset($this->request->get['page'])) {
             $url .= '&page=' . $this->request->get['page'];
         }
-//        $this->load->model('catalog/suppler2');
-//        $results = $this->model_catalog_suppler2->createTables();
 
         $data['breadcrumbs'] = array();
 
@@ -228,14 +250,11 @@ class ControllerCatalogSuppler2 extends Controller
             'separator' => ' :: '
         );
 
-        $data['cstart'] = $this->url->link('catalog/suppler2/cstart', 'user_token=' . $this->session->data['user_token'] . $url, true);
-        $data['ccontinue'] = $this->url->link('catalog/suppler2/ccontinue', 'user_token=' . $this->session->data['user_token'] . $url, true);
-        $data['cstop'] = $this->url->link('catalog/suppler2/cstop', 'user_token=' . $this->session->data['user_token'] . $url, true);
         $data['insert'] = $this->url->link('catalog/suppler2/add', 'user_token=' . $this->session->data['user_token'] . $url, true);
         $data['delete'] = $this->url->link('catalog/suppler2/delete', 'user_token=' . $this->session->data['user_token'] . $url, true);
+        $data['delete_ajax'] = $this->url->link('catalog/suppler2/delete_ajax', 'user_token=' . $this->session->data['user_token'] . $url, true);
 
         $data['supplers'] = array();
-//        $this->load->model('catalog/suppler2');
 
         $suppler_total = $this->model_catalog_suppler2->getTotalSupplers();
 
@@ -247,7 +266,6 @@ class ControllerCatalogSuppler2 extends Controller
             $action[] = array(
                 'text' => $this->language->get('edit'),
                 'href' => $this->url->link('catalog/suppler2/update', 'user_token=' . $this->session->data['user_token'] . '&id=' . $result['id'] . $url, true),
-                'load' => $this->url->link('catalog/suppler2/load', 'user_token=' . $this->session->data['user_token'] . '&id=' . $result['id'] . $url, true)
             );
 
             $data['supplers'][] = array(
@@ -325,6 +343,7 @@ class ControllerCatalogSuppler2 extends Controller
         );
 
         $this->document->addStyle('view/stylesheet/suppler2/suppler2.css');
+        $this->document->addScript('view/javascript/suppler2/suppler2.js', 'header');
 
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
@@ -333,7 +352,8 @@ class ControllerCatalogSuppler2 extends Controller
         $this->response->setOutput($this->load->view('catalog/suppler2/suppler2_list', $data));
     }
 
-    private function getForm()
+    private
+    function getForm()
     {
         $data = [];
 
@@ -345,7 +365,6 @@ class ControllerCatalogSuppler2 extends Controller
         $this->document->addStyle('view/stylesheet/suppler2/bootstrap-alerts.css');
 
         $this->document->addScript('view/javascript/suppler2/suppler2.js', 'header');
-        $this->document->addScript('view/javascript/suppler2/jstree.js', 'header');
 
         $data['token'] = $this->request->get['user_token'];
         $data['header'] = $this->load->controller('common/header');
@@ -355,7 +374,8 @@ class ControllerCatalogSuppler2 extends Controller
         $this->response->setOutput($this->load->view('catalog/suppler2/suppler_short_form', $data));
     }
 
-    public function check_xml_ajax()
+    public
+    function check_xml_ajax()
     {
         $this->response->addHeader('Content-Type: application/json');
         if (!empty($_POST['link'])) {
@@ -388,15 +408,17 @@ class ControllerCatalogSuppler2 extends Controller
         die();
     }
 
-    public function get_xml_vars_ajax()
+    public
+    function get_xml_vars_ajax()
     {
         $this->response->addHeader('Content-Type: application/json');
         if (!empty($_POST['link']) && !empty($_POST['route'])) {
             $link = $_POST['link'];
 
             $this->load->model('catalog/suppler2');
-            $xml_vars = $this->model_catalog_suppler2->get_xml_vars_from_url($link, $_POST['route']);
+            $xml_vars = $this->model_catalog_suppler2->get_xml_vars_from_url($link, $_POST['route'], !empty($_POST['product_number']) ? $_POST['product_number'] : 0);
 
+            $next_product_number = !empty($_POST['product_number']) ? $_POST['product_number'] + 2 : 2;
             if ($xml_vars['status'] == 'ok') {
                 if (!empty($xml_vars['rows'])) {
                     $rows = $xml_vars['rows'];
@@ -405,6 +427,11 @@ class ControllerCatalogSuppler2 extends Controller
                     if (!empty($rows) && !empty($_POST['id'])) {
                         // Отримуємо попередні налаштування
                         $id = $_POST['id'];
+
+                        if(empty($_POST['product_number'])){
+                            $suppler = $this->model_catalog_suppler2->getSuppler($id);
+                            $next_product_number = $suppler['product_number'] + 1;
+                        }
 
                         $suppler_data = $this->model_catalog_suppler2->getSupplerData($id);
                         foreach ($rows as &$row) {
@@ -418,6 +445,8 @@ class ControllerCatalogSuppler2 extends Controller
                     }
 
                     $data['rows'] = $rows;
+                    $data['product_number'] = $next_product_number;
+
                     $this->load->language('catalog/suppler2');
 
                     echo json_encode([
@@ -442,7 +471,8 @@ class ControllerCatalogSuppler2 extends Controller
         die();
     }
 
-    public function start_xml_ajax()
+    public
+    function start_xml_ajax()
     {
         $this->response->addHeader('Content-Type: application/json');
         if (!empty($_POST['id'])) {
@@ -467,7 +497,8 @@ class ControllerCatalogSuppler2 extends Controller
         die();
     }
 
-    public function save_xml_route_ajax()
+    public
+    function save_xml_route_ajax()
     {
         $this->response->addHeader('Content-Type: application/json');
         if (!empty($_POST['id']) && !empty($_POST['route'])) {
@@ -493,7 +524,8 @@ class ControllerCatalogSuppler2 extends Controller
         die();
     }
 
-    public function log()
+    public
+    function log()
     {
         $this->load->model('catalog/suppler2');
         $this->model_catalog_suppler2->createTables();

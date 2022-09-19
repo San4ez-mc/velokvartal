@@ -6,20 +6,16 @@
             <div class="container-fluid">
                 <div class="pull-left">
                 </div>
-                {#                        <a onclick="location='{{ cstart }}'" data-toggle="tooltip" class="btn btn-primary"#}
-                {#                           type="button">{{ button_cstart }}</a>&nbsp;&nbsp;<a onclick="location = '{{ ccontinue }}'"#}
-                {#                                                                               data-toggle="tooltip"#}
-                {#                                                                               class="btn btn-primary"#}
-                {#                                                                               type="button">{{ button_ccontinue }}</a>&nbsp;&nbsp;<a#}
-                {#                                onclick="location='{{ cstop }}'" data-toggle="tooltip" class="btn btn-primary"#}
-                {#                                type="button">{% if (supplers.0.flag is defined and supplers.0.flag and supplers.0.flag1 is defined and supplers.0.flag1) %} {{ '<font color="#ABF74E">'~ button_cstop ~ '</font>' }}{% endif %} {% if (supplers.0.flag is defined and not supplers.0.flag and supplers.0.flag1 is defined and supplers.0.flag1) %} {{ '<font color="#FC9E46">'~ button_cstop ~ '</font>' }}{% endif %} {% if (supplers.0.flag is defined and not supplers.0.flag and supplers.0.flag1 is defined and not supplers.0.flag1) %} {{ button_cstop }}{% endif %} {% if (supplers.0.flag is defined and supplers.0.flag and supplers.0.flag1 is defined and not supplers.0.flag1) %} {{ button_cstop }}{% endif %} {% if (supplers.0.flag is not defined and supplers.0.flag1 is not defined) %} {{ button_cstop }}{% endif %}</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#}
                 <div class="pull-right">
                     <a href="{{ insert }}" data-toggle="tooltip" title="{{ button_insert }}"
                        class="btn btn-primary"><i class="fa fa-plus"></i></a>
 
-                    <button type="button" data-toggle="tooltip" form="form-supplers2" title="{{ button_delete }}" class="btn btn-danger"
-                            onclick="confirm('{{ text_confirm }}') ? $('#form-supplers2').submit() : false;"><i
-                                class="fa fa-trash-o"></i></button>
+{#                    <button type="button" data-toggle="tooltip" form="form-supplers2" title="{{ button_delete }}" class="btn btn-danger"#}
+{#                            onclick="confirm('{{ text_confirm }}') ? $('#form-supplers2').submit() : false;"><i#}
+{#                                class="fa fa-trash-o"></i></button>#}
+                    <button type="button" data-toggle="tooltip" form="form-supplers2" title="{{ button_delete }}" class="btn btn-danger delete_btn" data-href="{{ delete_ajax }}">
+                        <i class="fa fa-trash-o"></i>
+                    </button>
                 </div>
                 <h1>{{ heading_title }}</h1>
                 <ul class="breadcrumb">
@@ -69,10 +65,10 @@
                                         {% endif %}
                                         <tr class="{{ set_class }}">
                                             <td style="text-align: center;">{% if suppler.selected %}
-                                                    <input type="checkbox" name="selected[]"
+                                                    <input type="checkbox" name="selected[]" class="suppler_list_checkbox"
                                                            value="{{ suppler.suppler_id }}" checked="checked"/>
                                                 {% else %}
-                                                    <input type="checkbox" name="selected[]"
+                                                    <input type="checkbox" name="selected[]" class="suppler_list_checkbox"
                                                            value="{{ suppler.suppler_id }}"/>
                                                 {% endif %}</td>
                                             <td class="text-left">{{ suppler.name }}</td>
@@ -117,6 +113,7 @@
                                 </tbody>
                             </table>
                         </div>
+                        <input type="hidden" name="test" value="test" />
                     </form>
                     <div class="row">
                         <div class="col-sm-6 text-left">{{ pagination }}</div>
