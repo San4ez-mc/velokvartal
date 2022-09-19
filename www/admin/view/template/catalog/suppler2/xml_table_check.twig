@@ -27,16 +27,20 @@
                     <select class="form-control" name="rows[{{ row.key }}][site_key]">
                         <option value=""></option>
                         <option {{ row.site_key == 'sku' ? 'selected' : '' }} value="sku">{{ text_sku }}*</option>
-                        <option disabled {{ row.site_key == 'name' ? 'selected' : '' }} value="name">{{ text_name }}</option>
+                        <option disabled {{ row.site_key == 'name' ? 'selected' : '' }}
+                                value="name">{{ text_name }}</option>
                         <option disabled {{ row.site_key == 'category' ? 'selected' : '' }}
                                 value="category">{{ text_category }}</option>
                         <option {{ row.site_key == 'description' ? 'selected' : '' }}
                                 value="description">{{ text_description }}</option>
                         <option {{ row.site_key == 'price' ? 'selected' : '' }} value="price">{{ text_price }}</option>
-                        <option {{ row.site_key == 'price_stock' ? 'selected' : '' }} value="price_stock">{{ text_price_stock }}</option>
-                        <option {{ row.site_key == 'quantity' ? 'selected' : '' }} value="quantity">{{ text_quantity }}</option>
+                        <option {{ row.site_key == 'price_stock' ? 'selected' : '' }}
+                                value="price_stock">{{ text_price_stock }}</option>
+                        <option {{ row.site_key == 'quantity' ? 'selected' : '' }}
+                                value="quantity">{{ text_quantity }}</option>
                         <option {{ row.site_key == 'image' ? 'selected' : '' }} value="image">{{ text_image }}</option>
-                        <option {{ row.site_key == 'image_extra' ? 'selected' : '' }} value="image_extra">{{ text_image_extra }}</option>
+                        <option {{ row.site_key == 'image_extra' ? 'selected' : '' }}
+                                value="image_extra">{{ text_image_extra }}</option>
                     </select>
                 </div>
             </td>
@@ -59,3 +63,19 @@
     {% endfor %}
     </tbody>
 </table>
+<div class="alert alert-info" role="alert">
+    {{ if_you_want_to_check_other }}
+</div>
+<table style="width:100%">
+    <tbody>
+    <tr>
+        <td style="width:30%; padding: 0 20px"><label for="link_input">{{ text_product_number }}</label></td>
+        <td style="width:70%">
+            <input class="form-control" min="1" type="number" name="product_number_to_check" value="{{ product_number }}"/>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<br/>
+<a href="#" data-toggle="tooltip" title="{{ button_insert }}"
+   class="btn btn-primary get_next_product">{{ get_next_product_fields }}</a>

@@ -4,7 +4,7 @@ class ModelCatalogSuppler2 extends Model
 {
     public function createTables()
     {
-        $this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX . "suppler2 (id INT(10) AUTO_INCREMENT, name varchar(64), link text, status INT(1), description TEXT, route varchar(256), order_num INT(3), PRIMARY KEY (id)) ENGINE=MyISAM DEFAULT CHARSET=utf8");
+        $this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX . "suppler2 (id INT(10) AUTO_INCREMENT, name varchar(64), link text, status INT(1), description TEXT, route varchar(256), product_number INT(10), order_num INT(3), PRIMARY KEY (id)) ENGINE=MyISAM DEFAULT CHARSET=utf8");
 
         $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "suppler2_data` ( `id` INT NOT NULL AUTO_INCREMENT , `suppler_id` INT NOT NULL , `key` VARCHAR(100) NOT NULL , `example_value` TEXT NOT NULL , `route` VARCHAR(256) NOT NULL , `site_key` VARCHAR(100) NOT NULL , `status` INT NOT NULL , PRIMARY KEY (`id`)) ENGINE = MyISAM CHARSET=utf8 COLLATE utf8_general_ci;");
 
@@ -29,7 +29,7 @@ class ModelCatalogSuppler2 extends Model
     {
         if (isset($data['name']) and isset($data['link'])) {
 
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2` (`name`, `link`, `status`, `description`, `route`, `order_num`) VALUES ('" . $this->db->escape($data['name']) . "', '" . $this->db->escape($data['link']) . "', '" . $this->db->escape($data['status']) . "', '" . $this->db->escape($data['description']) . "', '" . $this->db->escape($data['route']) . "', '" . $this->db->escape($data['order_name']) . "')");
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2` (`name`, `link`, `status`, `description`, `route`, `product_number`, `order_num`) VALUES ('" . $this->db->escape($data['name']) . "', '" . $this->db->escape($data['link']) . "', '" . $this->db->escape($data['status']) . "', '" . $this->db->escape($data['description']) . "', '" . $this->db->escape($data['route']) . "', 1,  '" . $this->db->escape($data['order_name']) . "')");
 
             if (!empty($data['rows'])) {
 
@@ -48,7 +48,7 @@ class ModelCatalogSuppler2 extends Model
     {
         if (isset($data['name']) and isset($data['link'])) {
 
-            $this->db->query("UPDATE `" . DB_PREFIX . "suppler2` SET `name` = '" . $this->db->escape($data['name']) . "', `link` =  '" . $this->db->escape($data['link']) . "',  `description` = '" . $this->db->escape($data['description']) . "',   `route` = '" . $this->db->escape($data['route']) . "', `status` =  '" . $this->db->escape($data['status']) . "', `order_num` =  '" . $this->db->escape($data['order_num']) . "' WHERE `" . DB_PREFIX . "suppler2`.`id` = {$id}");
+            $this->db->query("UPDATE `" . DB_PREFIX . "suppler2` SET `name` = '" . $this->db->escape($data['name']) . "', `link` =  '" . $this->db->escape($data['link']) . "',  `description` = '" . $this->db->escape($data['description']) . "', `product_number` = '" . $this->db->escape($data['product_number']) . "',  `route` = '" . $this->db->escape($data['route']) . "', `status` =  '" . $this->db->escape($data['status']) . "', `order_num` =  '" . $this->db->escape($data['order_num']) . "' WHERE `" . DB_PREFIX . "suppler2`.`id` = {$id}");
 
             $this->db->query("DELETE FROM `" . DB_PREFIX . "suppler2_data` WHERE suppler_id = {$id}");
 
@@ -64,10 +64,10 @@ class ModelCatalogSuppler2 extends Model
         }
     }
 
-    public function deleteSuppler($form_id)
+    public function deleteSuppler($id)
     {
-        $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2 WHERE `form_id` = '" . (int)$form_id . "'");
-        $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_data WHERE `form_id` = '" . (int)$form_id . "'");
+        $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2 WHERE `id` = '" . (int)$id . "'");
+        $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_data WHERE `id` = '" . (int)$id . "'");
 
         $this->cache->delete('suppler');
     }
@@ -152,20 +152,22 @@ class ModelCatalogSuppler2 extends Model
                                 $xml_product_array = (array)$xml_product;
 
                                 // знаходимо в рядку xml SKU і по ньому шукаємо продукт
-                                if (strripos(htmlspecialchars_decode($sku_data['route']), '->') === false) {
-//                                    $sku = (string)$xml_product->{$sku_data['route']};
+                                $sku_route = htmlspecialchars_decode($sku_data['route']);
+                                if (strripos($sku_route, '->') === false) {
                                     $sku = (string)$xml_product_array[$sku_data['route']];
-                                    //                                    $quantity = (string)$xml_product->{$sku_data['quantity']};
                                     $quantity = (string)$xml_product_array[$sku_data['quantity']];
                                     $product = $this->getProductBySKU(trim($sku));
                                 } else {
-                                    // todo допрацювати
-//                                    $parts = explode('->', $sku_data['route']);
-//                                    if (count($parts) == 2) {
-//                                        $products = $xml_product->{$parts[0]}->{$parts[1]};
-//                                    }
-//                                    $product = null;
-//                                    $sku = '';
+                                    $parts = explode('->', $sku_route);
+                                    if (count($parts) == 2) {
+                                        $data = (array)$xml_product_array[$parts[0]];
+                                        $sku = $data[$parts[1]];
+                                    }else if (count($parts) == 3) {
+                                        $data = (array)$xml_product_array[$parts[0]];
+                                        $data = (array)$data[$parts[1]];
+                                        $sku = $data[$parts[2]];
+                                    }
+                                    $product = $this->getProductBySKU(trim($sku));
                                 }
 
                                 if ($product) {
@@ -181,7 +183,6 @@ class ModelCatalogSuppler2 extends Model
                                         $route = htmlspecialchars_decode($suppler_row['route']);
 
                                         if (strripos($route, '->') === false) {
-//                                            $value = (string)$xml_product->{$suppler_row['route']};
                                             $value = (string)$xml_product_array[$route];
                                         } else {
                                             $parts = explode('->', $route);
@@ -361,20 +362,26 @@ class ModelCatalogSuppler2 extends Model
 
     }
 
-    public function get_xml_vars_from_url($link, $main_key)
+    public function get_xml_vars_from_url($link, $main_key, $product_number)
     {
         $xml = $this->get_xml_from_url($link);
-        return $this->get_xml_vars($xml, $main_key);
+        return $this->get_xml_vars($xml, $main_key, $product_number);
     }
 
-    public function get_xml_vars($xml, $main_key)
+    public function get_xml_vars($xml, $main_key, $product_number = 0)
     {
         $rows = [];
+
+       $product_number = (int)$product_number;
+
+        if($product_number < 0){
+            $product_number = 0;
+        }
 
         $first_key = array_key_first((array)$xml);
         $xml_array = (array)$xml;
         if (count($xml_array) === 1 && is_array($xml_array[$first_key])) {
-            $product = (array)$xml_array[$first_key][0];
+            $product = (array)$xml_array[$first_key][$product_number];
         } else {
             $products = $xml_array[$main_key];
 
@@ -385,40 +392,40 @@ class ModelCatalogSuppler2 extends Model
                 }
             }
 
-            if (!empty($products[0])) {
-                $product = $products[0];
+            $products_array = (array)$products;
+
+            if (!empty($products_array[$product_number])) {
+                $product = $products[$product_number];
+            }else{
+                if (count($products_array) === 1) {
+                    $products_array = (array)$products_array[array_key_first($products_array)];
+                    $product = $products_array[$product_number];
+                }
             }
         }
 
         if (!empty($product)) {
             $product_array = (array)$product;
 
-            if (count($product_array) === 1) {
-                $product_array = $product_array[array_key_first($product_array)][0];
-                $product_array = (array)$product_array;
-            }
-
             foreach ($product_array as $key => $row) {
                 if (is_array($row)) {
-
-                    // поки не буду виводити параметри
-//                    $rows[] = [
-//                        'key' => $key,
-//                        'value' => 'масив данных',
-//                        'route' => $key
-//                    ];
+                    foreach ($row as $key2 => $item) {
+                        $rows[] = [
+                            'key' => $key . ' -> ' . $key2,
+                            'value' => $item,
+                            'route' => $key . '->' . $key2
+                        ];
+                    }
                 } elseif (is_object($row)) {
                     if (count((array)$row) > 0) {
                         $row_array = (array)$row;
                         if (count($row_array) === 1) {
                             $row_array = $row_array[array_key_first($row_array)];
                         }
-//                        foreach ($row as $key2 => $item) {
-
                         if (!empty($row_array[0])) {
                             for ($i = 0; $i < count($row_array); $i++) {
                                 $rows[] = [
-                                    'key' => $key . '->' . $i,
+                                    'key' => $key . ' -> ' . $i,
                                     'value' => $row_array[$i],
                                     'route' => $key . '->' . $i
                                 ];
@@ -426,7 +433,7 @@ class ModelCatalogSuppler2 extends Model
                         } else {
                             foreach ($row_array as $key2 => $item) {
                                 $rows[] = [
-                                    'key' => $key . '->' . $key2,
+                                    'key' => $key . ' -> ' . $key2,
                                     'value' => $item->{array_key_first((array)$item)},
                                     'route' => $key . '->' . $key2
                                 ];
