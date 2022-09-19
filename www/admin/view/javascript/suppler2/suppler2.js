@@ -92,41 +92,43 @@ jQuery(document).ready(function ($) {
     $(document).on('click', '.tree_of_routes a', function (e) {
         e.preventDefault();
         const route = $(this).attr('data-route');
-        const link = $('[name=link]').val();
-        const token = $('[name=token]').val();
-
-        let id = $('[name=id]').val();
-        const id_str = (id.length > 0 ? '&id=' + id : '')
-        const route_str = (route !== undefined ? '&route=' + route : '')
-
-        $.ajax({
-            url: 'index.php?route=catalog/suppler2/get_xml_vars_ajax&user_token=' + token,
-            type: 'post',
-            data: 'link=' + link + id_str + route_str,
-            dataType: 'json',
-            beforeSend: function () {
-                $('.ajax_upload').html('').append('<img class="loader" src="/admin/view/image/suppler2/loader.gif"/>');
-            },
-            complete: function () {
-                // $('.check_xml').show();
-                $('.loader').remove();
-
-            },
-            success: function (json) {
-                $('.ajax_upload').html('');
-                if (json.status == 'ok') {
-                    $('[name=route]').val(route);
-                    if (json.rows !== undefined) {
-                        $('.ajax_upload').html(json.html);
-                    }
-                } else {
-                    show_log($('.ajax_upload'), json.message, 'danger', false);
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
-            }
-        });
+        $('[name=route]').val(route);
+        get_xml_vars();
+        // const route = $(this).attr('data-route');
+        // const link = $('[name=link]').val();
+        // const token = $('[name=token]').val();
+        //
+        // let id = $('[name=id]').val();
+        // const id_str = (id.length > 0 ? '&id=' + id : '')
+        // const route_str = (route !== undefined ? '&route=' + route : '')
+        //
+        // $.ajax({
+        //     url: 'index.php?route=catalog/suppler2/get_xml_vars_ajax&user_token=' + token,
+        //     type: 'post',
+        //     data: 'link=' + link + id_str + route_str,
+        //     dataType: 'json',
+        //     beforeSend: function () {
+        //         $('.ajax_upload').html('').append('<img class="loader" src="/admin/view/image/suppler2/loader.gif"/>');
+        //     },
+        //     complete: function () {
+        //         $('.loader').remove();
+        //
+        //     },
+        //     success: function (json) {
+        //         $('.ajax_upload').html('');
+        //         if (json.status == 'ok') {
+        //             $('[name=route]').val(route);
+        //             if (json.rows !== undefined) {
+        //                 $('.ajax_upload').html(json.html);
+        //             }
+        //         } else {
+        //             show_log($('.ajax_upload'), json.message, 'danger', false);
+        //         }
+        //     },
+        //     error: function (xhr, ajaxOptions, thrownError) {
+        //         alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        //     }
+        // });
     });
 
     $(document).on('click', '.show_more', function (e) {
@@ -140,12 +142,50 @@ jQuery(document).ready(function ($) {
             $('.supplers_checkbox').each(function () {
                 $(this).prop('checked', true);
             });
-        }else{
+        } else {
             $('.supplers_checkbox').each(function () {
                 $(this).prop('checked', false);
             });
         }
     });
+
+    $(document).on('click', '.delete_btn', function (e) {
+        const delete_link = $(this).attr('data-href');
+        let list = [];
+        $('.suppler_list_checkbox').each(function () {
+            if ($(this).prop('checked')) {
+                list.push($(this).val())
+            }
+        });
+
+        if (list.length > 0) {
+            $.ajax({
+                url: delete_link,
+                type: 'post',
+                data: {
+                    selected: list
+                },
+                dataType: 'json',
+                success: function (json) {
+                    console.log(json);
+                    if (json.status === 'ok') {
+                        location.reload();
+                    } else {
+                        console.log(json.message);
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                }
+            });
+        }
+    });
+
+    $(document).on('click', '.get_next_product', function (e) {
+        e.preventDefault();
+        get_xml_vars()
+    });
+
 });
 
 function show_log(target, message, type = 'info', break_ = false) {
@@ -208,4 +248,43 @@ function upload(ids, token, is_first = false) {
             }
         });
     }
+}
+
+function get_xml_vars() {
+    const route = $('[name=route]').val();
+    // const route = $(this).attr('data-route');
+    const link = $('[name=link]').val();
+    const product_number = $('[name="product_number_to_check"]').length > 0 ? $('[name="product_number_to_check"]').val() - 1 : $('[name=product_number]').val() - 1;
+    const token = $('[name=token]').val();
+
+    let id = $('[name=id]').val();
+    const id_str = (id.length > 0 ? '&id=' + id : '')
+    const route_str = (route !== undefined ? '&route=' + route : '')
+
+    $.ajax({
+        url: 'index.php?route=catalog/suppler2/get_xml_vars_ajax&user_token=' + token,
+        type: 'post',
+        data: 'link=' + link + id_str + route_str + '&product_number=' + product_number,
+        dataType: 'json',
+        beforeSend: function () {
+            $('.ajax_upload').html('').append('<img class="loader" src="/admin/view/image/suppler2/loader.gif"/>');
+        },
+        complete: function () {
+            $('.loader').remove();
+        },
+        success: function (json) {
+            $('.ajax_upload').html('');
+            if (json.status == 'ok') {
+                $('[name=route]').val(route);
+                if (json.rows !== undefined) {
+                    $('.ajax_upload').html(json.html);
+                }
+            } else {
+                show_log($('.ajax_upload'), json.message, 'danger', false);
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        }
+    });
 }
