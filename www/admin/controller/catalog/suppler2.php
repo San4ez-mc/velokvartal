@@ -382,7 +382,7 @@ class ControllerCatalogSuppler2 extends Controller
             $link = $_POST['link'];
 
             $this->load->model('catalog/suppler2');
-            $observe_result = $this->model_catalog_suppler2->observe_xml($link, !empty($_POST['id']) ? $_POST['id'] : null, !empty($_POST['route']) ? $_POST['route'] : null);
+            $observe_result = $this->model_catalog_suppler2->observe_xml($link, !empty($_POST['need_authorization']), !empty($_POST['login']) ? $_POST['login'] : null, !empty($_POST['password']) ? $_POST['password'] : null);
 
             if ($observe_result['status'] == 'ok') {
                 $routes = $observe_result['routes'];
@@ -390,10 +390,9 @@ class ControllerCatalogSuppler2 extends Controller
                         'status' => 'ok',
                         'routes' => $routes,
                         'message' => 'В древе ниже виберите каталог в котором по вашему мнению нужно искать товары для выгрузки',
-                        'html' => $this->load->view('catalog/suppler2/xml_table_check', [])
+//                        'html' => $this->load->view('catalog/suppler2/xml_table_check')
                     ]
                 );
-//                }
             } else {
                 echo json_encode($observe_result);
             }
@@ -428,7 +427,7 @@ class ControllerCatalogSuppler2 extends Controller
                         // Отримуємо попередні налаштування
                         $id = $_POST['id'];
 
-                        if(empty($_POST['product_number'])){
+                        if (empty($_POST['product_number'])) {
                             $suppler = $this->model_catalog_suppler2->getSuppler($id);
                             $next_product_number = $suppler['product_number'] + 1;
                         }
@@ -447,6 +446,9 @@ class ControllerCatalogSuppler2 extends Controller
                     $data['rows'] = $rows;
                     $data['product_number'] = $next_product_number;
 
+                    $data['quantity_setting_url'] = $this->url->link('catalog/suppler2/get_quantity_settings_html_ajax', 'user_token=' . $this->session->data['user_token'], true);
+                    $data['quantity_settings'] = $this->model_catalog_suppler2->getQuantitySettings($id);
+
                     $this->load->language('catalog/suppler2');
 
                     echo json_encode([
@@ -460,7 +462,6 @@ class ControllerCatalogSuppler2 extends Controller
                 echo json_encode($xml_vars);
             }
 
-//            $this->response->setOutput();
         } else {
             echo json_encode([
                     'status' => 'error',
@@ -486,7 +487,6 @@ class ControllerCatalogSuppler2 extends Controller
                 ]
             );
 
-//            $this->response->setOutput();
         } else {
             echo json_encode([
                     'status' => 'error',
@@ -512,8 +512,6 @@ class ControllerCatalogSuppler2 extends Controller
                     'status' => 'ok',
                 ]
             );
-
-//            $this->response->setOutput();
         } else {
             echo json_encode([
                     'status' => 'error',
@@ -527,13 +525,26 @@ class ControllerCatalogSuppler2 extends Controller
     public
     function log()
     {
-        $this->load->model('catalog/suppler2');
-        $this->model_catalog_suppler2->createTables();
         $this->load->language('catalog/suppler2');
-        $this->document->setTitle($this->language->get('heading_title'));
+        $this->document->setTitle($this->language->get('logs_heading_title'));
         $this->load->model('catalog/suppler2');
 
-        $data['logs'] = $this->model_catalog_suppler2->getLogs($_POST['id']);
+        $logs = [];
+        $logs_ = $this->model_catalog_suppler2->getLogs();
+        if (!empty($logs_)) {
+            foreach ($logs_ as $log) {
+                $logs[] = [
+                    'id' => $log['id'],
+                    'date' => date('d.m.Y H:i:s', $log['date']),
+                    'name' => $log['suppler_name'],
+                    'link' => $this->url->link('catalog/suppler2/log_data', 'user_token=' . $this->session->data['user_token'] . '&id=' . $log['id'], true),
+                    'status' => $log['status'] == 1 ? $this->language->get('text_successfully') : $this->language->get('text_errors')
+                ];
+            }
+        }
+        $data['logs'] = $logs;
+
+        $data['log_info'] = sprintf($this->language->get('log_info'), 'https://'.$_SERVER['SERVER_NAME']."/index.php?route=suppler2/api");
 
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
@@ -542,166 +553,52 @@ class ControllerCatalogSuppler2 extends Controller
         $this->response->setOutput($this->load->view('catalog/suppler2/log_list', $data));
     }
 
+    public
+    function log_data()
+    {
+        $this->load->language('catalog/suppler2');
+        $this->document->setTitle($this->language->get('logs_heading_title'));
+        $this->load->model('catalog/suppler2');
 
-//    public function parse_xml($id)
-//    {
-//        $log = [];
-//        $token = !empty($this->request->get['user_token']) ? $this->request->get['user_token'] : '';
-//        $this->load->model('catalog/suppler2');
-////        $this->load->model('catalog/product');
-//        $suppler = $this->model_catalog_suppler2->getSuppler($id);
-//        if ($suppler) {
-//            $log[] = [
-//                'type' => 'info',
-//                'message' => 'Начинается работа с поставщиком "' . $suppler['name'] . '"'
-//            ];
-//            $suppler_data = $this->model_catalog_suppler2->getSupplerData($id);
-//            $sku_data = $this->model_catalog_suppler2->getSupplerDataSKU($id);
-//            $xml = file_get_contents($suppler['link']);
-//            $xml = simplexml_load_string($xml);
-//
-//            if (!empty($xml)) {
-//                $log[] = [
-//                    'type' => 'success',
-//                    'message' => 'XML получен по указанной ссылке'
-//                ];
-//
-//                if (!empty($suppler_data)) {
-//                    $log[] = [
-//                        'type' => 'success',
-//                        'message' => 'Настройки поставщика найдены'
-//                    ];
-//
-//                    if (!empty($sku_data)) {
-//                        $log[] = [
-//                            'type' => 'info',
-//                            'message' => 'Настройка SKU найдено, начинается поиск товаров...'
-//                        ];
-//                        $not_found = 0;
-//                        $readed = 0;
-//                        foreach ($xml as $xml_product) {
-//                            $readed++;
-//                            if (strripos($sku_data['route'], '_') === false) {
-////                                $sku = (string)$xml_product->{$sku_data['route']};
-//                                $sku = 'BTRC-000';
-//                                $product = $this->model_catalog_suppler2->getProductBySKU($sku);
-//
-//                            } else {
-//                                // todo доробити, якщо будуть ключі багаторівневі
-//                                $product = null;
-//                                $sku = '';
-//                            }
-//
-//                            if ($product) {
-//
-//                                $log[] = [
-//                                    'type' => 'info',
-//                                    'message' => 'Найден товар <a href="/admin/index.php?route=catalog/product/edit&user_token=' . $token . '&product_id=' . $product['product_id'] . '" >' . $product['name'] . ' (' . $product['sku'] . ') </a>'
-//                                ];
-//
-//                                foreach ($suppler_data as $key) {
-//
-//                                    if (strripos($key['route'], '_') === false) {
-//                                        $value = (string)$xml_product->{$key['route']};
-//                                    } else {
-//                                        // todo доробити, якщо будуть ключі багаторівневі
-//                                        $value = '';
-//                                    }
-//
-//                                    switch ($key['site_key']) {
-//
-//                                        case 'name':
-//                                            $log[] = [
-//                                                'type' => 'success',
-//                                                'message' => 'Имя успешно заменено на ' . $value
-//                                            ];
-//                                            break;
-//                                        case 'category':
-//                                            $log[] = [
-//                                                'type' => 'success',
-//                                                'message' => 'Категория успешно заменена на ' . $value
-//                                            ];
-//                                            break;
-//                                        case 'description':
-//                                            $log[] = [
-//                                                'type' => 'success',
-//                                                'message' => 'Описание успешно заменено на: ' . $value
-//                                            ];
-//                                            break;
-//                                        case 'price':
-//                                            $log[] = [
-//                                                'type' => 'success',
-//                                                'message' => 'Цена успешно заменена на: ' . $value
-//                                            ];
-//                                            break;
-//                                        case 'image':
-//                                            copy($value, 'local/folder/flower.jpg');
-//                                            $product['image'] = $value;
-//                                            $this->model_catalog_suppler2->editProductField($product['product_id'], 'image', $value);
-//                                            $log[] = [
-//                                                'type' => 'success',
-//                                                'message' => 'Изображение успешно заменено на: ' . $value
-//                                            ];
-////                                            } else {
-////                                                $log[] = [
-////                                                    'type' => 'warning',
-////                                                    'message' => 'Не удалось заменить изображение'
-////                                                ];
-////                                            }
-//                                            break;
-//                                    }
-//                                }
-//                                break;
-//                            } else {
-//                                $not_found++;
-////                                $log[] = [
-////                                    'type' => 'warning',
-////                                    'message' => 'Товар с SKU ' . $sku . ' не найден'
-////                                ];
-//                            }
-//                        }
-//                        $log[] = [
-//                            'type' => 'info',
-//                            'message' => 'Обработано строк: ' . $readed . ''
-//                        ];
-//                        if ($not_found > 0) {
-//                            $log[] = [
-//                                'type' => 'warning',
-//                                'message' => 'SKU не найдено: ' . $not_found . ''
-//                            ];
-//                        }
-//                        $log[] = [
-//                            'type' => 'info',
-//                            'message' => 'Чтение файла поставщика "' . $suppler['name'] . '" завершено'
-//                        ];
-//                    } else {
-//                        $log[] = [
-//                            'type' => 'danger',
-//                            'message' => 'В настройках поставщика не указано поле SKU'
-//                        ];
-//                    }
-//                } else {
-//                    $log[] = [
-//                        'type' => 'danger',
-//                        'message' => 'Поставщик не настроен. Перейдите в список поставщиков и закончите, пожалуйста, настройку'
-//                    ];
-//                }
-//            } else {
-//                $log[] = [
-//                    'type' => 'danger',
-//                    'message' => 'Не удалось спарсить xml по указанной ссылке'
-//                ];
-//            }
-//        } else {
-//            $log[] = [
-//                'type' => 'danger',
-//                'message' => 'Поставщик не найден'
-//            ];
-//        }
-//        return $log;
-////        return [];
-//    }
+        $log = $this->model_catalog_suppler2->getLog($_GET['id']);
+        if (!empty($log)) {
+            if (!empty($log['rows'])) {
+                foreach ($log['rows'] as &$row) {
+                    $row['message'] = htmlspecialchars_decode($row['message']);
+                }
+            }
 
+            $data['log'] = [
+                'id' => $log['id'],
+                'date' => date('d.m.Y H:i:s', $log['date']),
+                'suppler_name' => $log['suppler_name'],
+                'rows' => $log['rows']
+            ];
+
+            $this->document->addScript('view/javascript/suppler2/suppler2.js', 'header');
+            $this->document->addStyle('view/stylesheet/suppler2/suppler2.css');
+
+            $data['header'] = $this->load->controller('common/header');
+            $data['column_left'] = $this->load->controller('common/column_left');
+            $data['footer'] = $this->load->controller('common/footer');
+
+            $this->response->setOutput($this->load->view('catalog/suppler2/log_details', $data));
+        } else {
+            $this->error['warning'] = $this->language->get('error_not_found');
+        }
+    }
+
+    public
+    function get_quantity_settings_html_ajax()
+    {
+        $this->response->addHeader('Content-Type: application/json');
+        $this->load->language('catalog/suppler2');
+        echo json_encode([
+                'status' => 'ok',
+                'html' => $this->load->view('catalog/suppler2/quantity_settings', [])
+            ]
+        );
+    }
 
     private
     function validateForm()

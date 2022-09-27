@@ -31,7 +31,8 @@
                     <td width="200"><label for="link_input">{{ text_link }}*</label></td>
                     <td>
                         <div class="input-group mb-3">
-                            <input id="link_input"  type="text" class="form-control" name="link" value="{{ suppler.link }}">
+                            <input id="link_input" type="text" class="form-control" name="link"
+                                   value="{{ suppler.link }}">
                             <div class="input-group-append">
                                 <span class="input-group-text" id="basic-addon2">
                                     <a href="{{ suppler.link }}" target="_blank">
@@ -44,6 +45,33 @@
                                 </span>
                             </div>
                         </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="200"><label for="need_authorization">{{ text_need_authorization }}</label></td>
+                    <td>
+                        {% if suppler.need_authorization == 1 %}
+                            <input type="checkbox" checked class="need_authorization" name="need_authorization"
+                                   value="1"/>
+                        {% else %}
+                            <input type="checkbox" class="need_authorization" name="need_authorization" value="1"/>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% set hidden = 'hidden ' %}
+                {% if suppler.need_authorization == 1 %}
+                    {% set hidden = ' ' %}
+                {% endif %}
+                <tr class="{{ hidden }} can_be_hidden">
+                    <td width="200"><label for="link_input">{{ text_login }}</label></td>
+                    <td>
+                        <input type="text" class="form-control" name="login" value="{{ suppler.login }}"/>
+                    </td>
+                </tr>
+                <tr class="{{ hidden }} can_be_hidden">
+                    <td width="200"><label for="link_input">{{ text_password }}</label></td>
+                    <td>
+                        <input type="password" class="form-control" name="password" value="{{ suppler.password }}"/>
                     </td>
                 </tr>
                 <tr>

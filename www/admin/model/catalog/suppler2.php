@@ -4,11 +4,15 @@ class ModelCatalogSuppler2 extends Model
 {
     public function createTables()
     {
-        $this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX . "suppler2 (id INT(10) AUTO_INCREMENT, name varchar(64), link text, status INT(1), description TEXT, route varchar(256), product_number INT(10), order_num INT(3), PRIMARY KEY (id)) ENGINE=MyISAM DEFAULT CHARSET=utf8");
+        $this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX . "suppler2 (id INT(10) AUTO_INCREMENT, name varchar(64), link text, status INT(1), need_authorization INT(1) DEFAULT 0, login varchar(256), password varchar(256),  description TEXT, route varchar(256), product_number INT(10), order_num INT(3), PRIMARY KEY (id)) ENGINE=MyISAM DEFAULT CHARSET=utf8");
 
         $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "suppler2_data` ( `id` INT NOT NULL AUTO_INCREMENT , `suppler_id` INT NOT NULL , `key` VARCHAR(100) NOT NULL , `example_value` TEXT NOT NULL , `route` VARCHAR(256) NOT NULL , `site_key` VARCHAR(100) NOT NULL , `status` INT NOT NULL , PRIMARY KEY (`id`)) ENGINE = MyISAM CHARSET=utf8 COLLATE utf8_general_ci;");
 
-        $this->db->query("CREATE TABLE IF NOT EXISTS " . DB_PREFIX . "suppler2_logs (id INT(10) AUTO_INCREMENT, date varchar(64), data text, status INT(1), PRIMARY KEY (id)) ENGINE=MyISAM DEFAULT CHARSET=utf8");
+        $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "suppler2_logs` (id INT(10) AUTO_INCREMENT, `suppler_id` INT NOT NULL, date varchar(64), status INT(1), PRIMARY KEY (id)) ENGINE=MyISAM DEFAULT CHARSET=utf8");
+
+        $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "suppler2_log_details` ( `id` INT NOT NULL AUTO_INCREMENT , `log_id` INT NOT NULL , `type` VARCHAR(20) NOT NULL , `message` TEXT NOT NULL , `break` INT(1) NOT NULL , PRIMARY KEY (`id`)) ENGINE = MyISAM;");
+
+        $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "suppler2_amount_settings` ( `id` INT NOT NULL AUTO_INCREMENT , `suppler_id` INT NOT NULL , `amount_key` VARCHAR(20) NOT NULL , `sign` VARCHAR(1) NOT NULL , `value` INT NOT NULL , PRIMARY KEY (`id`)) ENGINE = MyISAM DEFAULT CHARSET=utf8");
 
         $this->cache->delete('suppler');
     }
@@ -19,9 +23,18 @@ class ModelCatalogSuppler2 extends Model
         return !empty($query->rows) ? $query->rows[0] : null;
     }
 
-    public function getSupplers()
+    public function getSupplers($where = null)
     {
-        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "suppler2");
+        $where_string = '';
+        if (!empty($where)) {
+            $where_string = ' WHERE ';
+            foreach ($where as $where_param) {
+                $where_string .= $where_param . ' AND ';
+            }
+            $where_string = substr($where_string, 0, 5);
+        }
+
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "suppler2" . $where_string);
         return $query->rows;
     }
 
@@ -29,10 +42,9 @@ class ModelCatalogSuppler2 extends Model
     {
         if (isset($data['name']) and isset($data['link'])) {
 
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2` (`name`, `link`, `status`, `description`, `route`, `product_number`, `order_num`) VALUES ('" . $this->db->escape($data['name']) . "', '" . $this->db->escape($data['link']) . "', '" . $this->db->escape($data['status']) . "', '" . $this->db->escape($data['description']) . "', '" . $this->db->escape($data['route']) . "', 1,  '" . $this->db->escape($data['order_name']) . "')");
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2` (`name`, `link`, `need_authorization`, `login`, `password`, `status`, `description`, `route`, `product_number`, `order_num`) VALUES ('" . $this->db->escape($data['name']) . "', '" . $this->db->escape($data['link']) . "', '" . $this->db->escape($data['need_authorization']) . "', '" . $this->db->escape($data['login']) . "',, '" . $this->db->escape($data['password']) . "' '" . $this->db->escape($data['status']) . "', '" . $this->db->escape($data['description']) . "', '" . $this->db->escape($data['route']) . "', 1,  '" . $this->db->escape($data['order_name']) . "')");
 
             if (!empty($data['rows'])) {
-
                 $last_inserted_id = $this->db->getLastId();
                 foreach ($data['rows'] as $row) {
                     if (strlen($row['site_key']) > 0) {
@@ -40,6 +52,15 @@ class ModelCatalogSuppler2 extends Model
                     }
                 }
             }
+
+            if (!empty($data['quantity_settings'])) {
+                foreach ($data['quantity_settings'] as $key => $row) {
+                    if (strlen($row['sign']) > 0) {
+                        $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_amount_settings` ( `suppler_id`, `amount_key`, `sign`, `value`) VALUES (" . $id . ", '" . $key . "', '" . $this->db->escape($row['sign']) . "', '" . $this->db->escape($row['number']) . "');");
+                    }
+                }
+            }
+
             $this->cache->delete('suppler');
         }
     }
@@ -48,18 +69,39 @@ class ModelCatalogSuppler2 extends Model
     {
         if (isset($data['name']) and isset($data['link'])) {
 
-            $this->db->query("UPDATE `" . DB_PREFIX . "suppler2` SET `name` = '" . $this->db->escape($data['name']) . "', `link` =  '" . $this->db->escape($data['link']) . "',  `description` = '" . $this->db->escape($data['description']) . "', `product_number` = '" . $this->db->escape($data['product_number']) . "',  `route` = '" . $this->db->escape($data['route']) . "', `status` =  '" . $this->db->escape($data['status']) . "', `order_num` =  '" . $this->db->escape($data['order_num']) . "' WHERE `" . DB_PREFIX . "suppler2`.`id` = {$id}");
+            $this->db->query("UPDATE `" . DB_PREFIX . "suppler2` SET 
+                 `name` = '" . $this->db->escape($data['name']) . "',
+                 `link` =  '" . $this->db->escape($data['link']) . "',
+                 `need_authorization` =  '" . $this->db->escape($data['need_authorization']) . "',
+                 `login` =  '" . $this->db->escape($data['login']) . "',
+                 `password` =  '" . $this->db->escape($data['password']) . "',
+                 `description` = '" . $this->db->escape($data['description']) . "',
+                 `product_number` = '" . $this->db->escape($data['product_number']) . "',
+                 `route` = '" . $this->db->escape($data['route']) . "',
+                 `status` =  '" . $this->db->escape($data['status']) . "',
+                 `order_num` =  '" . $this->db->escape($data['order_num']) .
+                "' WHERE `" . DB_PREFIX . "suppler2`.`id` = {$id}");
 
             $this->db->query("DELETE FROM `" . DB_PREFIX . "suppler2_data` WHERE suppler_id = {$id}");
 
             if (!empty($data['rows'])) {
-
                 foreach ($data['rows'] as $row) {
                     if (strlen($row['site_key']) > 0) {
                         $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_data` ( `suppler_id`, `key`, `example_value`, `route`, `site_key`, `status`) VALUES (" . $id . ", '" . $this->db->escape($row['key']) . "', '" . $this->db->escape($row['value']) . "', '" . $this->db->escape($row['route']) . "', '" . $this->db->escape($row['site_key']) . "', '" . $this->db->escape($row['status']) . "');");
                     }
                 }
             }
+
+            $this->db->query("DELETE FROM `" . DB_PREFIX . "suppler2_amount_settings` WHERE suppler_id = {$id}");
+
+            if (!empty($data['quantity_settings'])) {
+                foreach ($data['quantity_settings'] as $key => $row) {
+                    if (strlen($row['sign']) > 0) {
+                        $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_amount_settings` ( `suppler_id`, `amount_key`, `sign`, `value`) VALUES (" . $id . ", '" . $key . "', '" . $this->db->escape($row['sign']) . "', '" . $this->db->escape($row['number']) . "');");
+                    }
+                }
+            }
+
             $this->cache->delete('suppler');
         }
     }
@@ -72,10 +114,51 @@ class ModelCatalogSuppler2 extends Model
         $this->cache->delete('suppler');
     }
 
+    public function getLog($log_id)
+    {
+        $log = [];
+        $query = $this->db->query("SELECT sl2.`id`, sl2.`date`, s2.`name` as suppler_name, sl2.`data`, sl2.`status` 
+                FROM `oc_suppler2_logs` sl2 
+                LEFT JOIN `oc_suppler2` s2 ON s2.id = sl2.suppler_id 
+                WHERE sl2.id=" . $log_id . "
+                ORDER BY `id` DESC;
+        ");
+
+        if (!empty($query->rows)) {
+            $log = $query->rows[0];
+
+            $query = $this->db->query("SELECT * FROM `oc_suppler2_log_details`
+                WHERE log_id=" . $log_id . "
+                ORDER BY `id` ASC;");
+            if (!empty($query->rows)) {
+                $log['rows'] = $query->rows;
+            }
+        }
+        return $log;
+    }
+
     public function getLogs()
     {
-        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "suppler2_logs");
+        $query = $this->db->query("SELECT sl2.`id`, sl2.`date`, s2.`name` as suppler_name, sl2.`data`, sl2.`status` 
+                FROM `oc_suppler2_logs` sl2 
+                LEFT JOIN `oc_suppler2` s2 ON s2.id = sl2.suppler_id 
+                ORDER BY `id` DESC;
+        ");
         return $query->rows;
+    }
+
+    public function getQuantitySettings($suppler_id)
+    {
+        $settings = [];
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "suppler2_amount_settings WHERE `suppler_id` = " . $suppler_id);
+        if (!empty($query->rows)) {
+            foreach ($query->rows as $row) {
+                $settings[$row['amount_key']]['sign'] = $row['sign'];
+                $settings[$row['amount_key']]['value'] = $row['value'];
+            }
+        }
+
+        return $settings;
     }
 
     public function parse_xml($id)
@@ -88,10 +171,12 @@ class ModelCatalogSuppler2 extends Model
         if ($suppler) {
             $log[] = [
                 'type' => 'info',
-                'message' => 'Начинается работа с поставщиком "' . $suppler['name'] . '"'
+                'message' => 'Начинается работа с поставщиком \'' . $suppler['name'] . '\''
             ];
             $suppler_data = $this->getSupplerData($id);
             $sku_data = $this->getSupplerDataSKU($id);
+            $quantity_data = $this->getSupplerDataQuantity($id);
+            $quantity_settings = $this->getQuantitySettings($id);
 
             $xml = $this->get_xml_from_url($suppler['link']);
 
@@ -152,22 +237,18 @@ class ModelCatalogSuppler2 extends Model
                                 $xml_product_array = (array)$xml_product;
 
                                 // знаходимо в рядку xml SKU і по ньому шукаємо продукт
-                                $sku_route = htmlspecialchars_decode($sku_data['route']);
-                                if (strripos($sku_route, '->') === false) {
-                                    $sku = (string)$xml_product_array[$sku_data['route']];
-                                    $quantity = (string)$xml_product_array[$sku_data['quantity']];
-                                    $product = $this->getProductBySKU(trim($sku));
-                                } else {
-                                    $parts = explode('->', $sku_route);
-                                    if (count($parts) == 2) {
-                                        $data = (array)$xml_product_array[$parts[0]];
-                                        $sku = $data[$parts[1]];
-                                    }else if (count($parts) == 3) {
-                                        $data = (array)$xml_product_array[$parts[0]];
-                                        $data = (array)$data[$parts[1]];
-                                        $sku = $data[$parts[2]];
+                                $sku = $this->get_xml_field_by_route($sku_data['route'], $xml_product_array);
+                                $product = $this->getProductBySKU(trim($sku));
+
+                                // знаходимо в рядку xml кількість
+                                $quantity = $this->get_xml_field_by_route($quantity_data['route'], $xml_product_array);
+                                //todo замінити значення кількості, якщо є додаткові налаштування
+                                if (!empty($quantity_settings)) {
+                                    foreach ($quantity_settings as $quantity_setting) {
+                                        if ($quantity == $quantity_setting['sign']) {
+                                            $quantity = $quantity_setting['value'];
+                                        }
                                     }
-                                    $product = $this->getProductBySKU(trim($sku));
                                 }
 
                                 if ($product) {
@@ -175,7 +256,7 @@ class ModelCatalogSuppler2 extends Model
 
                                     $log[] = [
                                         'type' => 'info',
-                                        'message' => 'Найден товар <a target="_blank" href="/admin/index.php?route=catalog/product/edit&user_token=' . $token . '&product_id=' . $product['product_id'] . '" >' . $product['name'] . ' (' . $product['sku'] . ') </a>'
+                                        'message' => 'Найден товар <a target=\'_blank\' href=\'/admin/index.php?route=catalog/product/edit&user_token=' . $token . '&product_id=' . $product['product_id'] . '\' >' . $product['name'] . ' (' . $product['sku'] . ') </a>'
                                     ];
 
                                     $extra_images = [];
@@ -188,7 +269,7 @@ class ModelCatalogSuppler2 extends Model
                                             $parts = explode('->', $route);
                                             if (count($parts) == 2) {
                                                 $value = (array)$xml_product_array[$parts[0]];
-                                                if(is_object($xml_product_array[$parts[0]]) && count((array)$xml_product_array[$parts[0]]) == 1){
+                                                if (is_object($xml_product_array[$parts[0]]) && count((array)$xml_product_array[$parts[0]]) == 1) {
                                                     $value = $value[array_key_first($value)];
                                                 }
                                                 $value = $value[$parts[1]];
@@ -278,7 +359,7 @@ class ModelCatalogSuppler2 extends Model
                                                     break;
                                             }
 
-                                            $params_changed ++;
+                                            $params_changed++;
                                         }
                                     }
 
@@ -286,7 +367,7 @@ class ModelCatalogSuppler2 extends Model
                                         $this->updateExtraImages($product['product_id'], $sku, $extra_images, $log);
                                     }
 
-                                    if(empty($params_changed)){
+                                    if (empty($params_changed)) {
                                         $log[] = [
                                             'type' => 'warning',
                                             'message' => 'В товаре не заменен ни один параметр так как они пустые в xml',
@@ -344,22 +425,59 @@ class ModelCatalogSuppler2 extends Model
         return $log;
     }
 
-    public function observe_xml($link, $id = null, $route = null)
+    function get_xml_field_by_route($route, $xml_product_array)
     {
-        $xml = $this->get_xml_from_url($link);
-
-        if ($xml) {
-            return [
-                'status' => 'ok',
-                'routes' => $this->create_xml_tree($xml)
-            ];
+        $route = htmlspecialchars_decode($route);
+        $value = '';
+        if (strripos($route, '->') === false) {
+            $value = (string)$xml_product_array[$route];
         } else {
-            return [
-                'status' => 'error',
-                'message' => 'No rows found'
-            ];
+            $parts = explode('->', $route);
+            if (count($parts) == 2) {
+                $data = (array)$xml_product_array[$parts[0]];
+                $value = $data[$parts[1]];
+            } else if (count($parts) == 3) {
+                $data = (array)$xml_product_array[$parts[0]];
+                $data = (array)$data[$parts[1]];
+                $value = $data[$parts[2]];
+            }
         }
+        return $value;
+    }
 
+    public function observe_xml($link, $need_authorization = false, $login = null, $password = null)
+    {
+        if ($need_authorization) {
+            $curl = curl_init();
+            $fp = fopen("ymarkettestload.xml", "w");
+            curl_setopt($curl, CURLOPT_URL, $link);
+            curl_setopt($curl, CURLOPT_USERPWD, $login . ":" . $password);
+            curl_setopt($curl, CURLOPT_FILE, $fp);
+            curl_setopt($curl, CURLOPT_USERAGENT, "Opera/10.00 (Windows NT 5.1; U; ru) Presto/2.2.0");
+            $result = curl_exec($curl);
+            curl_close($curl);
+            if ($result === false) {
+                echo 'Curl error: ' . curl_error($curl) . curl_errno($curl);
+                var_dump(curl_error($curl));
+                var_dump(curl_errno($curl));
+            }
+            var_dump($result);
+            die();
+        } else {
+            $xml = $this->get_xml_from_url($link);
+
+            if ($xml) {
+                return [
+                    'status' => 'ok',
+                    'routes' => $this->create_xml_tree($xml)
+                ];
+            } else {
+                return [
+                    'status' => 'error',
+                    'message' => 'No rows found'
+                ];
+            }
+        }
     }
 
     public function get_xml_vars_from_url($link, $main_key, $product_number)
@@ -372,9 +490,9 @@ class ModelCatalogSuppler2 extends Model
     {
         $rows = [];
 
-       $product_number = (int)$product_number;
+        $product_number = (int)$product_number;
 
-        if($product_number < 0){
+        if ($product_number < 0) {
             $product_number = 0;
         }
 
@@ -396,7 +514,7 @@ class ModelCatalogSuppler2 extends Model
 
             if (!empty($products_array[$product_number])) {
                 $product = $products[$product_number];
-            }else{
+            } else {
                 if (count($products_array) === 1) {
                     $products_array = (array)$products_array[array_key_first($products_array)];
                     $product = $products_array[$product_number];
@@ -692,6 +810,14 @@ class ModelCatalogSuppler2 extends Model
     function getSupplerDataSKU($id)
     {
         $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "suppler2_data WHERE `suppler_id` = '" . (int)$id . "' AND site_key = 'sku'");
+
+        return !empty($query->rows) ? $query->rows[0] : null;
+    }
+
+    public
+    function getSupplerDataQuantity($id)
+    {
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "suppler2_data WHERE `suppler_id` = '" . (int)$id . "' AND site_key = 'quantity'");
 
         return !empty($query->rows) ? $query->rows[0] : null;
     }
