@@ -218,7 +218,6 @@ class ModelCatalogSuppler2 extends Model
                             }
                         } else {
                             $xml_array = (array)$xml;
-//                            $xml_products = $xml->{$main_route};
                             $xml_products = $xml_array[$main_route];
 
                             if (is_object($xml_products)) {
@@ -698,7 +697,6 @@ class ModelCatalogSuppler2 extends Model
         $dir = $_SERVER['DOCUMENT_ROOT'] . 'image/catalog/xml/';
         $ext = end(explode('.', $url));
         $path = $dir . $sku . '.' . $ext;
-//        unlink($path);
         if (!is_dir($dir)) {
             mkdir($dir, 0777, true);
         }
