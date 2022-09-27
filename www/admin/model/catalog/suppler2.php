@@ -117,7 +117,7 @@ class ModelCatalogSuppler2 extends Model
     public function getLog($log_id)
     {
         $log = [];
-        $query = $this->db->query("SELECT sl2.`id`, sl2.`date`, s2.`name` as suppler_name, sl2.`data`, sl2.`status` 
+        $query = $this->db->query("SELECT sl2.`id`, sl2.`date`, s2.`name` as suppler_name, sl2.`status` 
                 FROM `oc_suppler2_logs` sl2 
                 LEFT JOIN `oc_suppler2` s2 ON s2.id = sl2.suppler_id 
                 WHERE sl2.id=" . $log_id . "
