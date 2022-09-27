@@ -16,69 +16,37 @@
             <div class="panel panel-default">
                 <div class="panel-body">
                     <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-supplers2">
+                        <div class="alert alert-info" role="alert">
+                            {{ log_info }}
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover">
                                 <thead>
                                 <tr>
                                     <td style="width: 1px;" class="text-center"></td>
                                     <td class="text-left" style="color: #1E91CF;">{{ text_date }}</td>
-                                    {#                                    <td class="text-left" style="color: #1E91CF;">{{ column_scode }}</td>#}
-                                    {#                                    <td class="text-left" style="color: #1E91CF;">{{ column_exec }}</td>#}
-                                    {#                                    <td class="text-left" style="color: #1E91CF;">{{ column_report }}</td>#}
-                                    {#                                    <td class="text-left" style="color: #1E91CF;">{{ column_errors }}</td>#}
-                                    {#                                    <td class="text-left" style="color: #1E91CF;">{{ column_status }}</td>#}
+                                    <td class="text-left" style="color: #1E91CF;">{{ text_suppler_name }}</td>
                                     <td class="text-left" style="color: #1E91CF; max-width:400px">{{ text_link }}</td>
                                     <td class="text-left" style="color: #1E91CF;">{{ text_status }}</td>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% if supplers %}
-                                    {% for suppler in supplers %}
+                                {% if logs %}
+                                    {% for log in logs %}
                                         {% set set_class = '' %}
-                                        {% if suppler.sku_set %}
+                                        {% if log.sku_set %}
                                             {% set set_class = 'success_set' %}
                                         {% endif %}
                                         <tr class="{{ set_class }}">
-                                            <td style="text-align: center;">{% if suppler.selected %}
-                                                    <input type="checkbox" name="selected[]"
-                                                           value="{{ suppler.suppler_id }}" checked="checked"/>
-                                                {% else %}
-                                                    <input type="checkbox" name="selected[]"
-                                                           value="{{ suppler.suppler_id }}"/>
-                                                {% endif %}</td>
-                                            <td class="text-left">{{ suppler.name }}</td>
-                                            <td class="text-left" style="max-width:400px;
-                                                            word-break: break-word;
-                                                            word-wrap: break-word;
-                                                            overflow-wrap: break-word;
-                                            ">
-                                                <a href="{{ suppler.link }}" target="_blank">{{ suppler.link }}</a>
+                                            <td style="text-align: center;">
+                                                <input type="checkbox" name="selected[]"
+                                                       value="{{ log.id }}"/>
+                                            <td class="text-left">{{ log.date }}</td>
+                                            <td class="text-left">{{ log.name }}</td>
+                                            <td class="text-left">
+                                                <a href="{{ log.link }}">{{ text_show_details }}</a>
                                             </td>
-                                            <td class="text-left"
-                                                style="max-width:300px;">{{ suppler.description }}</td>
-                                            <td class="text-left">{{ suppler.status }}</td>
-                                            {#                                            <td class="text-left">{% if suppler.suppler_id < 10 %} {{ ' 0'~suppler.suppler_id }} {% else %} {{ suppler.suppler_id }} {% endif %}</td>#}
-
-
-                                            {#                                            <td class="text-left">{% if (suppler.go and suppler.sos and suppler.on_off) %} {{ entry_c_work }}{% elseif (suppler.save_form and suppler.dj-suppler.djssf == 1) %} {{ entry_c_yday~suppler.dhissf }}{% elseif (suppler.save_form and suppler.dj-suppler.djssf == 0) %} {{ entry_c_today~suppler.dhissf }}{% elseif (suppler.save_form and suppler.dj-suppler.djssf > 1) %} {{ suppler.ddmhissf }}{% elseif (suppler.save_form == 0 and suppler.on_off == 1) %} {{ entry_c_wait }}{% endif %}</td>#}
-
-                                            {#                                            <td class="text-left">{% if (suppler.report is not empty) %} {{ suppler.report }}{% else %} {{ '0' }}{% endif %}#}
-                                            {#                                                /#}
-                                            {#                                                {% if (suppler.errors is not empty) %} {{ suppler.errors }}{% else %} {{ '0' }}{% endif %}</td>#}
-                                            {#                                            <td class="text-left">{{ suppler.text~' '~suppler.text1~' '~suppler.text2 }}</td>#}
-                                            {#                                            <td class="text-left">{% if (suppler.on_off == 1) %} {{ entry_c_on ~ ' (' ~ suppler.csort ~ ')' }}{% elseif (suppler.on_off == 0) %} {{ entry_c_off ~ ' (' ~ suppler.csort ~ ')' }}{% endif %}</td>#}
-
-
-                                            {#                                            <td class="text-left">{% for action in suppler.action %}#}
-                                            {#                                                <a href="{{ action.load }}" data-toggle="tooltip"#}
-                                            {#                                                   title="Load">{{ suppler.form_id~'.xml/csv/xls' }}</a></td>#}
-                                            {#                                            {% endfor %}</td>#}
-
-                                            <td class="text-left">{% for action in suppler.action %}
-                                                <a href="{{ action.href }}" data-toggle="tooltip"
-                                                   title="{{ button_edit }}" class="btn btn-primary"><i
-                                                            class="fa fa-pencil"></i></a></td>
-                                            {% endfor %}</td>
+                                            <td class="text-left">{{ log.status }}</td>
                                         </tr>
                                     {% endfor %}
                                 {% else %}
