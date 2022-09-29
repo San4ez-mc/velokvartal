@@ -12,7 +12,7 @@ class ModelCatalogSuppler2 extends Model
 
         $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "suppler2_log_details` ( `id` INT NOT NULL AUTO_INCREMENT , `log_id` INT NOT NULL , `type` VARCHAR(20) NOT NULL , `message` TEXT NOT NULL , `break` INT(1) NOT NULL , PRIMARY KEY (`id`)) ENGINE = MyISAM;");
 
-        $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "suppler2_amount_settings` ( `id` INT NOT NULL AUTO_INCREMENT , `suppler_id` INT NOT NULL , `amount_key` VARCHAR(20) NOT NULL , `sign` VARCHAR(1) NOT NULL , `value` INT NOT NULL , PRIMARY KEY (`id`)) ENGINE = MyISAM DEFAULT CHARSET=utf8");
+        $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "suppler2_amount_settings` ( `id` INT NOT NULL AUTO_INCREMENT , `suppler_id` INT NOT NULL , `amount_key` VARCHAR(20) NOT NULL , `sign` VARCHAR(10) NOT NULL , `value` INT NOT NULL , PRIMARY KEY (`id`)) ENGINE = MyISAM DEFAULT CHARSET=utf8");
 
         $this->cache->delete('suppler');
     }
@@ -823,7 +823,7 @@ class ModelCatalogSuppler2 extends Model
         $this->db->query("DELETE FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "'");
 
         if (isset($product_id) && isset($price)) {
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "_product_discount` (`product_id`, `quantity`, `price`, `date_start`, `date_end`) VALUES ('" . (int)$product_id . "', '" . (int)$quantity . "',  '" . (int)$price . "')");
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "_product_discount` (`product_id`, `quantity`, `price`) VALUES ('" . (int)$product_id . "', '" . (int)$quantity . "',  '" . (int)$price . "')");
         }
     }
 
