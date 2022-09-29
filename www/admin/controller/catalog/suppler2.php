@@ -415,7 +415,14 @@ class ControllerCatalogSuppler2 extends Controller
             $link = $_POST['link'];
 
             $this->load->model('catalog/suppler2');
-            $xml_vars = $this->model_catalog_suppler2->get_xml_vars_from_url($link, $_POST['route'], !empty($_POST['product_number']) ? $_POST['product_number'] : 0);
+            $xml_vars = $this->model_catalog_suppler2->get_xml_vars_from_url(
+                $link,
+                $_POST['route'],
+                !empty($_POST['product_number']) ? $_POST['product_number'] : 0,
+                !empty($_POST['need_authorization']),
+                !empty($_POST['login']) ? $_POST['login'] : null,
+                !empty($_POST['password']) ? $_POST['password'] : null
+            );
 
             $next_product_number = !empty($_POST['product_number']) ? $_POST['product_number'] + 2 : 2;
             if ($xml_vars['status'] == 'ok') {

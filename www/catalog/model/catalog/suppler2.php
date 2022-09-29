@@ -34,7 +34,7 @@ class ModelCatalogSuppler2 extends Model
             $quantity_data = $this->getSupplerDataQuantity($id);
             $quantity_settings = $this->getQuantitySettings($id);
 
-            $xml = $this->get_xml_from_url($suppler['link']);
+            $xml = $this->get_xml_from_url($suppler['link'], $suppler['need_authorization'], $suppler['login'], $suppler['password']);
 
             if (!empty($xml)) {
                 $log[] = [
@@ -316,7 +316,7 @@ class ModelCatalogSuppler2 extends Model
 
     public function addLog($data)
     {
-        $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_logs WHERE `date` < '" . (time() - 60 * 60 * 24 * 3) . "'");
+        $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_logs WHERE `date` < '" . (time() - 60 * 60 * 24 * 1) . "'");
 
         if (isset($data['suppler_id']) && !empty($data['rows'])) {
 
@@ -324,7 +324,7 @@ class ModelCatalogSuppler2 extends Model
 
             $last_inserted_id = $this->db->getLastId();
             foreach ($data['rows'] as $row) {
-                $this->db->query("INSERT INTO  `" . DB_PREFIX . "suppler2_log_details` (`log_id`, `type`, `message`, `break`) VALUES ('" . $last_inserted_id . "', '" . $this->db->escape($row['type']). "', '" . $this->db->escape($row['message']) . "', '". ($row['break'] ? 1 : 0) . "')");
+                $this->db->query("INSERT INTO  `" . DB_PREFIX . "suppler2_log_details` (`log_id`, `type`, `message`, `break`) VALUES ('" . $last_inserted_id . "', '" . $this->db->escape($row['type']) . "', '" . $this->db->escape($row['message']) . "', '" . ($row['break'] ? 1 : 0) . "')");
             }
         }
     }
@@ -378,12 +378,66 @@ class ModelCatalogSuppler2 extends Model
         return $value;
     }
 
-    function get_xml_from_url($link)
+    function get_xml_from_url($link, $need_authorization = false, $login = null, $password = null)
     {
-        $xml = file_get_contents($link);
-        $xml = simplexml_load_string($xml);
-        if (!$xml) {
-            $xml = simplexml_load_file($link);
+        if ($need_authorization) {
+            define("COOKIE_FILE", "cookie.txt");
+            $post = [
+                "FrontendUsers" => [
+                    'login' => $login,
+                    'password' => $password
+                ]
+            ];
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, "https://paul-lange-ukraine.com/login");
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/32.0.1700.107 Chrome/32.0.1700.107 Safari/537.36');
+            curl_setopt($ch, CURLOPT_COOKIEJAR, COOKIE_FILE);
+            curl_setopt($ch, CURLOPT_COOKIEFILE, COOKIE_FILE);
+            curl_setopt($ch, CURLOPT_FAILONERROR, 1);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_COOKIESESSION, true);
+            curl_setopt($ch, CURLOPT_HEADER, 1);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post));
+            curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+            $retValue = curl_exec($ch);
+
+            preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $retValue, $matches);
+            $cookies = array();
+            foreach ($matches[1] as $item) {
+                parse_str($item, $cookie);
+                $cookies = array_merge($cookies, $cookie);
+            }
+
+            $headers = array();
+            $cookies_str = '';
+            if (!empty($cookies)) {
+                foreach ($cookies as $cookie_key => $cookie) {
+                    $cookies_str .= $cookie_key . '=' . $cookie . '; ';
+                }
+            }
+            $headers[] = 'Cookie: ' . $cookies_str;
+
+            curl_setopt($ch, CURLOPT_URL, $link);
+            curl_setopt($ch, CURLOPT_POST, false);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_FAILONERROR, 1);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            $retValue = curl_exec($ch);
+            curl_close($ch);
+
+            $xml = simplexml_load_string($retValue);
+        } else {
+            $xml = file_get_contents($link);
+            $xml = simplexml_load_string($xml);
+            if (!$xml) {
+                $xml = simplexml_load_file($link);
+            }
         }
         return $xml;
     }
@@ -446,7 +500,7 @@ class ModelCatalogSuppler2 extends Model
         $this->db->query("DELETE FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "'");
 
         if (isset($product_id) && isset($price)) {
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "_product_discount` (`product_id`, `quantity`, `price`, `date_start`, `date_end`) VALUES ('" . (int)$product_id . "', '" . (int)$quantity . "',  '" . (int)$price . "')");
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "product_discount` (`product_id`, `quantity`, `price`, `date_start`, `date_end`) VALUES ('" . (int)$product_id . "', '" . (int)$quantity . "',  '" . (int)$price . "')");
         }
     }
 

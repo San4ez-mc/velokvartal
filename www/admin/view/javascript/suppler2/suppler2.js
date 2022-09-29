@@ -239,10 +239,15 @@ function get_xml_vars() {
     const id_str = (id.length > 0 ? '&id=' + id : '')
     const route_str = (route !== undefined ? '&route=' + route : '')
 
+    let authorization_string = '&need_authorization=0';
+    if ($('.need_authorization').prop('checked')) {
+        authorization_string = '&need_authorization=1&login=' + $('[name=login]').val() + '&password=' + $('[name=password]').val();
+    }
+
     $.ajax({
         url: 'index.php?route=catalog/suppler2/get_xml_vars_ajax&user_token=' + token,
         type: 'post',
-        data: 'link=' + link + id_str + route_str + '&product_number=' + product_number,
+        data: 'link=' + link + id_str + route_str + '&product_number=' + product_number + authorization_string,
         dataType: 'json',
         beforeSend: function () {
             $('.ajax_upload').html('').append('<img class="loader" src="/admin/view/image/suppler2/loader.gif"/>');
