@@ -500,7 +500,7 @@ class ModelCatalogSuppler2 extends Model
         $this->db->query("DELETE FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "'");
 
         if (isset($product_id) && isset($price)) {
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "product_discount` (`product_id`, `quantity`, `price`, `date_start`, `date_end`) VALUES ('" . (int)$product_id . "', '" . (int)$quantity . "',  '" . (int)$price . "')");
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "product_discount` (`product_id`, `quantity`, `price`) VALUES ('" . (int)$product_id . "', '" . (int)$quantity . "',  '" . (int)$price . "')");
         }
     }
 
