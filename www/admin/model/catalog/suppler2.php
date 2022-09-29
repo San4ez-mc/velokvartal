@@ -117,7 +117,11 @@ class ModelCatalogSuppler2 extends Model
     public function getLog($log_id)
     {
         $log = [];
-        $query = $this->db->query("SELECT sl2.`id`, sl2.`date`, s2.`name` as suppler_name, sl2.`status` 
+        $query = $this->db->query("SELECT 
+                                    sl2.`id`,
+                                     sl2.`date`,
+                                      s2.`name` as suppler_name,
+                                       sl2.`status` 
                 FROM `oc_suppler2_logs` sl2 
                 LEFT JOIN `oc_suppler2` s2 ON s2.id = sl2.suppler_id 
                 WHERE sl2.id=" . $log_id . "
@@ -139,7 +143,10 @@ class ModelCatalogSuppler2 extends Model
 
     public function getLogs()
     {
-        $query = $this->db->query("SELECT sl2.`id`, sl2.`date`, s2.`name` as suppler_name, sl2.`data`, sl2.`status` 
+        $query = $this->db->query("SELECT sl2.`id`,
+                                    sl2.`date`,
+                                     s2.`name` as suppler_name,
+                                      sl2.`status` 
                 FROM `oc_suppler2_logs` sl2 
                 LEFT JOIN `oc_suppler2` s2 ON s2.id = sl2.suppler_id 
                 ORDER BY `id` DESC;
@@ -178,7 +185,7 @@ class ModelCatalogSuppler2 extends Model
             $quantity_data = $this->getSupplerDataQuantity($id);
             $quantity_settings = $this->getQuantitySettings($id);
 
-            $xml = $this->get_xml_from_url($suppler['link']);
+            $xml = $this->get_xml_from_url($suppler['link'], $suppler['need_authorization'], $suppler['login'], $suppler['password']);
 
             if (!empty($xml)) {
                 $log[] = [
@@ -446,42 +453,24 @@ class ModelCatalogSuppler2 extends Model
 
     public function observe_xml($link, $need_authorization = false, $login = null, $password = null)
     {
-        if ($need_authorization) {
-            $curl = curl_init();
-            $fp = fopen("ymarkettestload.xml", "w");
-            curl_setopt($curl, CURLOPT_URL, $link);
-            curl_setopt($curl, CURLOPT_USERPWD, $login . ":" . $password);
-            curl_setopt($curl, CURLOPT_FILE, $fp);
-            curl_setopt($curl, CURLOPT_USERAGENT, "Opera/10.00 (Windows NT 5.1; U; ru) Presto/2.2.0");
-            $result = curl_exec($curl);
-            curl_close($curl);
-            if ($result === false) {
-                echo 'Curl error: ' . curl_error($curl) . curl_errno($curl);
-                var_dump(curl_error($curl));
-                var_dump(curl_errno($curl));
-            }
-            var_dump($result);
-            die();
-        } else {
-            $xml = $this->get_xml_from_url($link);
+        $xml = $this->get_xml_from_url($link, $need_authorization, $login, $password);
 
-            if ($xml) {
-                return [
-                    'status' => 'ok',
-                    'routes' => $this->create_xml_tree($xml)
-                ];
-            } else {
-                return [
-                    'status' => 'error',
-                    'message' => 'No rows found'
-                ];
-            }
+        if ($xml) {
+            return [
+                'status' => 'ok',
+                'routes' => $this->create_xml_tree($xml)
+            ];
+        } else {
+            return [
+                'status' => 'error',
+                'message' => 'No rows found'
+            ];
         }
     }
 
-    public function get_xml_vars_from_url($link, $main_key, $product_number)
+    public function get_xml_vars_from_url($link, $main_key, $product_number, $need_authorization = false, $login = null, $password = null)
     {
-        $xml = $this->get_xml_from_url($link);
+        $xml = $this->get_xml_from_url($link, $need_authorization, $login, $password);
         return $this->get_xml_vars($xml, $main_key, $product_number);
     }
 
@@ -682,12 +671,66 @@ class ModelCatalogSuppler2 extends Model
 
     }
 
-    function get_xml_from_url($link)
+    function get_xml_from_url($link, $need_authorization = false, $login = null, $password = null)
     {
-        $xml = file_get_contents($link);
-        $xml = simplexml_load_string($xml);
-        if (!$xml) {
-            $xml = simplexml_load_file($link);
+        if ($need_authorization) {
+            define("COOKIE_FILE", "cookie.txt");
+            $post = [
+                "FrontendUsers" => [
+                    'login' => $login,
+                    'password' => $password
+                ]
+            ];
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, "https://paul-lange-ukraine.com/login");
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/32.0.1700.107 Chrome/32.0.1700.107 Safari/537.36');
+            curl_setopt($ch, CURLOPT_COOKIEJAR, COOKIE_FILE);
+            curl_setopt($ch, CURLOPT_COOKIEFILE, COOKIE_FILE);
+            curl_setopt($ch, CURLOPT_FAILONERROR, 1);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_COOKIESESSION, true);
+            curl_setopt($ch, CURLOPT_HEADER, 1);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post));
+            curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+            $retValue = curl_exec($ch);
+
+            preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $retValue, $matches);
+            $cookies = array();
+            foreach ($matches[1] as $item) {
+                parse_str($item, $cookie);
+                $cookies = array_merge($cookies, $cookie);
+            }
+
+            $headers = array();
+            $cookies_str = '';
+            if (!empty($cookies)) {
+                foreach ($cookies as $cookie_key => $cookie) {
+                    $cookies_str .= $cookie_key . '=' . $cookie . '; ';
+                }
+            }
+            $headers[] = 'Cookie: ' . $cookies_str;
+
+            curl_setopt($ch, CURLOPT_URL, $link);
+            curl_setopt($ch, CURLOPT_POST, false);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_FAILONERROR, 1);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            $retValue = curl_exec($ch);
+            curl_close($ch);
+
+            $xml = simplexml_load_string($retValue);
+        } else {
+            $xml = file_get_contents($link);
+            $xml = simplexml_load_string($xml);
+            if (!$xml) {
+                $xml = simplexml_load_file($link);
+            }
         }
         return $xml;
     }
