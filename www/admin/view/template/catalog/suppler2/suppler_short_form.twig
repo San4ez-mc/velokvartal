@@ -78,8 +78,13 @@
                     <td width="200"><label for="link_input">{{ text_status }}</label></td>
                     <td>
                         <select class="custom-select form-control" name="status">
-                            <option value="1" selected>{{ text_on }}</option>
-                            <option value="0">{{ text_off }}</option>
+                            {% if suppler.status == 1 %}
+                                <option value="1" selected>{{ text_on }}</option>
+                                <option value="0">{{ text_off }}</option>
+                            {% else %}
+                                <option value="1">{{ text_on }}</option>
+                                <option value="0" selected>{{ text_off }}</option>
+                            {% endif %}
                         </select>
                         <input type="hidden" name="token" value="{{ token }}"/>
                         <input type="hidden" name="id" value="{{ suppler.id }}"/>
