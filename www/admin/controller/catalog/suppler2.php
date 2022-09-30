@@ -551,7 +551,7 @@ class ControllerCatalogSuppler2 extends Controller
         }
         $data['logs'] = $logs;
 
-        $data['log_info'] = sprintf($this->language->get('log_info'), 'https://'.$_SERVER['SERVER_NAME']."/index.php?route=suppler2/api");
+        $data['log_info'] = sprintf($this->language->get('log_info'), 'https://' . $_SERVER['SERVER_NAME'] . "/index.php?route=suppler2/api");
 
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
@@ -593,6 +593,24 @@ class ControllerCatalogSuppler2 extends Controller
         } else {
             $this->error['warning'] = $this->language->get('error_not_found');
         }
+    }
+
+    public
+    function product_price_table($product_id)
+    {
+        $this->load->language('catalog/suppler2');
+        $this->document->setTitle($this->language->get('logs_heading_title'));
+        $this->load->model('catalog/suppler2');
+
+        $rows = $this->model_catalog_suppler2->getProductPrices($product_id);
+        if (!empty($rows)) {
+            foreach ($rows as &$row) {
+                $row['date'] = date('d.m.Y H:i:s', $row['datetime']);
+            }
+        }
+        $data['rows'] = $rows;
+
+        return $this->load->view('catalog/suppler2/price_table', $data);
     }
 
     public
