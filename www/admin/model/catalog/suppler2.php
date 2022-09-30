@@ -14,6 +14,8 @@ class ModelCatalogSuppler2 extends Model
 
         $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "suppler2_amount_settings` ( `id` INT NOT NULL AUTO_INCREMENT , `suppler_id` INT NOT NULL , `amount_key` VARCHAR(20) NOT NULL , `sign` VARCHAR(10) NOT NULL , `value` INT NOT NULL , PRIMARY KEY (`id`)) ENGINE = MyISAM DEFAULT CHARSET=utf8");
 
+        $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "suppler2_amount_to_source` ( `id` INT NOT NULL AUTO_INCREMENT , `suppler_id` INT NOT NULL , `product_id` INT NOT NULL , `quantity` INT NOT NULL , `price` INT NOT NULL , `stock_price` INT NOT NULL , `source` VARCHAR(20) NOT NULL , `datetime` VARCHAR(20), PRIMARY KEY (`id`)) ENGINE = MyISAM;");
+
         $this->cache->delete('suppler');
     }
 
@@ -42,7 +44,7 @@ class ModelCatalogSuppler2 extends Model
     {
         if (isset($data['name']) and isset($data['link'])) {
 
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2` (`name`, `link`, `need_authorization`, `login`, `password`, `status`, `description`, `route`, `product_number`, `order_num`) VALUES ('" . $this->db->escape($data['name']) . "', '" . $this->db->escape($data['link']) . "', '" . $this->db->escape($data['need_authorization']) . "', '" . $this->db->escape($data['login']) . "',, '" . $this->db->escape($data['password']) . "' '" . $this->db->escape($data['status']) . "', '" . $this->db->escape($data['description']) . "', '" . $this->db->escape($data['route']) . "', 1,  '" . $this->db->escape($data['order_name']) . "')");
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2` (`name`, `link`, `need_authorization`, `login`, `password`, `status`, `description`, `route`, `product_number`, `order_num`) VALUES ('" . $this->db->escape($data['name']) . "', '" . $this->db->escape($data['link']) . "', '" . $this->db->escape($data['need_authorization']) . "', '" . $this->db->escape($data['login']) . "', '" . $this->db->escape($data['password']) . "' '" . $this->db->escape($data['status']) . "', '" . $this->db->escape($data['description']) . "', '" . $this->db->escape($data['route']) . "', 1,  '" . $this->db->escape($data['order_name']) . "')");
 
             if (!empty($data['rows'])) {
                 $last_inserted_id = $this->db->getLastId();
@@ -309,9 +311,15 @@ class ModelCatalogSuppler2 extends Model
                                                     ];
                                                     break;
                                                 case 'price':
-                                                    if (!empty($availability)) {
-                                                        $this->editProductField($product['product_id'], 'price', $value);
-                                                        $this->editProductField($product['product_id'], 'price_zak', $value);
+                                                    if (!empty($quantity)) {
+
+                                                        $this->addPriceToSource([
+                                                            'product_id' => $product['product_id'],
+                                                            'price' => $value,
+                                                            'suppler_id' => $id,
+                                                            'quantity' => $quantity,
+                                                            'source' => 'xml'
+                                                        ]);
 
                                                         $log[] = [
                                                             'type' => 'success',
@@ -869,6 +877,47 @@ class ModelCatalogSuppler2 extends Model
         $query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "suppler");
 
         return $query->row['total'];
+    }
+
+    public
+    function addPriceToSource($data)
+    {
+        $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_amount_to_source WHERE product_id = '" . (int)$data['product_id'] . "' AND  suppler_id = '" . (int)$data['suppler_id'] . "'");
+
+        if (!empty($data['suppler_id']) && !empty($data['product_id']) && !empty($data['price'])) {
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_amount_to_source` ( `suppler_id`, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime`) VALUES  ('" . $this->db->escape($data['suppler_id']) . "', '" . $this->db->escape($data['product_id']) . "', '" . $this->db->escape($data['quantity']) . "', '" . $this->db->escape($data['price']) . "', '" . $this->db->escape($data['stock_price']) . "', '" . $this->db->escape($data['source']) . "', " . time() . ")");
+        }
+
+        $prices = $this->getProductPrices($data['product_id']);
+
+        if (!empty($prices)) {
+            $final_price = 10000000000;
+            $total_quantity = 0;
+            foreach ($prices as $price_row) {
+                if ($price_row['price'] < $final_price) {
+                    $final_price = $price_row['price'];
+                }
+                $total_quantity += $price_row['quantity'];
+            }
+
+            $this->editProductField($data['product_id'], 'price', $final_price);
+            $this->editProductField($data['product_id'], 'quantity', $total_quantity);
+//        $this->editProductField($product['product_id'], 'price_zak', $value);
+            // todo тут прописати заміну ціни
+        }
+    }
+
+    public
+    function getProductPrices($product_id)
+    {
+        if (!empty($product_id)) {
+            $query = $this->db->query("SELECT s2ats.`id`, s2.`name` as suppler_name, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime` FROM " . DB_PREFIX . "suppler2_amount_to_source s2ats
+            LEFT JOIN  " . DB_PREFIX . "suppler2 s2 ON s2.id = s2ats.suppler_id 
+            WHERE `product_id` = '" . (int)$product_id . "'");
+
+            return $query->rows;
+        }
+        return null;
     }
 }
 
