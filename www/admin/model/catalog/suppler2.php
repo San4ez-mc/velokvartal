@@ -311,8 +311,7 @@ class ModelCatalogSuppler2 extends Model
                                                     ];
                                                     break;
                                                 case 'price':
-                                                    if (!empty($quantity)) {
-
+                                                    if (!empty((int)$quantity)) {
                                                         $this->addPriceToSource([
                                                             'product_id' => $product['product_id'],
                                                             'price' => $value,
@@ -894,16 +893,15 @@ class ModelCatalogSuppler2 extends Model
             $final_price = 10000000000;
             $total_quantity = 0;
             foreach ($prices as $price_row) {
-                if ($price_row['price'] < $final_price) {
+                if ((int)$price_row['price'] < (int)$final_price) {
                     $final_price = $price_row['price'];
                 }
-                $total_quantity += $price_row['quantity'];
+                $total_quantity += (int)$price_row['quantity'];
             }
 
             $this->editProductField($data['product_id'], 'price', $final_price);
             $this->editProductField($data['product_id'], 'quantity', $total_quantity);
 //        $this->editProductField($product['product_id'], 'price_zak', $value);
-            // todo тут прописати заміну ціни
         }
     }
 
