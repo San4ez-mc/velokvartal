@@ -14,7 +14,7 @@ class ModelCatalogSuppler2 extends Model
 
         $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "suppler2_amount_settings` ( `id` INT NOT NULL AUTO_INCREMENT , `suppler_id` INT NOT NULL , `amount_key` VARCHAR(20) NOT NULL , `sign` VARCHAR(10) NOT NULL , `value` INT NOT NULL , PRIMARY KEY (`id`)) ENGINE = MyISAM DEFAULT CHARSET=utf8");
 
-        $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "suppler2_amount_to_source` ( `id` INT NOT NULL AUTO_INCREMENT , `suppler_id` INT NOT NULL , `product_id` INT NOT NULL , `quantity` INT NOT NULL , `price` INT NOT NULL , `stock_price` INT NOT NULL , `source` VARCHAR(20) NOT NULL , `datetime` VARCHAR(20), PRIMARY KEY (`id`)) ENGINE = MyISAM;");
+        $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "suppler2_amount_to_source` ( `id` INT NOT NULL AUTO_INCREMENT , `suppler_id` INT NOT NULL , `suppler_desc` VARCHAR(255), `product_id` INT NOT NULL , `quantity` INT NOT NULL , `price` INT NOT NULL , `stock_price` INT NOT NULL , `source` VARCHAR(20) NOT NULL , `datetime` VARCHAR(20), PRIMARY KEY (`id`)) ENGINE = MyISAM;");
 
         $this->cache->delete('suppler');
     }
@@ -250,7 +250,7 @@ class ModelCatalogSuppler2 extends Model
 
                                 // знаходимо в рядку xml кількість
                                 $quantity = $this->get_xml_field_by_route($quantity_data['route'], $xml_product_array);
-                                //todo замінити значення кількості, якщо є додаткові налаштування
+                                // замінюємо кількість, яка є в xml зі спеціальних позначок
                                 if (!empty($quantity_settings)) {
                                     foreach ($quantity_settings as $quantity_setting) {
                                         if ($quantity == $quantity_setting['sign']) {
@@ -885,6 +885,10 @@ class ModelCatalogSuppler2 extends Model
 
         if (!empty($data['suppler_id']) && !empty($data['product_id']) && !empty($data['price'])) {
             $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_amount_to_source` ( `suppler_id`, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime`) VALUES  ('" . $this->db->escape($data['suppler_id']) . "', '" . $this->db->escape($data['product_id']) . "', '" . $this->db->escape($data['quantity']) . "', '" . $this->db->escape($data['price']) . "', '" . $this->db->escape($data['stock_price']) . "', '" . $this->db->escape($data['source']) . "', " . time() . ")");
+        }
+
+        if (!empty($data['suppler_desc']) && !empty($data['product_id']) && !empty($data['price'])) {
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_amount_to_source` ( `suppler_desc`, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime`) VALUES  ('" . $this->db->escape($data['suppler_desc']) . "', '" . $this->db->escape($data['product_id']) . "', '" . $this->db->escape($data['quantity']) . "', '" . $this->db->escape($data['price']) . "', '" . $this->db->escape($data['stock_price']) . "', '" . $this->db->escape($data['source']) . "', " . time() . ")");
         }
 
         $prices = $this->getProductPrices($data['product_id']);
