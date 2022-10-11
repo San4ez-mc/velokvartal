@@ -3,6 +3,7 @@
 <div class="form-group"  style="font-size: 13px">
     <label class="col-sm-2 control-label" for="input-price-zak">{{ suppler2_data }}</label>
     <div class="col-sm-10" style="margin-bottom:10px;">
+        {% if rows %}
         <table class="table table-striped" style="font-size: 13px">
             <thead>
             <tr>
@@ -14,7 +15,7 @@
             </tr>
             </thead>
             <tbody>
-            {% if rows %}
+
             {% for row in rows %}
                 <tr>
                     <td>
@@ -34,8 +35,8 @@
                     </td>
                 </tr>
             {% endfor %}
-            {% else %}
-                {{ error_not_found }}
-            {% endif %}
             </tbody>
         </table>
+        {% else %}
+        {{ error_not_found }}
+        {% endif %}
