@@ -606,6 +606,7 @@ class ControllerCatalogSuppler2 extends Controller
         if (!empty($rows)) {
             foreach ($rows as &$row) {
                 $row['date'] = date('d.m.Y H:i:s', $row['datetime']);
+                $row['suppler_name'] = !empty($row['suppler_name']) ? $row['suppler_name'] : $row['suppler_desc'];
             }
         }
         $data['rows'] = $rows;

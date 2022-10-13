@@ -881,31 +881,57 @@ class ModelCatalogSuppler2 extends Model
     public
     function addPriceToSource($data)
     {
-        $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_amount_to_source WHERE product_id = '" . (int)$data['product_id'] . "' AND  suppler_id = '" . (int)$data['suppler_id'] . "'");
+        file_put_contents('source.txt', json_encode($data));
 
         if (!empty($data['suppler_id']) && !empty($data['product_id']) && !empty($data['price'])) {
+            $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_amount_to_source WHERE product_id = '" . (int)$data['product_id'] . "' AND  suppler_id = '" . (int)$data['suppler_id'] . "'");
+
             $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_amount_to_source` ( `suppler_id`, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime`) VALUES  ('" . $this->db->escape($data['suppler_id']) . "', '" . $this->db->escape($data['product_id']) . "', '" . $this->db->escape($data['quantity']) . "', '" . $this->db->escape($data['price']) . "', '" . $this->db->escape($data['stock_price']) . "', '" . $this->db->escape($data['source']) . "', " . time() . ")");
         }
 
         if (!empty($data['suppler_desc']) && !empty($data['product_id']) && !empty($data['price'])) {
+            $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_amount_to_source WHERE product_id = '" . (int)$data['product_id'] . "' AND  suppler_desc = '" . $data['suppler_desc'] . "'");
+
             $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_amount_to_source` ( `suppler_desc`, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime`) VALUES  ('" . $this->db->escape($data['suppler_desc']) . "', '" . $this->db->escape($data['product_id']) . "', '" . $this->db->escape($data['quantity']) . "', '" . $this->db->escape($data['price']) . "', '" . $this->db->escape($data['stock_price']) . "', '" . $this->db->escape($data['source']) . "', " . time() . ")");
         }
 
-        $prices = $this->getProductPrices($data['product_id']);
+        $this->updatePrices($data['product_id']);
+    }
+
+    public function updatePrices($product_id = null)
+    {
+        $prices = $this->getProductPrices($product_id);
 
         if (!empty($prices)) {
             $final_price = 10000000000;
             $total_quantity = 0;
+            $from_1c = 0;
             foreach ($prices as $price_row) {
                 if ((int)$price_row['price'] < (int)$final_price) {
                     $final_price = $price_row['price'];
                 }
-                $total_quantity += (int)$price_row['quantity'];
+                if ($price_row['source'] == 'xml' || empty($from_1c)) {
+                    $total_quantity += (int)$price_row['quantity'];
+                    if ($price_row['source'] != 'xml') {
+                        $from_1c++;
+                    }
+                }
             }
 
-            $this->editProductField($data['product_id'], 'price', $final_price);
-            $this->editProductField($data['product_id'], 'quantity', $total_quantity);
+            $this->editProductField($product_id, 'price', $final_price);
+            $this->editProductField($product_id, 'quantity', $total_quantity);
 //        $this->editProductField($product['product_id'], 'price_zak', $value);
+        }
+    }
+
+    public function updateAllPrices()
+    {
+        $query = $this->db->query("SELECT `product_id` FROM " . DB_PREFIX . "suppler2_amount_to_source s2ats GROUP BY product_id");
+
+        if (!empty($query->rows)) {
+            foreach ($query->rows as $row) {
+                $this->updatePrices($row['product_id']);
+            }
         }
     }
 
@@ -913,7 +939,7 @@ class ModelCatalogSuppler2 extends Model
     function getProductPrices($product_id)
     {
         if (!empty($product_id)) {
-            $query = $this->db->query("SELECT s2ats.`id`, s2.`name` as suppler_name, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime` FROM " . DB_PREFIX . "suppler2_amount_to_source s2ats
+            $query = $this->db->query("SELECT s2ats.`id`, s2.`name` as suppler_name, `suppler_desc`, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime` FROM " . DB_PREFIX . "suppler2_amount_to_source s2ats
             LEFT JOIN  " . DB_PREFIX . "suppler2 s2 ON s2.id = s2ats.suppler_id 
             WHERE `product_id` = '" . (int)$product_id . "'");
 
