@@ -9,13 +9,6 @@
 $_['heading_title']          = 'Products';
 
 // Text
-
-// OCFilter start
-$_['entry_values']          		= 'Add the values ​​for this option.';
-$_['tab_ocfilter']          		= 'OCFilter Options';
-$_['ocfilter_select_category'] 	= 'To start, select a category for this product.';
-// OCFilter end
-      
 $_['text_success']           = 'Success: You have modified products!';
 $_['text_list']              = 'Product List';
 $_['text_add']               = 'Add Product';

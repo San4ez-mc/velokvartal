@@ -37,7 +37,7 @@ class Session {
 			exit();
 		}	
 
-	if (version_compare('VERSION','3.0','>=')) {
+	if (version_compare(VERSION,'3.0','>=')) {
 		if ($this->adaptor && !session_id()) {
 			session_start();
 		}

@@ -6,6 +6,20 @@ class ControllerAccountRegister extends Controller {
 	private $error = array();
 
 	public function index() {
+
+
+            /* start socnetauth2 metka */
+			$data['SOCNETAUTH2_DATA'] = $this->load->controller('account/socnetauth2/showcode');
+			/* end socnetauth2 metka */
+
+            
+
+
+            /* start socnetauth2 metka */
+			$data['SOCNETAUTH2_DATA'] = $this->load->controller('account/socnetauth2/showcode');
+			/* end socnetauth2 metka */
+
+            
 		if ($this->customer->isLogged()) {
 			$this->response->redirect($this->url->link('account/account', '', true));
 		}

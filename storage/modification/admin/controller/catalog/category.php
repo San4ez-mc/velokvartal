@@ -746,6 +746,13 @@ class ControllerCatalogCategory extends Controller {
 				'limit'       => $this->config->get('config_limit_autocomplete')
 			);
 
+
+      // OCFilter start
+      if (isset($filter_data['filter_name']) && isset($filter_data['limit']) && $filter_data['limit'] == 5) {
+        $filter_data['limit'] = 15;
+      }
+      // OCFilter end
+      
 			$results = $this->model_catalog_category->getCategories($filter_data);
 
 			foreach ($results as $result) {

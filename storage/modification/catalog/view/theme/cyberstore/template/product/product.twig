@@ -80,7 +80,7 @@
 				<div id="fix_image">
 				<div class="thumbnails">
 					{% if (thumb) %}
-						<div class="general-image{% if (images) %} have-images{% endif %}">
+						<div class="general-image{% if (false) %} have-images{% endif %}">
 							<div id="image-box">
 								<div class="stickers-ns">
 									{% if ((on_off_sticker_special == '1') and special) %}
@@ -114,7 +114,7 @@
 									  <img data-num="0" itemprop="image" class="img-responsive" src="{{ thumb }}" title="{{ heading_title }}" alt="{{ heading_title }}" />
 									</a>
 								  </div>
-								  {% if (images) %}
+								  {% if (false) %}
 								  {% set num_image_b = 1 %}
 								  {% for image in images %}
 								  <div class="item">
@@ -128,22 +128,10 @@
 							</div>
 						</div>
 						<script>
-							$('.slider-main-img').slick({
-							draggable: true,
-							centerMode: true,
-							swipeToSlide: false,
-							slidesToShow: 1,
-							slidesToScroll: 1,
-							infinite: false,
-							arrows: false,
-							initialSlide: 0,
-							fade: true,
-							adaptiveHeight: false,
-							asNavFor: '.thumbnails .image-additional'
-						  });
+							
 						</script>
 					{% endif %}
-					{% if (images) %}
+					{% if (false) %}
 						<div class="image-additional">
 						  <div class="item">
 							<a class="thumbnail" href="javascript:void(0)" title="{{ heading_title }}">
@@ -195,7 +183,7 @@
 			{% if (ns_show_nextprev_prod) %}
 			<div id="next-prev-box">{{ nextprevproduct }}</div>
 			{% endif %}
-	  {% if ns_on_off_countdown_product != '0' %}
+	  {% if (false) %}
 		  {% if special %}
 			<div class="special-countdown">
 			{% if special_date_end != "" %}
@@ -1189,7 +1177,7 @@ if ($(window).width() > 992) {
 }
 {% endif %}
 function optionimage(image, image_zoom,image_thumb) {
-	{% if (images) %}
+	{% if (false) %}
 		if($('.option-image-new').length > 0) {
 			var slideIndex = Number($('.slider-main-img .slick-slide:last-child').attr('data-slick-index'));
 			$('.slider-main-img .item.option-image-new a').replaceWith('<a {% if (fancybox == 1) %}data-fancybox="gallery"{% endif %} class="thumbnail cloud-zoom" data-magnify-src="'+ image_zoom +'" href="'+ image_zoom +'"><img data-num="'+ slideIndex +'" src="'+ image +'" /></a>');

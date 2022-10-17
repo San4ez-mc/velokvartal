@@ -174,15 +174,6 @@ class ControllerProductCategory extends Controller {
 			$limit = $this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
 		}
 
-
-		// OCFilter start
-    if (isset($this->request->get['filter_ocfilter'])) {
-      $filter_ocfilter = $this->request->get['filter_ocfilter'];
-    } else {
-      $filter_ocfilter = '';
-    }
-		// OCFilter end
-      
 		$data['breadcrumbs'] = array();
 
 		$data['breadcrumbs'][] = array(
@@ -320,19 +311,11 @@ class ControllerProductCategory extends Controller {
 			);
 
 
-  		// OCFilter start
-  		$filter_data['filter_ocfilter'] = $filter_ocfilter;
-
-      if ($this->config->get('module_ocfilter_sub_category')) {
-        if (empty($filter_data['filter_sub_category'])) {
-          $filter_data['filter_sub_category'] = true;
-        }
-
-        if (isset($this->request->get['filter_ocfilter'])) {
-          $data['categories'] = array();
-        }
+      // OCFilter start
+      if ($this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->useSubCategory() && $this->ocfilter->api->isSelected() && empty($filter_data['filter_sub_category'])) {
+        $filter_data['filter_sub_category'] = true;
       }
-  		// OCFilter end
+      // OCFilter end
       
 			$product_total = $this->model_catalog_product->getTotalProducts($filter_data);
 
@@ -500,6 +483,9 @@ class ControllerProductCategory extends Controller {
 			'additional_image_hover' 	=> $additional_image_hover,
 	
 					'product_id'  => $result['product_id'],
+
+			 'quantity' => $result['quantity'],
+            
 					'thumb'       => $image,
 					'name'        => $result['name'],
 					'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
@@ -514,13 +500,6 @@ class ControllerProductCategory extends Controller {
 
 			$url = '';
 
-
-      // OCFilter start
-			if (isset($this->request->get['filter_ocfilter'])) {
-				$url .= '&filter_ocfilter=' . $this->request->get['filter_ocfilter'];
-			}
-      // OCFilter end
-      
 			if (isset($this->request->get['filter'])) {
 				$url .= '&filter=' . $this->request->get['filter'];
 			}
@@ -529,6 +508,17 @@ class ControllerProductCategory extends Controller {
 				$url .= '&limit=' . $this->request->get['limit'];
 			}
 
+
+      // OCFilter start
+      if (isset($url) && $this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
+        $url .= '&' . $this->ocfilter->api->getParamsIndex() . '=' . $this->ocfilter->api->getParamsString();
+        
+        if (isset($this->request->get['ocfilter_placement'])) {
+          $url .= '&ocfilter_placement=' . $this->request->get['ocfilter_placement'];
+        }
+      }
+      // OCFilter end
+      
 			$data['sorts'] = array();
 
 			$data['sorts'][] = array(
@@ -589,13 +579,6 @@ class ControllerProductCategory extends Controller {
 
 			$url = '';
 
-
-      // OCFilter start
-			if (isset($this->request->get['filter_ocfilter'])) {
-				$url .= '&filter_ocfilter=' . $this->request->get['filter_ocfilter'];
-			}
-      // OCFilter end
-      
 			if (isset($this->request->get['filter'])) {
 				$url .= '&filter=' . $this->request->get['filter'];
 			}
@@ -608,6 +591,17 @@ class ControllerProductCategory extends Controller {
 				$url .= '&order=' . $this->request->get['order'];
 			}
 
+
+      // OCFilter start
+      if (isset($url) && $this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
+        $url .= '&' . $this->ocfilter->api->getParamsIndex() . '=' . $this->ocfilter->api->getParamsString();
+        
+        if (isset($this->request->get['ocfilter_placement'])) {
+          $url .= '&ocfilter_placement=' . $this->request->get['ocfilter_placement'];
+        }        
+      }
+      // OCFilter end
+      
 			$data['limits'] = array();
 
 			$limits = array_unique(array($this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit'), 25, 50, 75, 100));
@@ -624,13 +618,6 @@ class ControllerProductCategory extends Controller {
 
 			$url = '';
 
-
-      // OCFilter start
-			if (isset($this->request->get['filter_ocfilter'])) {
-				$url .= '&filter_ocfilter=' . $this->request->get['filter_ocfilter'];
-			}
-      // OCFilter end
-      
 			if (isset($this->request->get['filter'])) {
 				$url .= '&filter=' . $this->request->get['filter'];
 			}
@@ -647,6 +634,17 @@ class ControllerProductCategory extends Controller {
 				$url .= '&limit=' . $this->request->get['limit'];
 			}
 
+
+      // OCFilter start
+      if (isset($url) && $this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
+        $url .= '&' . $this->ocfilter->api->getParamsIndex() . '=' . $this->ocfilter->api->getParamsString();
+        
+        if (isset($this->request->get['ocfilter_placement'])) {
+          $url .= '&ocfilter_placement=' . $this->request->get['ocfilter_placement'];
+        }        
+      }
+      // OCFilter end
+      
 			$pagination = new Pagination();
 			$pagination->total = $product_total;
 			$pagination->page = $page;
@@ -704,70 +702,8 @@ class ControllerProductCategory extends Controller {
 			$data['limit'] = $limit;
 
       // OCFilter Start
-      if ($this->ocfilter->getParams()) {
-        if (isset($product_total) && !$product_total) {
-      	  $this->response->redirect($this->url->link('product/category', 'path=' . $this->request->get['path']));
-        }
-
-        if (isset($data['description_bottom'])) {
-          $data['description_bottom'] = '';
-        }
-
-        if (isset($data['description_2'])) {
-          $data['description_2'] = '';
-        }
-
-        if (isset($data['description'])) {
-          $data['description'] = '';
-        }
-
-        if (isset($data['ext_description'])) {
-          $data['ext_description'] = '';
-        }
-
-        $this->document->setTitle($this->ocfilter->getPageMetaTitle($this->document->getTitle()));
-			  $this->document->setDescription($this->ocfilter->getPageMetaDescription($this->document->getDescription()));
-        $this->document->setKeywords($this->ocfilter->getPageMetaKeywords($this->document->getKeywords()));
-
-        $data['heading_title'] = $data['seo_h1'] = $this->ocfilter->getPageHeadingTitle($data['heading_title']);
-
-        if (isset($data['description_bottom'])) {
-          $data['description_bottom'] = $this->ocfilter->getPageDescription();
-        } else if (isset($data['description_2'])) {
-          $data['description_2'] = $this->ocfilter->getPageDescription();
-        } else if (isset($data['description'])) {
-          $data['description'] = $this->ocfilter->getPageDescription();
-        } else if (isset($data['ext_description'])) {
-          $data['ext_description'] = $this->ocfilter->getPageDescription();
-        }
-
-        if (!trim(strip_tags(html_entity_decode($data['description'], ENT_QUOTES, 'UTF-8')))) {
-        	$data['thumb'] = '';
-        }
-
-        $breadcrumb = $this->ocfilter->getPageBreadCrumb();
-
-        if ($breadcrumb) {
-  			  $data['breadcrumbs'][] = $breadcrumb;
-        }
-
-        $this->document->deleteLink('canonical');
-        $this->document->deleteLink('prev');
-        $this->document->deleteLink('next');
-
-        if ($page > 1) {
-          $this->document->addLink($this->url->link('product/category', 'path=' . $category_info['category_id'] . '&filter_ocfilter=' . $this->request->get['filter_ocfilter'], true), 'canonical');
-        }
-
-  			if ($page == 2) {
-  			  $this->document->addLink($this->url->link('product/category', 'path=' . $category_info['category_id'] . '&filter_ocfilter=' . $this->request->get['filter_ocfilter'], true), 'prev');
-  			} else if ($page > 2) {
-  			  $this->document->addLink($this->url->link('product/category', 'path=' . $category_info['category_id'] . '&filter_ocfilter=' . $this->request->get['filter_ocfilter'] . '&page=' . ($page - 1), true), 'prev');
-  			}
-
-  			if ($limit && ceil($product_total / $limit) > $page) {
-  			  $this->document->addLink($this->url->link('product/category', 'path=' . $category_info['category_id'] . '&filter_ocfilter=' . $this->request->get['filter_ocfilter'] . '&page=' . ($page + 1), true), 'next');
-  			}
+      if ($this->registry->get('ocfilter') && $this->ocfilter->startup()) {
+        $this->ocfilter->api->setProductListControllerData($data, (isset($product_total) ? $product_total : null));
       }
       // OCFilter End
       

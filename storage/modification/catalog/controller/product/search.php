@@ -449,6 +449,9 @@ class ControllerProductSearch extends Controller {
 			'date_end'	  => $special_date_end,
 		
 					'product_id'  => $result['product_id'],
+
+            'quantity' => $result['quantity'],
+            
 					'thumb'       => $image,
 					'name'        => $result['name'],
 					'description' => utf8_substr(trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8'))), 0, $this->config->get('theme_' . $this->config->get('config_theme') . '_product_description_length')) . '..',
@@ -487,6 +490,17 @@ class ControllerProductSearch extends Controller {
 				$url .= '&limit=' . $this->request->get['limit'];
 			}
 
+
+      // OCFilter start
+      if (isset($url) && $this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
+        $url .= '&' . $this->ocfilter->api->getParamsIndex() . '=' . $this->ocfilter->api->getParamsString();
+        
+        if (isset($this->request->get['ocfilter_placement'])) {
+          $url .= '&ocfilter_placement=' . $this->request->get['ocfilter_placement'];
+        }
+      }
+      // OCFilter end
+      
 			$data['sorts'] = array();
 
 			$data['sorts'][] = array(
@@ -575,6 +589,17 @@ class ControllerProductSearch extends Controller {
 				$url .= '&order=' . $this->request->get['order'];
 			}
 
+
+      // OCFilter start
+      if (isset($url) && $this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
+        $url .= '&' . $this->ocfilter->api->getParamsIndex() . '=' . $this->ocfilter->api->getParamsString();
+        
+        if (isset($this->request->get['ocfilter_placement'])) {
+          $url .= '&ocfilter_placement=' . $this->request->get['ocfilter_placement'];
+        }        
+      }
+      // OCFilter end
+      
 			$data['limits'] = array();
 
 			$limits = array_unique(array($this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit'), 25, 50, 75, 100));
@@ -623,6 +648,17 @@ class ControllerProductSearch extends Controller {
 				$url .= '&limit=' . $this->request->get['limit'];
 			}
 
+
+      // OCFilter start
+      if (isset($url) && $this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
+        $url .= '&' . $this->ocfilter->api->getParamsIndex() . '=' . $this->ocfilter->api->getParamsString();
+        
+        if (isset($this->request->get['ocfilter_placement'])) {
+          $url .= '&ocfilter_placement=' . $this->request->get['ocfilter_placement'];
+        }        
+      }
+      // OCFilter end
+      
 			$pagination = new Pagination();
 			$pagination->total = $product_total;
 			$pagination->page = $page;
@@ -670,6 +706,13 @@ class ControllerProductSearch extends Controller {
 		$data['sort'] = $sort;
 		$data['order'] = $order;
 		$data['limit'] = $limit;
+
+      // OCFilter Start
+      if ($this->registry->get('ocfilter') && $this->ocfilter->startup()) {
+        $this->ocfilter->api->setProductListControllerData($data, (isset($product_total) ? $product_total : null));
+      }
+      // OCFilter End
+      
 
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');

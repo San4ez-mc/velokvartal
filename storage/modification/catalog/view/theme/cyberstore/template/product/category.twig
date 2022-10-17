@@ -95,7 +95,41 @@
 		  {% endfor %}
 	  </div>
 	  {% endif %}
-	  {% if (products) %}
+	  <!-- OCFilter Start -->
+      {% if ocfilter_description_top %}
+      <div class="ocf-description ocf-description-top">{{ ocfilter_description_top }}</div>
+      {% endif %}
+      
+      {% if ocfilter_pages.top %}
+      <nav class="ocf-page-list-top">  
+        {% for ocfilter_page_group in ocfilter_pages.top %}
+        <div class="ocf-page-group">
+          {% if ocfilter_page_group.name %}
+          <div class="ocf-page-group-name">{{ ocfilter_page_group.name }}</div>
+          {% endif %}
+          <ul class="ocf-category-page-list">
+            {% for ocfilter_page in ocfilter_page_group.pages %}           
+            {% if ocfilter_page.selected %}
+            <li class="ocf-page-selected"><a href="{{ ocfilter_page.href }}">{{ ocfilter_page.name }}</a></li>
+            {% else %}
+            <li><a href="{{ ocfilter_page.href }}">{{ ocfilter_page.name }}</a></li>
+            {% endif %}            
+            {% endfor %}
+          </ul>         
+        </div>
+        {% endfor %}
+      </nav>
+      {% endif %} 
+      
+      {% if (products) %}
+      <!-- OCFilter Start -->      
+      {% if ocfilter_mobile_button %}
+      <div class="ocf-btn-mobile-static ocf-mobile">
+        <button type="button" class="ocf-btn ocf-btn-default" data-ocf="mobile"><span class="ocf-btn-name">{{ button_ocfilter_mobile }}</span> <i class="ocf-icon ocf-icon-16 ocf-brand ocf-sliders"></i></button>
+      </div>
+      {% endif %}   
+      <!-- /OCFilter End -->
+      <!-- /OCFilter End -->
 	  <div class="row">
 		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-xs-center text-sm-right localstorage mt-10 mb-20">
 			<div class="btn-group">
@@ -207,7 +241,11 @@
 			</div>
 			  <div class="caption">
 				<div class="list-left-block">
-				<div class="product-name"><a href="{{ product['href'] }}">{{ product['name'] }}</a></div>
+				
+			
+			<div class="product-name"><a href="{{ product['href'] }}">{{ product['name'] }} ({{ product['quantity'] }}шт.)</a></div>
+            
+            
 				{% if (ns_on_off_category_page_model_product != '0') %}
 					<div class="product-model">{{ product['model']}}</div>
 				{% endif %}
@@ -354,6 +392,20 @@
 				{% endif %}
 				</div>
 				<div class="list-right-block">
+
+			<div class="info-product">
+			    {% if (product['quantity'] > 0) %}
+                    <span class="stock_status_success">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9.77616 4.60058C10.047 4.3766 10.4481 4.41458 10.6721 4.68542C10.8712 4.92617 10.8633 5.26986 10.6689 5.50057L10.5873 5.58137L5.60652 9.70036L3.46645 8.28164C3.17352 8.08744 3.09348 7.69255 3.28768 7.39962C3.46029 7.13923 3.79149 7.04706 4.06869 7.16618L4.16969 7.22084L5.52226 8.11752L9.77616 4.60058Z" fill="#00BC52"/>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M14 7C14 3.13401 10.866 0 7 0C3.13401 0 0 3.13401 0 7C0 10.866 3.13401 14 7 14C10.866 14 14 10.866 14 7ZM1.27273 7C1.27273 3.83691 3.83691 1.27273 7 1.27273C10.1631 1.27273 12.7273 3.83691 12.7273 7C12.7273 10.1631 10.1631 12.7273 7 12.7273C3.83691 12.7273 1.27273 10.1631 1.27273 7Z" fill="#00BC52"/>
+                        </svg>
+                    {{ product['stock_status'] }}</span>
+                {% else %}
+                    <span class="qty-not-in-stock">{{ product['stock_status'] }}</span>
+                {% endif %}
+            </div>
+            
 				<div class="pq-box">
 				 {% if (product['price']) %}
 				<div class="price">
@@ -482,7 +534,34 @@
 		<div class="pull-right"><a href="{{ continue }}" class="btn btn-primary">{{ button_continue }}</a></div>
 	  </div>
 	  {% endif %}
-	  {{ content_bottom }}</div>
+	  <!-- OCFilter Start -->
+      {% if ocfilter_pages.bottom %}
+      <nav class="ocf-page-list-bottom">      
+        {% for ocfilter_page_group in ocfilter_pages.bottom %}    
+        <div class="ocf-page-group">
+          {% if ocfilter_page_group.name %}
+          <div class="ocf-page-group-name">{{ ocfilter_page_group.name }}</div>
+          {% endif %}
+          <ul class="ocf-category-page-list">
+            {% for ocfilter_page in ocfilter_page_group.pages %}
+            {% if ocfilter_page.selected %}
+            <li class="ocf-page-selected"><a href="{{ ocfilter_page.href }}">{{ ocfilter_page.name }}</a></li>
+            {% else %}
+            <li><a href="{{ ocfilter_page.href }}">{{ ocfilter_page.name }}</a></li>
+            {% endif %}     
+            {% endfor %}
+          </ul>         
+        </div>               
+        {% endfor %}
+      </nav>
+      {% endif %}
+      
+      {% if ocfilter_description_bottom %}   
+      <div class="ocf-description ocf-description-bottom">{{ ocfilter_description_bottom }}</div>
+      {% endif %}
+      <!-- /OCFilter End -->
+      
+      {{ content_bottom }}</div>
 	{{ column_right }}</div>
 </div>
 </div>

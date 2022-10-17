@@ -71,6 +71,13 @@
       <input type="button" value="{{ button_search }}" id="button-search" class="btn btn-primary" />
       <h2>{{ text_search }}</h2>
       {% if products %}
+      <!-- OCFilter Start -->      
+      {% if ocfilter_mobile_button %}
+      <div class="ocf-btn-mobile-static ocf-mobile">
+        <button type="button" class="ocf-btn ocf-btn-default" data-ocf="mobile"><span class="ocf-btn-name">{{ button_ocfilter_mobile }}</span> <i class="ocf-icon ocf-icon-16 ocf-brand ocf-sliders"></i></button>
+      </div>
+      {% endif %}   
+      <!-- /OCFilter End -->
       <div class="row">
         <div class="col-md-2 col-sm-6 hidden-xs">
           <div class="btn-group btn-group-sm">
