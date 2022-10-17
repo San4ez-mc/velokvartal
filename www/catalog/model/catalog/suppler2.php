@@ -321,7 +321,7 @@ class ModelCatalogSuppler2 extends Model
 
     public function addLog($data)
     {
-        $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_logs WHERE `date` < '" . (time() - 60 * 60 * 24 * 1) . "'");
+        $this->deleteOldLogs(1);
 
         if (isset($data['suppler_id']) && !empty($data['rows'])) {
 
@@ -332,6 +332,12 @@ class ModelCatalogSuppler2 extends Model
                 $this->db->query("INSERT INTO  `" . DB_PREFIX . "suppler2_log_details` (`log_id`, `type`, `message`, `break`) VALUES ('" . $last_inserted_id . "', '" . $this->db->escape($row['type']) . "', '" . $this->db->escape($row['message']) . "', '" . ($row['break'] ? 1 : 0) . "')");
             }
         }
+    }
+
+    public function deleteOldLogs($days = 1)
+    {
+        $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_logs WHERE id IN (SELECT id FROM " . DB_PREFIX . "suppler2_logs WHERE `date` < '" . (time() - 60 * 60 * 24 * (int)$days) . "')");
+        $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_log_details WHERE log_id IN (SELECT id FROM " . DB_PREFIX . "suppler2_logs WHERE `date` < '" . (time() - 60 * 60 * 24 * (int)$days) . "')");
     }
 
     public function getQuantitySettings($suppler_id)
