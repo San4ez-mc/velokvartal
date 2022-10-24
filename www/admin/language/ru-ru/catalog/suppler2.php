@@ -25,6 +25,7 @@ $_['text_category'] = 'Категория';
 $_['text_description'] = 'Описание';
 $_['text_price'] = 'Цена';
 $_['text_price_stock'] = 'Цена со скидкой';
+$_['text_price_desc'] = 'Описание цены';
 $_['text_date'] = 'Дата';
 $_['text_availability'] = 'Наличие';
 $_['text_quantity'] = 'Количество';
