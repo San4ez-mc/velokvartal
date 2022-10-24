@@ -702,13 +702,6 @@ class ControllerCatalogProduct extends Controller {
 
 		$data['user_token'] = $this->session->data['user_token'];
 
-
-    // OCFilter start
-    $data['tab_ocfilter'] = $this->language->get('tab_ocfilter');
-    $data['entry_values'] = $this->language->get('entry_values');
-    $data['ocfilter_select_category'] = $this->language->get('ocfilter_select_category');
-    // OCFilter end
-      
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
 		} else {
@@ -908,22 +901,9 @@ class ControllerCatalogProduct extends Controller {
 	}
 
 	protected function getForm() {
-
-    // OCFilter start
-    $this->document->addStyle('view/stylesheet/ocfilter/ocfilter.css');
-    $this->document->addScript('view/javascript/ocfilter/ocfilter.js');
-    // OCFilter end
-      
 		$data['entry_optsku'] = $this->language->get('entry_optsku');
 		$data['text_form'] = !isset($this->request->get['product_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
 
-
-    // OCFilter start
-    $data['tab_ocfilter'] = $this->language->get('tab_ocfilter');
-    $data['entry_values'] = $this->language->get('entry_values');
-    $data['ocfilter_select_category'] = $this->language->get('ocfilter_select_category');
-    // OCFilter end
-      
 		if (isset($this->error['warning'])) {
 			$data['error_warning'] = $this->error['warning'];
 		} else {
@@ -1806,6 +1786,12 @@ class ControllerCatalogProduct extends Controller {
 		}
 
 
+    // OCFilter start
+    $this->document->addStyle('view/stylesheet/ocfilter/ocfilter.css?v=' . OCF_VERSION);
+    $this->document->addScript('view/javascript/ocfilter/ocfilter.js?v=' . OCF_VERSION); 
+    // OCFilter end
+      
+
         $data['tabs_product_on_off'] = $this->config->get('tabs_product_on_off');
         $tabs_product_on_off = $this->config->get('tabs_product_on_off');
 
@@ -1849,6 +1835,9 @@ class ControllerCatalogProduct extends Controller {
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
 
+
+    		$data['price_rows'] = $this->load->controller('catalog/suppler2/product_price_table', $this->request->get['product_id']);
+			
 		$this->response->setOutput($this->load->view('catalog/product_form', $data));
 	}
 

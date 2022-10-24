@@ -477,10 +477,14 @@ class SeoPro {
     }
 
     public function validate() {
-
-    $this->detectAjax();
-      
 $this->detectAjax();
+
+    // OCFilter start
+    if (method_exists($this, 'detectAjax')) {
+      $this->detectAjax();
+    }  
+    // OCFilter end
+      
 
         // break redirect for php-cli-script
         if (php_sapi_name() === 'cli')

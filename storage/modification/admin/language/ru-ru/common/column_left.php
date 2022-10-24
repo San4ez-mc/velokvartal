@@ -81,14 +81,6 @@ $_['text_suppler']                  	    = 'Поставщики';
 $_['text_manufacturer']                = 'Производители';
 $_['text_navigation']           	   = 'Навигация';
 $_['text_module']                      = 'Модули';
-
-// OCFilter start
-$_['text_ocfilter']                    = 'OCFilter';
-$_['text_ocfilter_option']             = 'Фильтры';
-$_['text_ocfilter_page']               = 'Страницы';
-$_['text_ocfilter_setting']            = 'Настройки';
-// OCFilter end
-      
 $_['text_option']                      = 'Опции';
 $_['text_opencartforum']               = 'OpenCartForum магазин';
 $_['text_order']                       = 'Заказы';
@@ -176,4 +168,10 @@ $_['text_blog_review']                 = 'Отзывы блога';
 $_['text_blog_setting']                = 'Настройки блога';
 $_['text_complete_status']             = 'Завершенных заказов'; 
 $_['text_processing_status']           = 'Заказов в процессе'; 
+
+			$_['text_supplers']                = 'Список';
+			$_['text_suppler2']                = 'Поставщики';
+	        $_['text_xml_upload']              = 'Загрузка';
+ 			$_['text_xml_log']                 = 'Лог';
+			
 $_['text_other_status']                = 'Другие заказы'; 

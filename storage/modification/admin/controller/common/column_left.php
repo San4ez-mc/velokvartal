@@ -185,36 +185,44 @@ class ControllerCommonColumnLeft extends Controller {
 
 
       // OCFilter start
-			$ocfilter = array();
+      $this->language->load('extension/module/ocfilter');
+      
+      $ocfilter = array();
 
-			if ($this->user->hasPermission('access', 'extension/module/ocfilter')) {
-				$ocfilter[] = array(
-					'name'     => $this->language->get('text_ocfilter_option'),
-					'href'     => $this->url->link('extension/module/ocfilter/filter', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
+      if ($this->user->hasPermission('access', 'extension/module/ocfilter')) {
+        if (isset($this->session->data['user_token'])) {
+          $token_key = 'user_token';
+        } else {
+          $token_key = 'token';
+        }
+      
+        $ocfilter[] = array(
+          'name'     => $this->language->get('text_ocfilter_filter'),
+          'href'     => $this->url->link('extension/module/ocfilter/filter', $token_key . '=' . $this->session->data[$token_key], 'SSL'),
+          'children' => array()
+        );
 
-				$ocfilter[] = array(
-					'name'	   => $this->language->get('text_ocfilter_page'),
-					'href'     => $this->url->link('extension/module/ocfilter/page', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
+        $ocfilter[] = array(
+          'name'     => $this->language->get('text_ocfilter_page'),
+          'href'     => $this->url->link('extension/module/ocfilter/page', $token_key . '=' . $this->session->data[$token_key], 'SSL'),
+          'children' => array()
+        );
 
-				$ocfilter[] = array(
-					'name'	   => $this->language->get('text_ocfilter_setting'),
-					'href'     => $this->url->link('extension/module/ocfilter', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
+        $ocfilter[] = array(
+          'name'     => $this->language->get('text_ocfilter_setting'),
+          'href'     => $this->url->link('extension/module/ocfilter', $token_key . '=' . $this->session->data[$token_key], 'SSL'),
+          'children' => array()
+        );
+      }
 
-			if ($ocfilter) {
-				$catalog[] = array(
-					'name'	   => $this->language->get('text_ocfilter'),
-					'href'     => '',
-					'children' => $ocfilter
-				);
-			}
-		  // OCFilter end
+      if ($ocfilter) {
+        $catalog[] = array(
+          'name'     => $this->language->get('text_ocfilter'),
+          'href'     => '',
+          'children' => $ocfilter
+        );
+      }
+      // OCFilter end
       
 			if ($this->user->hasPermission('access', 'catalog/filter')) {
 				$catalog[] = array(
@@ -352,6 +360,37 @@ if ($this->user->hasPermission('access', 'catalog/suppler')) {
 				);
 			}
 
+
+			$suppler2 = [];
+			if ($this->user->hasPermission('access', 'catalog/suppler2')) {
+				$suppler2[] = array(
+					'name'	   => $this->language->get('text_supplers'),
+					'href'     => $this->url->link('catalog/suppler2', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+
+				$suppler2[] = array(
+					'name'	   => $this->language->get('text_xml_upload'),
+     				'href'     => $this->url->link('catalog/suppler2/upload', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+				$suppler2[] = array(
+					'name'	   => $this->language->get('text_xml_log'),
+     				'href'     => $this->url->link('catalog/suppler2/log', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);
+			}
+
+			if ($suppler2) {
+				$data['menus'][] = array(
+					'id'       => 'menu-suppler2',
+					'icon'	   => 'fa-toggle-up',
+					'name'	   => $this->language->get('text_suppler2'),
+					'href'     => '',
+					'children' => $suppler2
+				);
+			}
+			
 			// Extension
 			$marketplace = array();
 			

@@ -19,9 +19,9 @@ class ControllerStartupSeoUrl extends Controller {
 			$this->url->addRewrite($this);
 
       // OCFilter start
-      if ($this->registry->has('ocfilter')) {
-  			$this->url->addRewrite($this->ocfilter);
-  		}
+      if ($this->registry->get('ocfilter')) {
+        $this->url->addRewrite($this->ocfilter->seo);
+      }
       // OCFilter end
       
 		}
@@ -76,6 +76,15 @@ class ControllerStartupSeoUrl extends Controller {
 						$this->request->get['manufacturer_id'] = $url[1];
 					}
 
+
+          // OCFilter start
+          if ($url[0] == 'ocfilter_page_id') {
+            $this->request->get['ocfilter_page_id'] = $url[1];
+            
+            continue;
+          }
+          // OCFilter end
+      
 					if ($url[0] == 'information_id') {
 						$this->request->get['information_id'] = $url[1];
 					}

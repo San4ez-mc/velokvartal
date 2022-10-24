@@ -9,13 +9,6 @@
 $_['heading_title']          = 'Товары';
 
 // Text
-
-// OCFilter start
-$_['entry_values']          		= 'Добавьте значения для этой опции.';
-$_['tab_ocfilter']          		= 'Опции фильтра';
-$_['ocfilter_select_category'] 	= 'Для начала, выберите категории для этого товара.';
-// OCFilter end
-      
 $_['text_success']           = 'Настройки успешно изменены!';
 $_['text_list']              = 'Список товаров';
 $_['text_add']               = 'Добавить';

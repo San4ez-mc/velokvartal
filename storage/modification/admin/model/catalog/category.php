@@ -248,6 +248,16 @@ class ModelCatalogCategory extends Model {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "article_related_wb WHERE category_id = '" . (int)$category_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "coupon_category WHERE category_id = '" . (int)$category_id . "'");
 
+			if(!empty($category_id)) {
+				$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "category WHERE parent_id = '" . (int)$category_id . "'");
+
+				foreach ($query->rows as $result) {
+					$this->deleteCategory($result['category_id']);
+				}
+			}
+			$this->db->query("DELETE FROM " . DB_PREFIX . "category_to_1c WHERE category_id = '" . (int)$category_id . "'");
+			
+
 		$this->cache->delete('category');
 		
 		if($this->config->get('config_seo_pro')){		

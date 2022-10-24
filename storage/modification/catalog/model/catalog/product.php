@@ -87,21 +87,6 @@ class ModelCatalogProduct extends Model {
 			$sql .= " FROM " . DB_PREFIX . "product p";
 		}
 
-
-		// OCFilter start
-		if (!empty($data['filter_ocfilter'])) {
-    	$this->load->model('extension/module/ocfilter');
-
-      $ocfilter_product_sql = $this->model_extension_module_ocfilter->getSearchSQL($data['filter_ocfilter']);
-		} else {
-      $ocfilter_product_sql = false;
-    }
-
-    if ($ocfilter_product_sql && $ocfilter_product_sql->join) {
-    	$sql .= $ocfilter_product_sql->join;
-    }
-    // OCFilter end
-      
 		$sql .= " LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'";
 
 		if (!empty($data['filter_category_id'])) {
@@ -182,9 +167,9 @@ class ModelCatalogProduct extends Model {
 		}
 
 
-    // OCFilter start
-    if (!empty($ocfilter_product_sql) && $ocfilter_product_sql->where) {
-    	$sql .= $ocfilter_product_sql->where;
+    // OCFilter start (reset caching by sql string key)
+    if ($this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
+      $sql .= " /* " . crc32($this->ocfilter->api->getParamsString()) . " */ ";
     }
     // OCFilter end
       
@@ -237,6 +222,13 @@ class ModelCatalogProduct extends Model {
 
 		$product_data = array();
 
+
+    // OCFilter start
+    if ($this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
+      $this->ocfilter->api->setProductSQL(__FUNCTION__, $sql);
+    }
+    // OCFilter end
+      
 		$query = $this->db->query($sql);
 
 		foreach ($query->rows as $result) {
@@ -288,6 +280,13 @@ class ModelCatalogProduct extends Model {
 
 		$product_data = array();
 
+
+    // OCFilter start
+    if ($this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
+      $this->ocfilter->api->setProductSQL(__FUNCTION__, $sql);
+    }
+    // OCFilter end
+      
 		$query = $this->db->query($sql);
 
 		foreach ($query->rows as $result) {
@@ -510,21 +509,6 @@ class ModelCatalogProduct extends Model {
 			$sql .= " FROM " . DB_PREFIX . "product p";
 		}
 
-
-		// OCFilter start
-		if (!empty($data['filter_ocfilter'])) {
-    	$this->load->model('extension/module/ocfilter');
-
-      $ocfilter_product_sql = $this->model_extension_module_ocfilter->getSearchSQL($data['filter_ocfilter']);
-		} else {
-      $ocfilter_product_sql = false;
-    }
-
-    if ($ocfilter_product_sql && $ocfilter_product_sql->join) {
-    	$sql .= $ocfilter_product_sql->join;
-    }
-    // OCFilter end
-      
 		$sql .= " LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE pd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'";
 
 		if (!empty($data['filter_category_id'])) {
@@ -605,9 +589,9 @@ class ModelCatalogProduct extends Model {
 		}
 
 
-    // OCFilter start
-    if (!empty($ocfilter_product_sql) && $ocfilter_product_sql->where) {
-    	$sql .= $ocfilter_product_sql->where;
+    // OCFilter start (reset caching by sql string key)
+    if ($this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
+      $sql .= " /* " . crc32($this->ocfilter->api->getParamsString()) . " */ ";
     }
     // OCFilter end
       
@@ -615,6 +599,13 @@ class ModelCatalogProduct extends Model {
 			$sql .= " AND p.manufacturer_id = '" . (int)$data['filter_manufacturer_id'] . "'";
 		}
 
+
+    // OCFilter start
+    if ($this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
+      $this->ocfilter->api->setProductSQL(__FUNCTION__, $sql);
+    }
+    // OCFilter end
+      
 		$query = $this->db->query($sql);
 
 		return $query->row['total'];
@@ -632,7 +623,32 @@ class ModelCatalogProduct extends Model {
 		return $query->rows;
 	}
 
+
+          public function getProductCategoryPath($product_id) {//nick
+        $query = $this->db->query("SELECT category_id FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "' ORDER BY `main_category` DESC LIMIT 1");
+        if($query->row['category_id']){
+            // Parent category
+            $path2 = $query->row['category_id'];
+            // Category parent
+            $query = $this->db->query("SELECT parent_id FROM " . DB_PREFIX . "category WHERE category_id = '" . $query->row['category_id'] . "' AND parent_id != 0");
+            while($query->num_rows){
+                $path2 = $query->row['parent_id'] . "_" . $path2;
+                // Sub-category parent
+                $query = $this->db->query("SELECT parent_id FROM " . DB_PREFIX . "category WHERE category_id = '" . $query->row['parent_id'] . "' AND parent_id != 0");
+            }
+            return $path2;
+        }
+        return false;
+    }
+            
 	public function getTotalProductSpecials() {
+
+    // OCFilter start
+    if ($this->registry->get('ocfilter') && $this->ocfilter->startup() && $this->ocfilter->api->isSelected()) {
+      return $this->ocfilter->api->getTotalProductSpecials();
+    }
+    // OCFilter end    
+      
 		$query = $this->db->query("SELECT COUNT(DISTINCT ps.product_id) AS total FROM " . DB_PREFIX . "product_special ps LEFT JOIN " . DB_PREFIX . "product p ON (ps.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "' AND ps.customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "' AND ((ps.date_start = '0000-00-00' OR ps.date_start < NOW()) AND (ps.date_end = '0000-00-00' OR ps.date_end > NOW()))");
 
 		if (isset($query->row['total'])) {

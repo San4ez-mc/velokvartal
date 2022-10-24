@@ -60,8 +60,19 @@ $this->load->language('cyberstore/lang');
 			'href' => $this->url->link('common/home')
 		);
 
-		$this->load->model('catalog/category');
+		
 
+            
+
+
+            $this->load->model('catalog/category');
+            unset($this->request->get['search']);
+            unset($this->request->get['tag']);
+            unset($this->request->get['manufacturer_id']);
+			if (!isset($this->request->get['path'])) {
+			    $this->request->get['path'] = $this->model_catalog_product->getProductCategoryPath((int)$this->request->get['product_id']);
+			}
+            
 		if (isset($this->request->get['path'])) {
 			$path = '';
 
@@ -209,6 +220,15 @@ $this->load->language('cyberstore/lang');
 		if ($product_info) {
 			$url = '';
 
+
+            $this->load->model('catalog/category');
+            unset($this->request->get['search']);
+            unset($this->request->get['tag']);
+            unset($this->request->get['manufacturer_id']);
+			if (!isset($this->request->get['path'])) {
+			    $this->request->get['path'] = $this->model_catalog_product->getProductCategoryPath((int)$this->request->get['product_id']);
+			}
+            
 			if (isset($this->request->get['path'])) {
 				$url .= '&path=' . $this->request->get['path'];
 			}
@@ -876,6 +896,13 @@ $this->load->language('cyberstore/lang');
 			$this->model_catalog_product->updateViewed($this->request->get['product_id']);
 			
 
+      // OCFilter Start
+      if ($this->registry->get('ocfilter') && $this->ocfilter->startup()) {
+        $this->ocfilter->api->setProductItemControllerData($data);
+      }
+      // OCFilter End
+      
+
 			if(isset($this->request->post['quickview29'])) {
 				$data['column_left'] = $data['column_right'] = $data['content_top'] = $data['content_bottom'] = $data['footer'] = $data['header'] = '';
 			} else {
@@ -1058,6 +1085,15 @@ $this->load->language('cyberstore/lang');
 		} else {
 			$url = '';
 
+
+            $this->load->model('catalog/category');
+            unset($this->request->get['search']);
+            unset($this->request->get['tag']);
+            unset($this->request->get['manufacturer_id']);
+			if (!isset($this->request->get['path'])) {
+			    $this->request->get['path'] = $this->model_catalog_product->getProductCategoryPath((int)$this->request->get['product_id']);
+			}
+            
 			if (isset($this->request->get['path'])) {
 				$url .= '&path=' . $this->request->get['path'];
 			}
@@ -1117,6 +1153,13 @@ $this->load->language('cyberstore/lang');
 
 			$this->response->addHeader($this->request->server['SERVER_PROTOCOL'] . ' 404 Not Found');
 
+
+      // OCFilter Start
+      if ($this->registry->get('ocfilter') && $this->ocfilter->startup()) {
+        $this->ocfilter->api->setProductItemControllerData($data);
+      }
+      // OCFilter End
+      
 			$data['column_left'] = $this->load->controller('common/column_left');
 			$data['column_right'] = $this->load->controller('common/column_right');
 			$data['content_top'] = $this->load->controller('common/content_top');

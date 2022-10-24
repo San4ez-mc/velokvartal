@@ -70,14 +70,6 @@ $_['text_suppler']                	 = 'Suppliers';
 $_['text_manufacturer']         = 'Manufacturers';
 $_['text_navigation']           = 'Navigation';
 $_['text_opencartforum']        = 'OpenCartForum Marketplace';
-
-// OCFilter start
-$_['text_ocfilter']                    = 'OCFilter';
-$_['text_ocfilter_option']             = 'Filters';
-$_['text_ocfilter_page']               = 'SEO Pages';
-$_['text_ocfilter_setting']            = 'Settings';
-// OCFilter end
-      
 $_['text_option']               = 'Options';
 $_['text_order']                = 'Orders';
 $_['text_order_status']         = 'Order Statuses';
