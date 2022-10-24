@@ -336,8 +336,18 @@ class ModelCatalogSuppler2 extends Model
 
     public function deleteOldLogs($days = 1)
     {
-        $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_logs WHERE id IN (SELECT id FROM " . DB_PREFIX . "suppler2_logs WHERE `date` < '" . (time() - 60 * 60 * 24 * (int)$days) . "')");
-        $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_log_details WHERE log_id IN (SELECT id FROM " . DB_PREFIX . "suppler2_logs WHERE `date` < '" . (time() - 60 * 60 * 24 * (int)$days) . "')");
+        $query = $this->db->query("SELECT id FROM " . DB_PREFIX . "suppler2_logs WHERE `date` < '" . (time() - 60 * 60 * 24 * (int)$days) . "'" );
+        $logs_ids_to_delete = [];
+        if(!empty($query->rows)){
+            foreach ($query->rows as $row){
+                $logs_ids_to_delete[] = $row['id'];
+            }
+
+            $logs_ids_str = implode(', ', $logs_ids_to_delete);
+
+            $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_logs WHERE id IN (" .  $logs_ids_str .")");
+            $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_log_details WHERE log_id IN (" .  $logs_ids_str .")");
+        }
     }
 
     public function getQuantitySettings($suppler_id)
@@ -581,5 +591,52 @@ class ModelCatalogSuppler2 extends Model
             return $query->rows;
         }
         return null;
+    }
+
+    public function getProductQuantityText($product_id)
+    {
+        $prices = $this->getProductPrices($product_id);
+
+        $store_price_found = false;
+        $xml_price_found = false;
+        $ones_price_found = false;
+
+        if (!empty($prices)) {
+            foreach ($prices as $price_row) {
+                if ($price_row['source'] === '1c' && trim($price_row['suppler_desc']) === 'Склад магазина') {
+                    $store_price_found = true;
+                }
+
+                if ($price_row['source'] === 'xml') {
+                    $xml_price_found = true;
+                }
+
+                if ($price_row['source'] === '1c' && trim($price_row['suppler_desc']) === 'Склад поставщика') {
+                    $ones_price_found = true;
+                }
+            }
+        }
+
+        if ($store_price_found) {
+            return [
+                'status' => 1,
+                'text' => 'В наличии'
+            ];
+        } elseif ($xml_price_found) {
+            return [
+                'status' => 1,
+                'text' => 'Доставка 1-3 дня'
+            ];
+        } elseif ($ones_price_found) {
+            return [
+                'status' => 1,
+                'text' => 'Доставка 1-5 дней'
+            ];
+        } else {
+            return [
+                'status' => 0,
+                'text' => 'Нет в наличии'
+            ];
+        }
     }
 }

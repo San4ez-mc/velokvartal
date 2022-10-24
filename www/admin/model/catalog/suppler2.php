@@ -14,7 +14,7 @@ class ModelCatalogSuppler2 extends Model
 
         $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "suppler2_amount_settings` ( `id` INT NOT NULL AUTO_INCREMENT , `suppler_id` INT NOT NULL , `amount_key` VARCHAR(20) NOT NULL , `sign` VARCHAR(10) NOT NULL , `value` INT NOT NULL , PRIMARY KEY (`id`)) ENGINE = MyISAM DEFAULT CHARSET=utf8");
 
-        $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "suppler2_amount_to_source` ( `id` INT NOT NULL AUTO_INCREMENT , `suppler_id` INT NOT NULL , `suppler_desc` VARCHAR(255), `product_id` INT NOT NULL , `quantity` INT NOT NULL , `price` INT NOT NULL , `stock_price` INT NOT NULL , `source` VARCHAR(20) NOT NULL , `datetime` VARCHAR(20), PRIMARY KEY (`id`)) ENGINE = MyISAM;");
+        $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "suppler2_amount_to_source` ( `id` INT NOT NULL AUTO_INCREMENT , `suppler_id` INT NOT NULL , `suppler_desc` VARCHAR(255), `product_id` INT NOT NULL , `quantity` INT NOT NULL , `price` INT NOT NULL , `stock_price` INT NOT NULL , `price_desc` VARCHAR(255), `source` VARCHAR(20) NOT NULL , `datetime` VARCHAR(20), PRIMARY KEY (`id`)) ENGINE = MyISAM;");
 
         $this->cache->delete('suppler');
     }
@@ -881,33 +881,19 @@ class ModelCatalogSuppler2 extends Model
     public
     function addPriceToSource($data)
     {
-        if (!empty($data['suppler_id']) && !empty($data['product_id']) && !empty($data['price'])) {
+        if (!empty($data['suppler_id']) && !empty($data['product_id']) && (!empty($data['price']) || !empty($data['stock_price']))) {
             $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_amount_to_source WHERE product_id = '" . (int)$data['product_id'] . "' AND  suppler_id = '" . (int)$data['suppler_id'] . "'");
 
             $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_amount_to_source` ( `suppler_id`, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime`) VALUES  ('" . $this->db->escape($data['suppler_id']) . "', '" . $this->db->escape($data['product_id']) . "', '" . $this->db->escape($data['quantity']) . "', '" . $this->db->escape($data['price']) . "', '" . $this->db->escape($data['stock_price']) . "', '" . $this->db->escape($data['source']) . "', " . time() . ")");
         }
 
-        if (!empty($data['suppler_desc']) && !empty($data['product_id']) && !empty($data['price'])) {
+        if (!empty($data['suppler_desc']) && !empty($data['product_id']) && (!empty($data['price']) || !empty($data['stock_price']))) {
             $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_amount_to_source WHERE product_id = '" . (int)$data['product_id'] . "' AND  suppler_desc = '" . $data['suppler_desc'] . "'");
 
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_amount_to_source` ( `suppler_desc`, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime`) VALUES  ('" . $this->db->escape($data['suppler_desc']) . "', '" . $this->db->escape($data['product_id']) . "', '" . $this->db->escape($data['quantity']) . "', '" . $this->db->escape($data['price']) . "', '" . $this->db->escape($data['stock_price']) . "', '" . $this->db->escape($data['source']) . "', " . time() . ")");
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_amount_to_source` ( `suppler_desc`, `product_id`, `quantity`, `price`, `price_desc`, `stock_price`, `source`, `datetime`) VALUES  ('" . $this->db->escape($data['suppler_desc']) . "', '" . $this->db->escape($data['product_id']) . "', '" . $this->db->escape($data['quantity']) . "', '" . $this->db->escape($data['price']) . "', '" . $this->db->escape($data['price_desc']) . "', '" . $this->db->escape($data['stock_price']) . "', '" . $this->db->escape($data['source']) . "', " . time() . ")");
         }
 
         $this->updatePrices($data['product_id']);
-    }
-
-    public
-    function addStockToSource($data)
-    {
-//        if (!empty($data['suppler_id']) && !empty($data['product_id']) && !empty($data['price'])) {
-//            $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_amount_to_source` ( `suppler_id`, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime`) VALUES  ('" . $this->db->escape($data['suppler_id']) . "', '" . $this->db->escape($data['product_id']) . "', '" . $this->db->escape($data['quantity']) . "', '" . $this->db->escape($data['price']) . "', '" . $this->db->escape($data['stock_price']) . "', '" . $this->db->escape($data['source']) . "', " . time() . ")");
-//        }
-//
-//        if (!empty($data['suppler_desc']) && !empty($data['product_id']) && !empty($data['price'])) {
-//            $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_amount_to_source` ( `suppler_desc`, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime`) VALUES  ('" . $this->db->escape($data['suppler_desc']) . "', '" . $this->db->escape($data['product_id']) . "', '" . $this->db->escape($data['quantity']) . "', '" . $this->db->escape($data['price']) . "', '" . $this->db->escape($data['stock_price']) . "', '" . $this->db->escape($data['source']) . "', " . time() . ")");
-//        }
-//
-//        $this->updatePrices($data['product_id']);
     }
 
     public function updatePrices($product_id = null)
@@ -917,20 +903,71 @@ class ModelCatalogSuppler2 extends Model
         if (!empty($prices)) {
             $final_price = 10000000000;
             $total_quantity = 0;
-            $from_1c = 0;
-            foreach ($prices as $price_row) {
-                if ((int)$price_row['price'] < (int)$final_price) {
-                    $final_price = $price_row['price'];
-                }
-                if ($price_row['source'] == 'xml' || empty($from_1c)) {
-                    $total_quantity += (int)$price_row['quantity'];
-                    if ($price_row['source'] != 'xml') {
-                        $from_1c++;
+            // мінімальна ціна і кількість сумується
+//            $from_1c = 0;
+//            foreach ($prices as $price_row) {
+//                if (!empty($price_row['price']) && (int)$price_row['price'] < (int)$final_price) {
+//                    $final_price = $price_row['price'];
+//                }
+//                if ($price_row['source'] == 'xml' || empty($from_1c)) {
+//                    $total_quantity += (int)$price_row['quantity'];
+//                    if ($price_row['source'] != 'xml') {
+//                        $from_1c++;
+//                    }
+//                }
+//            }
+
+            $store_price_found = false;
+            $store_price = 0;
+            $xml_price_found = false;
+            $xml_price = 0;
+            $ones_price_found = false;
+            $ones_price = 0;
+
+            if (!empty($prices)) {
+                $from_1c = 0;
+                foreach ($prices as $price_row) {
+                    if ($price_row['source'] === '1c' && trim($price_row['suppler_desc']) === 'Склад магазина') {
+                        if (!empty($price_row['price'])) {
+                            $store_price_found = true;
+                            $store_price = $price_row['price'];
+                        }
+                    }
+
+                    if ($price_row['source'] === 'xml') {
+                        if (!empty($price_row['price'])) {
+                            $xml_price_found = true;
+                            $xml_price = $price_row['price'];
+                        }
+                    }
+
+                    if ($price_row['source'] === '1c' && trim($price_row['suppler_desc']) === 'Склад поставщика') {
+                        if (!empty($price_row['price'])) {
+                            $ones_price_found = true;
+                            $ones_price = $price_row['price'];
+                        }
+                    }
+
+                    if ($price_row['source'] == 'xml' || empty($from_1c)) {
+                        $total_quantity += (int)$price_row['quantity'];
+                        if ($price_row['source'] != 'xml') {
+                            $from_1c++;
+                        }
                     }
                 }
             }
 
-            $this->editProductField($product_id, 'price', $final_price);
+            if ($store_price_found) {
+                $this->editProductField($product_id, 'price', $store_price);
+            } elseif ($xml_price_found) {
+                $this->editProductField($product_id, 'price', $xml_price);
+            } elseif ($ones_price_found) {
+                $this->editProductField($product_id, 'price', $ones_price);
+            } else {
+                $this->editProductField($product_id, 'price', 0);
+            }
+
+//            $this->editProductField($product_id, 'price', $final_price);
             $this->editProductField($product_id, 'quantity', $total_quantity);
 //        $this->editProductField($product['product_id'], 'price_zak', $value);
         }
@@ -951,7 +988,7 @@ class ModelCatalogSuppler2 extends Model
     function getProductPrices($product_id)
     {
         if (!empty($product_id)) {
-            $query = $this->db->query("SELECT s2ats.`id`, s2.`name` as suppler_name, `suppler_desc`, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime` FROM " . DB_PREFIX . "suppler2_amount_to_source s2ats
+            $query = $this->db->query("SELECT s2ats.`id`, s2.`name` as suppler_name, `suppler_desc`, `price_desc`, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime` FROM " . DB_PREFIX . "suppler2_amount_to_source s2ats
             LEFT JOIN  " . DB_PREFIX . "suppler2 s2 ON s2.id = s2ats.suppler_id 
             WHERE `product_id` = '" . (int)$product_id . "'");
 

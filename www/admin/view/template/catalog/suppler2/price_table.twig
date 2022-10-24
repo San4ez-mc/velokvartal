@@ -9,6 +9,8 @@
             <tr>
                 <th><label>{{ text_suppler_name }}</label></th>
                 <th><label>{{ text_price }}</label></th>
+                <th><label>{{ text_price_stock }}</label></th>
+                <th><label>{{ text_price_desc }}</label></th>
                 <th><label>{{ text_quantity }}</label></th>
                 <th><label>{{ text_date }}</label></th>
                 <th><label>{{ text_source }}</label></th>
@@ -23,6 +25,12 @@
                     </td>
                     <td>
                         <span>{{ row.price }}</span>
+                    </td>
+                    <td>
+                        <span>{{ row.stock_price }}</span>
+                    </td>
+                    <td>
+                        <span>{{ row.price_desc }}</span>
                     </td>
                     <td>
                         <span>{{ row.quantity }}</span>
