@@ -74,7 +74,6 @@ class ModelCatalogSuppler2 extends Model
                             }
                         } else {
                             $xml_array = (array)$xml;
-//                            $xml_products = $xml->{$main_route};
                             $xml_products = $xml_array[$main_route];
 
                             if (is_object($xml_products)) {
@@ -98,7 +97,7 @@ class ModelCatalogSuppler2 extends Model
 
                                 // знаходимо в рядку xml кількість
                                 $quantity = $this->get_xml_field_by_route($quantity_data['route'], $xml_product_array);
-                                //todo замінити значення кількості, якщо є додаткові налаштування
+                                // замінюємо кількість, яка є в xml зі спеціальних позначок
                                 if (!empty($quantity_settings)) {
                                     foreach ($quantity_settings as $quantity_setting) {
                                         if ($quantity == $quantity_setting['sign']) {
@@ -116,6 +115,12 @@ class ModelCatalogSuppler2 extends Model
                                     ];
 
                                     $extra_images = [];
+                                    $price_info = [
+                                        'product_id' => $product['product_id'],
+                                        'suppler_id' => $id,
+                                        'quantity' => $quantity,
+                                        'source' => 'xml'
+                                    ];
                                     foreach ($suppler_data as $suppler_row) {
                                         $route = htmlspecialchars_decode($suppler_row['route']);
 
@@ -160,13 +165,15 @@ class ModelCatalogSuppler2 extends Model
                                                     break;
                                                 case 'price':
                                                     if (!empty((int)$quantity)) {
-                                                        $this->addPriceToSource([
-                                                            'product_id' => $product['product_id'],
-                                                            'price' => $value,
-                                                            'suppler_id' => $id,
-                                                            'quantity' => $quantity,
-                                                            'source' => 'xml'
-                                                        ]);
+//                                                        $this->addPriceToSource([
+//                                                            'product_id' => $product['product_id'],
+//                                                            'price' => $value,
+//                                                            'suppler_id' => $id,
+//                                                            'quantity' => $quantity,
+//                                                            'source' => 'xml'
+//                                                        ]);
+
+                                                        $price_info['price'] = $value;
 
                                                         $log[] = [
                                                             'type' => 'success',
@@ -182,7 +189,8 @@ class ModelCatalogSuppler2 extends Model
                                                 case 'price_stock':
                                                     if (!empty($quantity)) {
                                                         if (!empty($value)) {
-                                                            $this->editProductDiscount($product['product_id'], $value, $quantity);
+//                                                            $this->editProductDiscount($product['product_id'], $value, $quantity);
+                                                            $price_info['stock_price'] = $value;
 
                                                             $log[] = [
                                                                 'type' => 'success',
@@ -220,6 +228,14 @@ class ModelCatalogSuppler2 extends Model
                                             $params_changed++;
                                         }
                                     }
+
+                                    $this->addPriceToSource([
+                                        'product_id' => $product['product_id'],
+                                        'suppler_id' => $id,
+                                        'quantity' => $quantity,
+                                        'source' => 'xml'
+                                    ]);
+
 
                                     if (!empty($extra_images)) {
                                         $this->updateExtraImages($product['product_id'], $sku, $extra_images, $log);
@@ -336,17 +352,17 @@ class ModelCatalogSuppler2 extends Model
 
     public function deleteOldLogs($days = 1)
     {
-        $query = $this->db->query("SELECT id FROM " . DB_PREFIX . "suppler2_logs WHERE `date` < '" . (time() - 60 * 60 * 24 * (int)$days) . "'" );
+        $query = $this->db->query("SELECT id FROM " . DB_PREFIX . "suppler2_logs WHERE `date` < '" . (time() - 60 * 60 * 24 * (int)$days) . "'");
         $logs_ids_to_delete = [];
-        if(!empty($query->rows)){
-            foreach ($query->rows as $row){
+        if (!empty($query->rows)) {
+            foreach ($query->rows as $row) {
                 $logs_ids_to_delete[] = $row['id'];
             }
 
             $logs_ids_str = implode(', ', $logs_ids_to_delete);
 
-            $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_logs WHERE id IN (" .  $logs_ids_str .")");
-            $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_log_details WHERE log_id IN (" .  $logs_ids_str .")");
+            $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_logs WHERE id IN (" . $logs_ids_str . ")");
+            $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_log_details WHERE log_id IN (" . $logs_ids_str . ")");
         }
     }
 
@@ -553,29 +569,116 @@ class ModelCatalogSuppler2 extends Model
         }
     }
 
+
     public
     function addPriceToSource($data)
     {
-        $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_amount_to_source WHERE product_id = '" . (int)$data['product_id'] . "' AND  suppler_id = '" . (int)$data['suppler_id'] . "'");
+        if (!empty($data['suppler_id']) && !empty($data['product_id']) && (!empty($data['price']) || !empty($data['stock_price']))) {
+            $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_amount_to_source WHERE product_id = '" . (int)$data['product_id'] . "' AND  suppler_id = '" . (int)$data['suppler_id'] . "'");
 
-        if (!empty($data['suppler_id']) && !empty($data['product_id']) && !empty($data['price'])) {
             $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_amount_to_source` ( `suppler_id`, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime`) VALUES  ('" . $this->db->escape($data['suppler_id']) . "', '" . $this->db->escape($data['product_id']) . "', '" . $this->db->escape($data['quantity']) . "', '" . $this->db->escape($data['price']) . "', '" . $this->db->escape($data['stock_price']) . "', '" . $this->db->escape($data['source']) . "', " . time() . ")");
         }
 
-        $prices = $this->getProductPrices($data['product_id']);
+        if (!empty($data['suppler_desc']) && !empty($data['product_id']) && (!empty($data['price']) || !empty($data['stock_price']))) {
+            $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_amount_to_source WHERE product_id = '" . (int)$data['product_id'] . "' AND  suppler_desc = '" . $data['suppler_desc'] . "'");
+
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_amount_to_source` ( `suppler_desc`, `product_id`, `quantity`, `price`, `price_desc`, `stock_price`, `source`, `datetime`) VALUES  ('" . $this->db->escape($data['suppler_desc']) . "', '" . $this->db->escape($data['product_id']) . "', '" . $this->db->escape($data['quantity']) . "', '" . $this->db->escape($data['price']) . "', '" . $this->db->escape($data['price_desc']) . "', '" . $this->db->escape($data['stock_price']) . "', '" . $this->db->escape($data['source']) . "', " . time() . ")");
+        }
+
+        $this->updatePrices($data['product_id']);
+    }
+
+    public function updatePrices($product_id = null)
+    {
+        $prices = $this->getProductPrices($product_id);
 
         if (!empty($prices)) {
             $final_price = 10000000000;
             $total_quantity = 0;
-            foreach ($prices as $price_row) {
-                if ((int)$price_row['price'] < (int)$final_price) {
-                    $final_price = $price_row['price'];
+            // мінімальна ціна і кількість сумується
+//            $from_1c = 0;
+//            foreach ($prices as $price_row) {
+//                if (!empty($price_row['price']) && (int)$price_row['price'] < (int)$final_price) {
+//                    $final_price = $price_row['price'];
+//                }
+//                if ($price_row['source'] == 'xml' || empty($from_1c)) {
+//                    $total_quantity += (int)$price_row['quantity'];
+//                    if ($price_row['source'] != 'xml') {
+//                        $from_1c++;
+//                    }
+//                }
+//            }
+
+            $store_price_found = false;
+            $store_price = 0;
+            $store_stock_price = 0;
+
+            $xml_price_found = false;
+            $xml_price = 0;
+            $xml_stock_price = 0;
+
+            $ones_price_found = false;
+            $ones_price = 0;
+            $ones_stock_price = 0;
+
+            if (!empty($prices)) {
+                $from_1c = 0;
+                foreach ($prices as $price_row) {
+                    if ($price_row['source'] === '1c' && trim($price_row['suppler_desc']) === 'Склад магазина') {
+                        if (!empty($price_row['price'])) {
+                            $store_price_found = true;
+                            $store_price = $price_row['price'];
+                        }
+                        if (!empty($price_row['stock_price'])) {
+                            $store_stock_price = $price_row['stock_price'];
+                        }
+                    }
+
+                    if ($price_row['source'] === 'xml') {
+                        if (!empty($price_row['price'])) {
+                            $xml_price_found = true;
+                            $xml_price = $price_row['price'];
+                        }
+                        if (!empty($price_row['stock_price'])) {
+                            $xml_stock_price = $price_row['stock_price'];
+                        }
+                    }
+
+                    if ($price_row['source'] === '1c' && trim($price_row['suppler_desc']) === 'Склад поставщика') {
+                        if (!empty($price_row['price'])) {
+                            $ones_price_found = true;
+                            $ones_price = $price_row['price'];
+                        }
+                        if (!empty($price_row['stock_price'])) {
+                            $ones_stock_price = $price_row['stock_price'];
+                        }
+                    }
+
+                    if ($price_row['source'] == 'xml' || empty($from_1c)) {
+                        $total_quantity += (int)$price_row['quantity'];
+                        if ($price_row['source'] != 'xml') {
+                            $from_1c++;
+                        }
+                    }
                 }
-                $total_quantity += (int)$price_row['quantity'];
             }
 
-            $this->editProductField($data['product_id'], 'price', $final_price);
-            $this->editProductField($data['product_id'], 'quantity', $total_quantity);
+            if ($store_price_found) {
+                $this->editProductField($product_id, 'price', $store_price);
+                $this->editProductDiscount($product_id, $store_stock_price, $total_quantity);
+            } elseif ($xml_price_found) {
+                $this->editProductField($product_id, 'price', $xml_price);
+                $this->editProductDiscount($product_id, $xml_stock_price, $total_quantity);
+            } elseif ($ones_price_found) {
+                $this->editProductField($product_id, 'price', $ones_price);
+                $this->editProductDiscount($product_id, $ones_stock_price, $total_quantity);
+            } else {
+                $this->editProductField($product_id, 'price', 0);
+                $this->editProductDiscount($product_id);
+            }
+
+//            $this->editProductField($product_id, 'price', $final_price);
+            $this->editProductField($product_id, 'quantity', $total_quantity);
 //        $this->editProductField($product['product_id'], 'price_zak', $value);
         }
     }
