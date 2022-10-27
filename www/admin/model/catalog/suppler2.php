@@ -839,11 +839,11 @@ class ModelCatalogSuppler2 extends Model
     }
 
     public
-    function editProductDiscount($product_id, $price, $quantity)
+    function editProductDiscount($product_id, $price = null, $quantity = null)
     {
         $this->db->query("DELETE FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "'");
 
-        if (isset($product_id) && isset($price)) {
+        if (isset($product_id) && !empty($price)) {
             $this->db->query("INSERT INTO `" . DB_PREFIX . "product_discount` (`product_id`, `quantity`, `price`) VALUES ('" . (int)$product_id . "', '" . (int)$quantity . "',  '" . (int)$price . "')");
         }
     }
@@ -915,7 +915,7 @@ class ModelCatalogSuppler2 extends Model
         $prices = $this->getProductPrices($product_id);
 
         if (!empty($prices)) {
-            $final_price = 10000000000;
+//            $final_price = 10000000000;
             $total_quantity = 0;
             // мінімальна ціна і кількість сумується
 //            $from_1c = 0;
@@ -943,44 +943,42 @@ class ModelCatalogSuppler2 extends Model
             $ones_price = 0;
             $ones_stock_price = 0;
 
-            if (!empty($prices)) {
-                $from_1c = 0;
-                foreach ($prices as $price_row) {
-                    if ($price_row['source'] === '1c' && trim($price_row['suppler_desc']) === 'Склад магазина') {
-                        if (!empty($price_row['price'])) {
-                            $store_price_found = true;
-                            $store_price = $price_row['price'];
-                        }
-                        if (!empty($price_row['stock_price'])) {
-                            $store_stock_price = $price_row['stock_price'];
-                        }
+            $from_1c = 0;
+            foreach ($prices as $price_row) {
+                if ($price_row['source'] === '1c' && trim($price_row['suppler_desc']) === 'Склад магазина') {
+                    if (!empty($price_row['price'])) {
+                        $store_price_found = true;
+                        $store_price = $price_row['price'];
                     }
-
-                    if ($price_row['source'] === 'xml') {
-                        if (!empty($price_row['price'])) {
-                            $xml_price_found = true;
-                            $xml_price = $price_row['price'];
-                        }
-                        if (!empty($price_row['stock_price'])) {
-                            $xml_stock_price = $price_row['stock_price'];
-                        }
+                    if (!empty($price_row['stock_price'])) {
+                        $store_stock_price = $price_row['stock_price'];
                     }
+                }
 
-                    if ($price_row['source'] === '1c' && trim($price_row['suppler_desc']) === 'Склад поставщика') {
-                        if (!empty($price_row['price'])) {
-                            $ones_price_found = true;
-                            $ones_price = $price_row['price'];
-                        }
-                        if (!empty($price_row['stock_price'])) {
-                            $ones_stock_price = $price_row['stock_price'];
-                        }
+                if ($price_row['source'] === 'xml') {
+                    if (!empty($price_row['price'])) {
+                        $xml_price_found = true;
+                        $xml_price = $price_row['price'];
                     }
+                    if (!empty($price_row['stock_price'])) {
+                        $xml_stock_price = $price_row['stock_price'];
+                    }
+                }
 
-                    if ($price_row['source'] == 'xml' || empty($from_1c)) {
-                        $total_quantity += (int)$price_row['quantity'];
-                        if ($price_row['source'] != 'xml') {
-                            $from_1c++;
-                        }
+                if ($price_row['source'] === '1c' && trim($price_row['suppler_desc']) === 'Склад поставщика') {
+                    if (!empty($price_row['price'])) {
+                        $ones_price_found = true;
+                        $ones_price = $price_row['price'];
+                    }
+                    if (!empty($price_row['stock_price'])) {
+                        $ones_stock_price = $price_row['stock_price'];
+                    }
+                }
+
+                if ($price_row['source'] == 'xml' || empty($from_1c)) {
+                    $total_quantity += (int)$price_row['quantity'];
+                    if ($price_row['source'] != 'xml') {
+                        $from_1c++;
                     }
                 }
             }
@@ -995,7 +993,7 @@ class ModelCatalogSuppler2 extends Model
                 $this->editProductField($product_id, 'price', $ones_price);
                 $this->editProductDiscount($product_id, $ones_stock_price, $total_quantity);
             } else {
-                $this->editProductField($product_id, 'price', 0);
+//                $this->editProductField($product_id, 'price', 0);
                 $this->editProductDiscount($product_id);
             }
 
