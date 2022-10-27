@@ -194,7 +194,7 @@ class ModelCatalogSuppler2 extends Model
 
                                                             $log[] = [
                                                                 'type' => 'success',
-                                                                'message' => $this->replace_quotes('Цена успешно заменена на: ' . $value)
+                                                                'message' => $this->replace_quotes('Цена  со скидкой успешно заменена на: ' . $value)
                                                             ];
                                                         }
                                                     } else {
@@ -720,7 +720,11 @@ class ModelCatalogSuppler2 extends Model
             }
         }
 
-        if ($store_price_found) {
+        $this->load->model('catalog/product');
+
+        $product = $this->model_catalog_product->getProduct($product_id);
+
+        if (!empty($product['quantity']) || $store_price_found) {
             return [
                 'status' => 1,
                 'text' => 'В наличии'
