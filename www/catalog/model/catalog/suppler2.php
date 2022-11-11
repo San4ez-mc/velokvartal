@@ -729,7 +729,8 @@ class ModelCatalogSuppler2 extends Model
                 'status' => 1,
                 'text' => 'В наличии'
             ];
-        } elseif ($xml_price_found) {
+        } else
+            if ($xml_price_found) {
             return [
                 'status' => 1,
                 'text' => 'Доставка 1-3 дня'
