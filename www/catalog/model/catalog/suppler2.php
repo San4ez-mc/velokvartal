@@ -532,7 +532,7 @@ class ModelCatalogSuppler2 extends Model
     }
 
     public
-    function editProductDiscount($product_id, $price, $quantity)
+    function editProductDiscount($product_id, $price = null, $quantity = null)
     {
         $this->db->query("DELETE FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "'");
 
