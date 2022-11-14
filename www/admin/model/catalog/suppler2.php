@@ -382,13 +382,7 @@ class ModelCatalogSuppler2 extends Model
                                         }
                                     }
 
-                                    $this->addPriceToSource([
-                                        'product_id' => $product['product_id'],
-                                        'suppler_id' => $id,
-                                        'quantity' => $quantity,
-                                        'source' => 'xml'
-                                    ]);
-
+                                    $this->addPriceToSource($price_info);
 
                                     if (!empty($extra_images)) {
                                         $this->updateExtraImages($product['product_id'], $sku, $extra_images, $log);
