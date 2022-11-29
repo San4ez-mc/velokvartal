@@ -719,27 +719,28 @@ class ModelCatalogSuppler2 extends Model
 
         $product = $this->model_catalog_product->getProduct($product_id);
 
-        if (!empty($product['quantity']) || $store_price_found) {
+//        if (!empty($product['quantity']) || $store_price_found) {
+        if ($store_price_found) {
             return [
                 'status' => 1,
                 'text' => 'В наличии'
             ];
         } else
             if ($xml_price_found) {
-            return [
-                'status' => 1,
-                'text' => 'Доставка 1-3 дня'
-            ];
-        } elseif ($ones_price_found) {
-            return [
-                'status' => 1,
-                'text' => 'Доставка 1-5 дней'
-            ];
-        } else {
-            return [
-                'status' => 0,
-                'text' => 'Нет в наличии'
-            ];
-        }
+                return [
+                    'status' => 1,
+                    'text' => 'Доставка 1-3 дня'
+                ];
+            } elseif ($ones_price_found) {
+                return [
+                    'status' => 1,
+                    'text' => 'Доставка 1-5 дней'
+                ];
+            } else {
+                return [
+                    'status' => 0,
+                    'text' => 'Нет в наличии'
+                ];
+            }
     }
 }
