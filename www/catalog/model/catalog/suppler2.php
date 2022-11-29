@@ -701,16 +701,18 @@ class ModelCatalogSuppler2 extends Model
 
         if (!empty($prices)) {
             foreach ($prices as $price_row) {
-                if ($price_row['source'] === '1c' && trim($price_row['suppler_desc']) === 'Склад магазина') {
-                    $store_price_found = true;
-                }
+                if ((int)$price_row['quantity'] > 0) {
+                    if ($price_row['source'] === '1C' && trim($price_row['suppler_desc']) === 'Склад магазина') {
+                        $store_price_found = true;
+                    }
 
-                if ($price_row['source'] === 'xml') {
-                    $xml_price_found = true;
-                }
+                    if ($price_row['source'] === 'xml') {
+                        $xml_price_found = true;
+                    }
 
-                if ($price_row['source'] === '1c' && trim($price_row['suppler_desc']) === 'Склад поставщика') {
-                    $ones_price_found = true;
+                    if ($price_row['source'] === '1C' && trim($price_row['suppler_desc']) === 'Склад поставщика') {
+                        $ones_price_found = true;
+                    }
                 }
             }
         }
