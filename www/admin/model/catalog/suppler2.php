@@ -889,13 +889,13 @@ class ModelCatalogSuppler2 extends Model
     public
     function addPriceToSource($data)
     {
-        if (!empty($data['suppler_id']) && !empty($data['product_id']) && (!empty($data['price']) || !empty($data['stock_price']))) {
+        if (!empty($data['suppler_id']) && !empty($data['product_id']) && (!empty($data['price']) || !empty($data['stock_price'])) && !empty($data['quantity'])) {
             $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_amount_to_source WHERE product_id = '" . (int)$data['product_id'] . "' AND  suppler_id = '" . (int)$data['suppler_id'] . "'");
 
             $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_amount_to_source` ( `suppler_id`, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime`) VALUES  ('" . $this->db->escape($data['suppler_id']) . "', '" . $this->db->escape($data['product_id']) . "', '" . $this->db->escape($data['quantity']) . "', '" . $this->db->escape($data['price']) . "', '" . $this->db->escape($data['stock_price']) . "', '" . $this->db->escape($data['source']) . "', " . time() . ")");
         }
 
-        if (!empty($data['suppler_desc']) && !empty($data['product_id']) && (!empty($data['price']) || !empty($data['stock_price']))) {
+        if (!empty($data['suppler_desc']) && !empty($data['product_id']) && (!empty($data['price']) || !empty($data['stock_price'])) && !empty($data['quantity'])) {
             $this->db->query("DELETE FROM " . DB_PREFIX . "suppler2_amount_to_source WHERE product_id = '" . (int)$data['product_id'] . "' AND  suppler_desc = '" . $data['suppler_desc'] . "'");
 
             $this->db->query("INSERT INTO `" . DB_PREFIX . "suppler2_amount_to_source` ( `suppler_desc`, `product_id`, `quantity`, `price`, `price_desc`, `stock_price`, `source`, `datetime`) VALUES  ('" . $this->db->escape($data['suppler_desc']) . "', '" . $this->db->escape($data['product_id']) . "', '" . $this->db->escape($data['quantity']) . "', '" . $this->db->escape($data['price']) . "', '" . $this->db->escape($data['price_desc']) . "', '" . $this->db->escape($data['stock_price']) . "', '" . $this->db->escape($data['source']) . "', " . time() . ")");
