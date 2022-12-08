@@ -194,13 +194,13 @@ class ModelCatalogSuppler2 extends Model
 
                                                             $log[] = [
                                                                 'type' => 'success',
-                                                                'message' => $this->replace_quotes('Акционная цена  со скидкой успешно заменена на: ' . $value)
+                                                                'message' => $this->replace_quotes('Акционная цена успешно заменена на: ' . $value)
                                                             ];
                                                         }
                                                     } else {
                                                         $log[] = [
                                                             'type' => 'info',
-                                                            'message' => $this->replace_quotes('Цена со скидкой не заменена так как товара нет в наличии в xml')
+                                                            'message' => $this->replace_quotes('Акционная цена не заменена так как товара нет в наличии в xml')
                                                         ];
                                                     }
                                                     break;

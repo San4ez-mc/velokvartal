@@ -353,7 +353,7 @@ class ModelCatalogSuppler2 extends Model
                                                     } else {
                                                         $log[] = [
                                                             'type' => 'info',
-                                                            'message' => 'Цена со скидкой не заменена так как товара нет в наличии в xml'
+                                                            'message' => 'Акционная цена не заменена так как товара нет в наличии в xml'
                                                         ];
                                                     }
                                                     break;
@@ -383,10 +383,6 @@ class ModelCatalogSuppler2 extends Model
                                     }
 
                                     $this->addPriceToSource($price_info);
-
-                                    if($product['id'] =='25766' ){
-                                        var_dump($price_info);
-                                    }
 
                                     if (!empty($extra_images)) {
                                         $this->updateExtraImages($product['product_id'], $sku, $extra_images, $log);
