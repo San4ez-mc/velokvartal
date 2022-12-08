@@ -682,7 +682,15 @@ class ModelCatalogSuppler2 extends Model
     function getProductPrices($product_id)
     {
         if (!empty($product_id)) {
-            $query = $this->db->query("SELECT s2ats.`id`, s2.`name` as suppler_name, `product_id`, `quantity`, `price`, `stock_price`, `source`, `datetime` FROM " . DB_PREFIX . "suppler2_amount_to_source s2ats
+            $query = $this->db->query("SELECT s2ats.`id`,
+                                        s2.`name` as suppler_name,
+                                        `suppler_desc`,
+                                         `product_id`,
+                                          `quantity`,
+                                           `price`,
+                                            `stock_price`,
+                                             `source`,
+                                              `datetime` FROM " . DB_PREFIX . "suppler2_amount_to_source s2ats
             LEFT JOIN  " . DB_PREFIX . "suppler2 s2 ON s2.id = s2ats.suppler_id 
             WHERE `product_id` = '" . (int)$product_id . "'");
 
@@ -699,18 +707,22 @@ class ModelCatalogSuppler2 extends Model
         $xml_price_found = false;
         $ones_price_found = false;
 
+        if($product_id === '24113'){
+            var_dump($prices);
+        }
+
         if (!empty($prices)) {
             foreach ($prices as $price_row) {
                 if ((int)$price_row['quantity'] > 0) {
-                    if ($price_row['source'] === '1C' && trim($price_row['suppler_desc']) === 'Склад магазина') {
+                    if (trim($price_row['source']) === '1C' && trim($price_row['suppler_desc']) === 'Склад магазина') {
                         $store_price_found = true;
                     }
 
-                    if ($price_row['source'] === 'xml') {
+                    if (trim($price_row['source']) === 'xml') {
                         $xml_price_found = true;
                     }
 
-                    if ($price_row['source'] === '1C' && trim($price_row['suppler_desc']) === 'Склад поставщика') {
+                    if (trim($price_row['source']) === '1C' && trim($price_row['suppler_desc']) === 'Склад поставщика') {
                         $ones_price_found = true;
                     }
                 }
