@@ -707,10 +707,6 @@ class ModelCatalogSuppler2 extends Model
         $xml_price_found = false;
         $ones_price_found = false;
 
-        if($product_id === '24113'){
-            var_dump($prices);
-        }
-
         if (!empty($prices)) {
             foreach ($prices as $price_row) {
                 if ((int)$price_row['quantity'] > 0) {
