@@ -347,7 +347,7 @@ class ModelCatalogSuppler2 extends Model
 
                                                             $log[] = [
                                                                 'type' => 'success',
-                                                                'message' => 'Цена успешно заменена на: ' . $value
+                                                                'message' => 'Акционная цена успешно заменена на: ' . $value
                                                             ];
                                                         }
                                                     } else {
@@ -383,6 +383,10 @@ class ModelCatalogSuppler2 extends Model
                                     }
 
                                     $this->addPriceToSource($price_info);
+
+                                    if($product['id'] =='25766' ){
+                                        var_dump($price_info);
+                                    }
 
                                     if (!empty($extra_images)) {
                                         $this->updateExtraImages($product['product_id'], $sku, $extra_images, $log);
