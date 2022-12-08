@@ -529,10 +529,12 @@ class ModelCatalogSuppler2 extends Model
     public
     function editProductDiscount($product_id, $price = null, $quantity = null)
     {
-        $this->db->query("DELETE FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "'");
+//        $this->db->query("DELETE FROM " . DB_PREFIX . "product_discount WHERE product_id = '" . (int)$product_id . "'");
+        $this->db->query("DELETE FROM " . DB_PREFIX . "product_special WHERE product_id = '" . (int)$product_id . "'");
 
-        if (isset($product_id) && isset($price)) {
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "product_discount` (`product_id`, `quantity`, `price`) VALUES ('" . (int)$product_id . "', '" . (int)$quantity . "',  '" . (int)$price . "')");
+        if (isset($product_id) && !empty($price)) {
+//            $this->db->query("INSERT INTO `" . DB_PREFIX . "product_discount` (`product_id`, `quantity`, `price`) VALUES ('" . (int)$product_id . "', '" . (int)$quantity . "',  '" . (int)$price . "')");
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "product_special` (`product_id`, `customer_group_id`, `date_start`, `price`) VALUES ('" . (int)$product_id . "', 1, '" . (int)date('Y-m-d') . "',  '" . (int)$price . "')");
         }
     }
 
