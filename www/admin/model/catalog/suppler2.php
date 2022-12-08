@@ -347,13 +347,13 @@ class ModelCatalogSuppler2 extends Model
 
                                                             $log[] = [
                                                                 'type' => 'success',
-                                                                'message' => 'Цена успешно заменена на: ' . $value
+                                                                'message' => 'Акционная цена успешно заменена на: ' . $value
                                                             ];
                                                         }
                                                     } else {
                                                         $log[] = [
                                                             'type' => 'info',
-                                                            'message' => 'Цена со скидкой не заменена так как товара нет в наличии в xml'
+                                                            'message' => 'Акционная цена не заменена так как товара нет в наличии в xml'
                                                         ];
                                                     }
                                                     break;
